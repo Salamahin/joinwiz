@@ -27,7 +27,7 @@ lazy val core = project
   .dependsOn(macros)
   .settings(
     commonSettings,
-    libraryDependencies ++= Seq(dependencies.sparkCore, dependencies.sparkSql)
+    libraryDependencies ++= Seq(dependencies.sparkCore, dependencies.sparkSql, dependencies.scalatest)
   )
 
 lazy val dependencies = new {
@@ -35,6 +35,7 @@ lazy val dependencies = new {
 
   val sparkCore = "org.apache.spark" %% "spark-core" % sparkV % Provided
   val sparkSql = "org.apache.spark" %% "spark-sql" % sparkV % Provided
+  val scalatest = "org.scalatest" %% "scalatest" % "3.1.0" % Test
 }
 
 lazy val assemblySettings = Seq(

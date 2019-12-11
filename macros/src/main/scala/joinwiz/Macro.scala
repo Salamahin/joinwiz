@@ -17,7 +17,7 @@ class RTColumnExtractor[T] {
   def apply[S](expr: T => S): RTColumn[S] = macro TypedColumnNameExtractorMacro.rightColumn[T, S]
 }
 
-private[fm] object TypedColumnNameExtractorMacro {
+private object TypedColumnNameExtractorMacro {
   def leftColumn[T: c.WeakTypeTag, S: c.WeakTypeTag]
   (c: blackbox.Context)
   (expr: c.Expr[T => S]): c.Expr[LTColumn[S]] = {
