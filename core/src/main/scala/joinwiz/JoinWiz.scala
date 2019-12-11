@@ -11,7 +11,7 @@ object JoinWiz extends EqualityLaws with AndLaws {
 
   type JOIN_CONDITION[T, U] = (LTColumnExtractor[T], RTColumnExtractor[U]) => Operator
 
-  implicit class DatasetSyntax[T](ds: Dataset[T]) {
+  implicit class JoinWizSyntax[T](ds: Dataset[T]) {
     def joinWiz[U](other: Dataset[U], joinType: String)(joinBy: JOIN_CONDITION[T, U]): Dataset[(T, U)] = {
       ds
         .as(LEFT_DS_ALIAS)

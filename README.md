@@ -9,12 +9,25 @@ Spark API enhancements for Dataset's joins.
 ## Usage
 
 ```scala
-case class A(pk: String)
-case class B(fk: Option[String])
+object Runner extends App {
+  val ss = SparkSession.builder()
+    .master("local[*]")
+    .getOrCreate()
 
-val dsA: Dataset[A] = ???
-val dsB: Dataset[B] = ???
+  import ss.implicits._
 
-import JoinWiz._
-dsA.innerJoin(dsB)((left, right) => left(_.pk) =:= right(_.fk))
+  case class A(pk: String)
+  case class B(fk: Option[String])
+
+  val dsA = Seq(A("pk1")).toDS()
+  val dsB = Seq(B(Some("pk1"))).toDS()
+
+  dsA
+    .innerJoin(dsB)((left, right) => left(_.pk) =:= right(_.fk))
+    .show()
+
+  dsA
+    .khomutovJoin(dsB)((left, right) => left(_.pk) =:= right(_.fk))
+    .show()
+}
 ```

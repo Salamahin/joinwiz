@@ -11,7 +11,6 @@ lazy val global = project
 
 lazy val commonSettings = Seq(
   scalacOptions ++= Seq(
-    "-unchecked",
     "-encoding",
     "utf8"
   )
