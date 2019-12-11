@@ -4,7 +4,7 @@ Spark API enhancements for Dataset's joins.
 ## Motivation
 * Prevent from joining by conflicting types like string-decimal
 * Specify join condition with lambdas instead of strings
-* Gives opportunity for joining expression analysis for skewed data fixes, statistics collection etc
+* Opportunity for joining expression analysis for skewed data fixes, statistics collection etc
 
 ## Usage
 
