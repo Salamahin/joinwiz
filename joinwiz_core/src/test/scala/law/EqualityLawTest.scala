@@ -26,11 +26,11 @@ class EqualityLawTest extends AnyFunSuite with Matchers {
     }) should be(Equality(LeftField("aString"), RightField("bOptString")))
   }
 
-//  test("right Option[T] and left T can build an equality") {
-//    (testee match {
-//      case (left, right) => left(_.aOptString) =:= right(_.bString)
-//    }) should be(Equality(LeftField("aOptString"), RightField("bString")))
-//  }
+  test("right Option[T] and left T can build an equality") {
+    (testee match {
+      case (left, right) => left(_.aOptString) =:= right(_.bString)
+    }) should be(Equality(LeftField("aOptString"), RightField("bString")))
+  }
 
   test("left T and const T can build an equality") {
     (testee match {

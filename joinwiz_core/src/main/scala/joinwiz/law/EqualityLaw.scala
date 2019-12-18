@@ -1,6 +1,5 @@
 package joinwiz.law
 
-import joinwiz.JoinWiz.{LEFT_DS_ALIAS, RIGHT_DS_ALIAS}
 import joinwiz._
 
 trait EqualityLaw[T, S] {
@@ -19,34 +18,18 @@ trait LowPriorityEqualityLaws {
 }
 
 trait EqualityLaws extends LowPriorityEqualityLaws {
-  implicit def compatibleTypesAreCommutative[T, S]
-  (implicit e: EqualityLaw[LTColumn[S], RTColumn[T]]): EqualityLaw[LTColumn[T], RTColumn[S]] = equalityRule {
-
-
-//    (left: LTColumn[T], right: RTColumn[S]) => {
-//      val newLeft = new LTColumn[S] {
-//        override val name: String = left.name
-//        override type Orig = right.Orig
-//        override val expr: this.Orig => S = right.expr
-//      }
-//
-//      val newRight = new RTColumn[T] {
-//        override val name: String = right.name
-//        override type Orig = left.Orig
-//        override val expr: this.Orig => T = left.expr
-//      }
-//
-//      e.build(newLeft, newRight)
-    }
-  }
-
   implicit def sameTypeCanEqual[T]: EqualityLaw[LTColumn[T], RTColumn[T]] = equalityRule {
     (left: LTColumn[T], right: RTColumn[T]) =>
       Equality(LeftField(left.name), RightField(right.name))
   }
 
-  implicit def nullableTypeCanEqual[T]: EqualityLaw[LTColumn[T], RTColumn[Option[T]]] = equalityRule {
+  implicit def rightNullableTypeCanEqual[T]: EqualityLaw[LTColumn[T], RTColumn[Option[T]]] = equalityRule {
     (left: LTColumn[T], right: RTColumn[Option[T]]) =>
+      Equality(LeftField(left.name), RightField(right.name))
+  }
+
+  implicit def leftNullableTypeCanEqual[T]: EqualityLaw[LTColumn[Option[T]], RTColumn[T]] = equalityRule {
+    (left: LTColumn[Option[T]], right: RTColumn[T]) =>
       Equality(LeftField(left.name), RightField(right.name))
   }
 
