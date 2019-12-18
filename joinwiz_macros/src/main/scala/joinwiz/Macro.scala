@@ -5,9 +5,17 @@ import scala.language.experimental.macros
 import scala.reflect.macros.blackbox
 
 
-case class LTColumn[S](name: String)
+trait LTColumn[S] {
+  val name: String
+  type Orig
+  val expr: Orig => S
+}
 
-case class RTColumn[S](name: String)
+trait RTColumn[S] {
+  val name: String
+  type Orig
+  val expr: Orig => S
+}
 
 class LTColumnExtractor[T] {
   def apply[S](expr: T => S): LTColumn[S] = macro TypedColumnNameExtractorMacro.leftColumn[T, S]
@@ -24,9 +32,15 @@ private object TypedColumnNameExtractorMacro {
     import c.universe._
 
     val sType = c.weakTypeOf[S]
+    val tType = c.weakTypeOf[T]
     val name = extractArgName[T, S](c)(expr)
 
-    c.Expr(q"joinwiz.LTColumn[$sType]($name)")
+    c.Expr(
+      q"""new joinwiz.LTColumn[$sType] {
+            override val name = $name
+            override type Orig = $tType
+            override val expr: $tType => $sType = $expr
+      }""")
   }
 
   def rightColumn[T: c.WeakTypeTag, S: c.WeakTypeTag]
@@ -35,9 +49,15 @@ private object TypedColumnNameExtractorMacro {
     import c.universe._
 
     val sType = c.weakTypeOf[S]
+    val tType = c.weakTypeOf[T]
     val name = extractArgName[T, S](c)(expr)
 
-    c.Expr(q"joinwiz.RTColumn[$sType]($name)")
+    c.Expr(
+      q"""new joinwiz.RTColumn[$sType] {
+            override val name = $name
+            override type Orig = $tType
+            override val expr: $tType => $sType = $expr
+      }""")
   }
 
   private def extractArgName[T: c.WeakTypeTag, S: c.WeakTypeTag]

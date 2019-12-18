@@ -1,12 +1,22 @@
 name := "joinwiz"
-organization in ThisBuild := "joinWiz"
+organization in ThisBuild := "joinwiz"
 scalaVersion in ThisBuild := "2.11.12"
+homepage := Some(url("https://github.com/salamahin/joinwiz"))
+publishMavenStyle := true
+
+publishTo := Some(
+  if (isSnapshot.value)
+    Opts.resolver.sonatypeSnapshots
+  else
+    Opts.resolver.sonatypeStaging
+)
 
 lazy val global = project
   .in(file("."))
   .aggregate(
-    core,
-    macros
+    joinwiz_core,
+    joinwiz_macros,
+    joinwiz_testkit
   )
 
 lazy val commonSettings = Seq(
@@ -16,14 +26,21 @@ lazy val commonSettings = Seq(
   )
 )
 
-lazy val macros = project
+lazy val joinwiz_macros = project
   .settings(
     commonSettings,
     libraryDependencies += "org.scala-lang" % "scala-reflect" % scalaVersion.value
   )
 
-lazy val core = project
-  .dependsOn(macros)
+lazy val joinwiz_core = project
+  .dependsOn(joinwiz_macros)
+  .settings(
+    commonSettings,
+    libraryDependencies ++= Seq(dependencies.sparkCore, dependencies.sparkSql, dependencies.scalatest)
+  )
+
+lazy val joinwiz_testkit = project
+  .dependsOn(joinwiz_core)
   .settings(
     commonSettings,
     libraryDependencies ++= Seq(dependencies.sparkCore, dependencies.sparkSql, dependencies.scalatest)

@@ -21,8 +21,23 @@ trait LowPriorityEqualityLaws {
 trait EqualityLaws extends LowPriorityEqualityLaws {
   implicit def compatibleTypesAreCommutative[T, S]
   (implicit e: EqualityLaw[LTColumn[S], RTColumn[T]]): EqualityLaw[LTColumn[T], RTColumn[S]] = equalityRule {
-    (left: LTColumn[T], right: RTColumn[S]) =>
-      e.build(new LTColumn[S](left.name), new RTColumn[T](right.name))
+
+
+//    (left: LTColumn[T], right: RTColumn[S]) => {
+//      val newLeft = new LTColumn[S] {
+//        override val name: String = left.name
+//        override type Orig = right.Orig
+//        override val expr: this.Orig => S = right.expr
+//      }
+//
+//      val newRight = new RTColumn[T] {
+//        override val name: String = right.name
+//        override type Orig = left.Orig
+//        override val expr: this.Orig => T = left.expr
+//      }
+//
+//      e.build(newLeft, newRight)
+    }
   }
 
   implicit def sameTypeCanEqual[T]: EqualityLaw[LTColumn[T], RTColumn[T]] = equalityRule {
