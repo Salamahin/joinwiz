@@ -1,5 +1,5 @@
 name := "joinwiz"
-organization in ThisBuild := "joinWiz"
+organization in ThisBuild := "io.github.salamahin"
 scalaVersion in ThisBuild := "2.11.12"
 
 lazy val global = project
