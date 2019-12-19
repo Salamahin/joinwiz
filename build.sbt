@@ -37,7 +37,6 @@ import ReleaseTransformations._
 sonatypeProjectHosting := Some(GitHubHosting("salamahin", "joinwiz", "danilasergeevich@gmail.com"))
 
 releaseIgnoreUntrackedFiles := true
-releaseUseGlobalVersion := false
 releaseProcess := Seq[ReleaseStep](
   checkSnapshotDependencies,
   inquireVersions,
