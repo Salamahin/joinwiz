@@ -6,14 +6,6 @@ lazy val commonSettings = Seq(
   scalacOptions ++= Seq("-encoding", "utf8")
 )
 
-lazy val assemblySettings = Seq(
-  assemblyJarName in assembly := name.value + ".jar",
-  assemblyMergeStrategy in assembly := {
-    case PathList("META-INF", _*) => MergeStrategy.discard
-    case _ => MergeStrategy.first
-  }
-)
-
 lazy val joinwiz_macro = project
   .settings(commonSettings: _*)
   .settings(
@@ -22,7 +14,7 @@ lazy val joinwiz_macro = project
 
 lazy val joinwiz_core = project
   .dependsOn(joinwiz_macro)
-  .settings(commonSettings ++ assemblySettings: _*)
+  .settings(commonSettings: _*)
   .settings(
     libraryDependencies ++= Seq(dependencies.sparkCore, dependencies.sparkSql, dependencies.scalatest)
   )
@@ -45,6 +37,7 @@ import ReleaseTransformations._
 sonatypeProjectHosting := Some(GitHubHosting("salamahin", "joinwiz", "danilasergeevich@gmail.com"))
 
 releaseIgnoreUntrackedFiles := true
+releaseUseGlobalVersion := false
 releaseProcess := Seq[ReleaseStep](
   checkSnapshotDependencies,
   inquireVersions,
