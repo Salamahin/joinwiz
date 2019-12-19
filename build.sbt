@@ -1,6 +1,6 @@
 name := "joinwiz"
 organization in ThisBuild := "io.github.salamahin"
-version := "0.4-SNAPSHOT"
+version := "0.6-SNAPSHOT"
 
 scalaVersion in ThisBuild := "2.11.12"
 
