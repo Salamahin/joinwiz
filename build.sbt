@@ -31,17 +31,16 @@ ThisBuild / publishMavenStyle := true
 ThisBuild / publishTo := sonatypePublishToBundle.value
 ThisBuild / licenses := Seq("Apache 2" -> new URL("http://www.apache.org/licenses/LICENSE-2.0.txt"))
 
-import xerial.sbt.Sonatype._
-import ReleaseTransformations._
+import sbtrelease.ReleasePlugin.autoImport.ReleaseTransformations._
 
-homepage := Some(url("https://github.com/Salamahin/joinwiz"))
-scmInfo := Some(
+ThisBuild / homepage := Some(url("https://github.com/Salamahin/joinwiz"))
+ThisBuild / scmInfo := Some(
   ScmInfo(
     url("https://github.com/Salamahin/joinwiz"),
     "scm:git@github.com:Salamahin/joinwiz.git"
   )
 )
-developers := List(
+ThisBuild / developers := List(
   Developer(id="Salamahin", name="Danila Goloshchapov", email="danilasergeevich@gmail.com", url=url("https://github.com/Salamahin"))
 )
 
