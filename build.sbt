@@ -34,7 +34,7 @@ ThisBuild / licenses := Seq("Apache 2" -> new URL("http://www.apache.org/license
 import xerial.sbt.Sonatype._
 import ReleaseTransformations._
 
-sonatypeProjectHosting := Some(GitHubHosting("salamahin", "joinwiz", "danilasergeevich@gmail.com"))
+sonatypeProjectHosting := Some(GitHubHosting("Salamahin", "joinwiz", "danilasergeevich@gmail.com"))
 
 releaseIgnoreUntrackedFiles := true
 releaseProcess := Seq[ReleaseStep](
