@@ -18,16 +18,16 @@ lazy val assemblySettings = Seq(
 
 lazy val joinwiz = project
   .in(file("."))
-  .aggregate(core, macros)
+  .aggregate(joinwiz_core, joinwiz_macro)
 
-lazy val macros = project
+lazy val joinwiz_macro = project
   .settings(
     commonSettings,
     libraryDependencies += "org.scala-lang" % "scala-reflect" % scalaVersion.value
   )
 
-lazy val core = project
-  .dependsOn(macros)
+lazy val joinwiz_core = project
+  .dependsOn(joinwiz_macro)
   .settings(
     commonSettings ++ assemblySettings,
     libraryDependencies ++= Seq(dependencies.sparkCore, dependencies.sparkSql, dependencies.scalatest)
