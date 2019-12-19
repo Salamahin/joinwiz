@@ -1,7 +1,5 @@
 name := "joinwiz"
 organization in ThisBuild := "io.github.salamahin"
-version := "0.0.15-SNAPSHOT"
-
 scalaVersion in ThisBuild := "2.11.12"
 
 lazy val commonSettings = Seq(
