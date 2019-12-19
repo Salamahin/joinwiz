@@ -49,3 +49,20 @@ ThisBuild / licenses := Seq("Apache 2" -> new URL("http://www.apache.org/license
 import xerial.sbt.Sonatype._
 
 sonatypeProjectHosting := Some(GitHubHosting("salamahin", "joinwiz", "danilasergeevich@gmail.com"))
+
+import ReleaseTransformations._
+
+releaseProcess := Seq[ReleaseStep](
+  checkSnapshotDependencies,
+  inquireVersions,
+  runClean,
+  runTest,
+  setReleaseVersion,
+  commitReleaseVersion,
+  tagRelease,
+  releaseStepCommandAndRemaining("publishSigned"),
+  releaseStepCommand("sonatypeBundleRelease"),
+  setNextVersion,
+  commitNextVersion,
+  pushChanges
+)
