@@ -1,20 +1,24 @@
 name := "joinwiz"
 organization in ThisBuild := "io.github.salamahin"
+version := "0.4-SNAPSHOT"
+
 scalaVersion in ThisBuild := "2.11.12"
 
-lazy val global = project
-  .in(file("."))
-  .aggregate(
-    core,
-    macros
-  )
-
 lazy val commonSettings = Seq(
-  scalacOptions ++= Seq(
-    "-encoding",
-    "utf8"
-  )
+  scalacOptions ++= Seq("-encoding", "utf8")
 )
+
+lazy val assemblySettings = Seq(
+  assemblyJarName in assembly := name.value + ".jar",
+  assemblyMergeStrategy in assembly := {
+    case PathList("META-INF", _*) => MergeStrategy.discard
+    case _ => MergeStrategy.first
+  }
+)
+
+lazy val joinwiz = project
+  .in(file("."))
+  .aggregate(core, macros)
 
 lazy val macros = project
   .settings(
@@ -25,7 +29,7 @@ lazy val macros = project
 lazy val core = project
   .dependsOn(macros)
   .settings(
-    commonSettings,
+    commonSettings ++ assemblySettings,
     libraryDependencies ++= Seq(dependencies.sparkCore, dependencies.sparkSql, dependencies.scalatest)
   )
 
@@ -37,27 +41,11 @@ lazy val dependencies = new {
   val scalatest = "org.scalatest" %% "scalatest" % "3.1.0" % Test
 }
 
-lazy val assemblySettings = Seq(
-  assemblyJarName in assembly := name.value + ".jar",
-  assemblyMergeStrategy in assembly := {
-    case PathList("META-INF", _*) => MergeStrategy.discard
-    case _ => MergeStrategy.first
-  }
-)
-
-useGpg := true
-ThisBuild / scmInfo := Some(
-  ScmInfo(
-    url("https://github.com/salamahin/joinwiz"),
-    "scm:git@github.com:salamahin/joinwiz.git"
-  )
-)
-ThisBuild / pomIncludeRepository := { _ => false }
-ThisBuild / licenses := List("Apache 2" -> new URL("http://www.apache.org/licenses/LICENSE-2.0.txt"))
-ThisBuild / homepage := Some(url("https://github.com/salamahin/joinwiz"))
-ThisBuild / publishTo := {
-  val nexus = "https://oss.sonatype.org/"
-  if (isSnapshot.value) Some("snapshots" at nexus + "content/repositories/snapshots")
-  else Some("releases" at nexus + "service/local/staging/deploy/maven2")
-}
+sonatypeProfileName := "io.github.salamahin"
 ThisBuild / publishMavenStyle := true
+ThisBuild / publishTo := sonatypePublishToBundle.value
+ThisBuild / licenses := Seq("Apache 2" -> new URL("http://www.apache.org/licenses/LICENSE-2.0.txt"))
+
+import xerial.sbt.Sonatype._
+
+sonatypeProjectHosting := Some(GitHubHosting("salamahin", "joinwiz", "danilasergeevich@gmail.com"))
