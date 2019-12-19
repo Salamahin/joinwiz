@@ -33,18 +33,18 @@ import xerial.sbt.Sonatype.GitHubHosting
 ThisBuild / publishMavenStyle := true
 ThisBuild / publishTo := sonatypePublishToBundle.value
 ThisBuild / licenses := Seq("Apache 2" -> new URL("http://www.apache.org/licenses/LICENSE-2.0.txt"))
-ThisBuild / sonatypeProjectHosting := Some(GitHubHosting("Salamahin", "joinwiz", "danilasergeevich@gmail.com"))
+//ThisBuild / sonatypeProjectHosting := Some(GitHubHosting("Salamahin", "joinwiz", "danilasergeevich@gmail.com"))
 
-//ThisBuild / homepage := Some(url("https://github.com/Salamahin/joinwiz"))
-//ThisBuild / scmInfo := Some(
-//  ScmInfo(
-//    url("https://github.com/Salamahin/joinwiz"),
-//    "scm:git@github.com:Salamahin/joinwiz.git"
-//  )
-//)
-//ThisBuild / developers := List(
-//  Developer(id="Salamahin", name="Danila Goloshchapov", email="danilasergeevich@gmail.com", url=url("https://github.com/Salamahin"))
-//)
+ThisBuild / homepage := Some(url("https://github.com/Salamahin/joinwiz"))
+ThisBuild / scmInfo := Some(
+  ScmInfo(
+    url("https://github.com/Salamahin/joinwiz"),
+    "scm:git@github.com:Salamahin/joinwiz.git"
+  )
+)
+ThisBuild / developers := List(
+  Developer(id="Salamahin", name="Danila Goloshchapov", email="danilasergeevich@gmail.com", url=url("https://github.com/Salamahin"))
+)
 
 releaseIgnoreUntrackedFiles := true
 releaseProcess := Seq[ReleaseStep](
