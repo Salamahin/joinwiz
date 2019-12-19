@@ -16,10 +16,6 @@ lazy val assemblySettings = Seq(
   }
 )
 
-lazy val joinwiz = project
-  .in(file("."))
-  .aggregate(joinwiz_core, joinwiz_macro)
-
 lazy val joinwiz_macro = project
   .settings(
     commonSettings,
