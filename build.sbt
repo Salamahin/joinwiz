@@ -1,6 +1,6 @@
 name := "joinwiz"
 organization in ThisBuild := "io.github.salamahin"
-version := "0.11-SNAPSHOT"
+version := "0.0.15-SNAPSHOT"
 
 scalaVersion in ThisBuild := "2.11.12"
 
@@ -37,9 +37,9 @@ lazy val dependencies = new {
   val scalatest = "org.scalatest" %% "scalatest" % "3.1.0" % Test
 }
 
-joinwiz_core / publishMavenStyle := true
-joinwiz_core / publishTo := sonatypePublishToBundle.value
-joinwiz_core / licenses := Seq("Apache 2" -> new URL("http://www.apache.org/licenses/LICENSE-2.0.txt"))
+ThisBuild / publishMavenStyle := true
+ThisBuild / publishTo := sonatypePublishToBundle.value
+ThisBuild / licenses := Seq("Apache 2" -> new URL("http://www.apache.org/licenses/LICENSE-2.0.txt"))
 
 import xerial.sbt.Sonatype._
 import ReleaseTransformations._
