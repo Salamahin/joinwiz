@@ -34,7 +34,16 @@ ThisBuild / licenses := Seq("Apache 2" -> new URL("http://www.apache.org/license
 import xerial.sbt.Sonatype._
 import ReleaseTransformations._
 
-sonatypeProjectHosting := Some(GitHubHosting("Salamahin", "joinwiz", "danilasergeevich@gmail.com"))
+homepage := Some(url("https://github.com/Salamahin/joinwiz"))
+scmInfo := Some(
+  ScmInfo(
+    url("https://github.com/Salamahin/joinwiz"),
+    "scm:git@github.com:Salamahin/joinwiz.git"
+  )
+)
+developers := List(
+  Developer(id="Salamahin", name="Danila Goloshchapov", email="danilasergeevich@gmail.com", url=url("https://github.com/Salamahin"))
+)
 
 releaseIgnoreUntrackedFiles := true
 releaseProcess := Seq[ReleaseStep](
