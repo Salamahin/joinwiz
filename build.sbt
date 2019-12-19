@@ -47,5 +47,22 @@ ThisBuild / publishTo := sonatypePublishToBundle.value
 ThisBuild / licenses := Seq("Apache 2" -> new URL("http://www.apache.org/licenses/LICENSE-2.0.txt"))
 
 import xerial.sbt.Sonatype._
+import ReleaseTransformations._
 
 sonatypeProjectHosting := Some(GitHubHosting("salamahin", "joinwiz", "danilasergeevich@gmail.com"))
+
+releaseIgnoreUntrackedFiles := true
+releaseProcess := Seq[ReleaseStep](
+  checkSnapshotDependencies,
+  inquireVersions,
+  runClean,
+  runTest,
+  setReleaseVersion,
+  commitReleaseVersion,
+  tagRelease,
+  releaseStepCommandAndRemaining("publishSigned"),
+  releaseStepCommand("sonatypeBundleRelease"),
+  setNextVersion,
+  commitNextVersion,
+  pushChanges
+)
