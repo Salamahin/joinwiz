@@ -1,11 +1,11 @@
 package joinwiz
 
-import joinwiz.law.{AndLaws, EqualityLaws}
+import joinwiz.law.AllLaws
 import org.apache.spark.sql.Dataset
 
 import scala.language.{implicitConversions, postfixOps}
 
-object JoinWiz extends EqualityLaws with AndLaws {
+object JoinWiz extends AllLaws {
   val LEFT_DS_ALIAS = "left"
   val RIGHT_DS_ALIAS = "right"
 
@@ -17,7 +17,7 @@ object JoinWiz extends EqualityLaws with AndLaws {
         .as(LEFT_DS_ALIAS)
         .joinWith(
           other.as(RIGHT_DS_ALIAS),
-          Operator.evaluate(joinBy(new LTColumnExtractor[T], new RTColumnExtractor[U])),
+          new ColumnEvaluator().evaluate(joinBy(new LTColumnExtractor[T], new RTColumnExtractor[U])),
           joinType
         )
     }

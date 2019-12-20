@@ -1,9 +1,8 @@
 package joinwiz.law
 
-import joinwiz.JoinWiz.{LEFT_DS_ALIAS, RIGHT_DS_ALIAS}
 import joinwiz._
 
-trait EqualityLaw[T, S] {
+trait EqualityLaw[-T, -S] {
   def build(left: T, right: S): Equality
 }
 
@@ -19,30 +18,24 @@ trait LowPriorityEqualityLaws {
 }
 
 trait EqualityLaws extends LowPriorityEqualityLaws {
-  implicit def compatibleTypesAreCommutative[T, S]
-  (implicit e: EqualityLaw[LTColumn[S], RTColumn[T]]): EqualityLaw[LTColumn[T], RTColumn[S]] = equalityRule {
-    (left: LTColumn[T], right: RTColumn[S]) =>
-      e.build(new LTColumn[S](left.name), new RTColumn[T](right.name))
+  implicit def sameTypeCanEqual[T, U, V]: EqualityLaw[LTColumn[U, T], RTColumn[V, T]] = equalityRule {
+    (left: LTColumn[U, T], right: RTColumn[V, T]) => Equality(left, right)
   }
 
-  implicit def sameTypeCanEqual[T]: EqualityLaw[LTColumn[T], RTColumn[T]] = equalityRule {
-    (left: LTColumn[T], right: RTColumn[T]) =>
-      Equality(LeftField(left.name), RightField(right.name))
+  implicit def rightNullableTypeCanEqual[T, U, V]: EqualityLaw[LTColumn[U, T], RTColumn[V, Option[T]]] = equalityRule {
+    (left: LTColumn[_, T], right: RTColumn[_, Option[T]]) => Equality(left, right)
   }
 
-  implicit def nullableTypeCanEqual[T]: EqualityLaw[LTColumn[T], RTColumn[Option[T]]] = equalityRule {
-    (left: LTColumn[T], right: RTColumn[Option[T]]) =>
-      Equality(LeftField(left.name), RightField(right.name))
+  implicit def leftNullableTypeCanEqual[T, U, V]: EqualityLaw[LTColumn[U, Option[T]], RTColumn[V, T]] = equalityRule {
+    (left: LTColumn[_, Option[T]], right: RTColumn[_, T]) => Equality(left, right)
   }
 
-  implicit def leftConstCanEqual[T]: EqualityLaw[LTColumn[T], T] = equalityRule {
-    (leftCol: LTColumn[T], const: T) =>
-      Equality(LeftField(leftCol.name), Const(const))
+  implicit def leftConstCanEqual[T, U]: EqualityLaw[LTColumn[U, T], T] = equalityRule {
+    (col: LTColumn[U, T], const: T) => Equality(col, Const(const))
   }
 
-  implicit def rightConstCanEqual[T]: EqualityLaw[RTColumn[T], T] = equalityRule {
-    (rightCol: RTColumn[T], const: T) =>
-      Equality(RightField(rightCol.name), Const(const))
+  implicit def rightConstCanEqual[T, V]: EqualityLaw[RTColumn[V, T], T] = equalityRule {
+    (right: RTColumn[V, T], const: T) => Equality(right, Const(const))
   }
 
   implicit class EqualitySyntax[T](left: T) {
