@@ -25,7 +25,9 @@ object Runner extends App {
   case class B(fk: Option[String])
 
   val dsA = Seq(A("pk1")).toDS()
-  val dsB = Seq(B(Some("pk1"))).toDS()
+  val dsB = Seq(B(Some("pk1"))).toDS()I
+
+  import JoinWiz._
 
   dsA
     .innerJoin(dsB)((left, right) => left(_.pk) =:= right(_.fk))
@@ -35,4 +37,46 @@ object Runner extends App {
     .khomutovJoin(dsB)((left, right) => left(_.pk) =:= right(_.fk))
     .show()
 }
+```
+
+## Testkit
+
+Running spark tests takes ages. Sometimes it worthful to test something relatively simple like set of joins and maps
+without actually running spark.
+With testkit you can write something like:
+```scala
+  val as = Seq(a1, a2, a3)
+  val bs = Seq(b1, b2)
+  val aDs = as.toDS()
+  val bDs = bs.toDS()
+
+
+  private def testMe[F[_] : DatasetLikeImpl](ft: F[A], fu: F[B]) = {
+    val api = implicitly[DatasetLikeImpl[F]]
+    import api._
+
+    DatasetApi(ft) {
+      _
+        .innerJoin(fu)(
+          (l, r) =>
+            l(_.pk) =:= r(_.fk) &&
+              l(_.value) =:= "val1" &&
+              r(_.value) =:= Some(BigDecimal(0L))
+        )
+        .map {
+          case (a, b) => (b, a)
+        }
+    }
+  }
+
+  test("sparkless inner join") { //takes millis to run
+    implicit val api = SparklessDatasetLike
+    testMe(as, bs) should contain only ((b1, a1))
+  }
+
+
+  test("spark's inner join") { //takes seconds to run + additional overhead for spark initialization
+    implicit val api = SparkDatasetLike
+    testMe(aDs, bDs).collect() should contain only ((b1, a1))
+  }
 ```

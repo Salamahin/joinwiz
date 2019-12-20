@@ -2,7 +2,7 @@ package joinwiz
 
 import joinwiz.SeqJoinOperatorTest.{A, B}
 import joinwiz.law.AllLaws
-import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.{Dataset, SparkSession}
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
@@ -28,10 +28,30 @@ class SeqJoinOperatorTest extends AnyFunSuite with Matchers with AllLaws with Be
   private val as = Seq(a1, a2, a3)
   private val bs = Seq(b1, b2)
 
-  private def testMe[F[_], V[_]](ft: F[A], fu: F[B])(implicit
-                                                     j: JoinApi[F, A],
-                                                     m: MapApi[F, V, (A, B)],
-                                                     e: V[(B, A)]) = {
+  private var ss: SparkSession = _
+  private var aDs: Dataset[A] = _
+  private var bDs: Dataset[B] = _
+
+  override def beforeAll() {
+    val sparkSession = SparkSession.builder()
+      .master("local[*]")
+      .getOrCreate()
+
+    import sparkSession.implicits._
+
+    ss = sparkSession
+    aDs = as.toDS()
+    bDs = bs.toDS()
+  }
+
+  override def afterAll() {
+    ss.close()
+  }
+
+  private def testMe[F[_] : DatasetLikeImpl](ft: F[A], fu: F[B]) = {
+    val api = implicitly[DatasetLikeImpl[F]]
+    import api._
+
     DatasetApi(ft) {
       _
         .innerJoin(fu)(
@@ -47,21 +67,13 @@ class SeqJoinOperatorTest extends AnyFunSuite with Matchers with AllLaws with Be
   }
 
   test("sparkless inner join") {
-    import SparklessApi._
-    testMe(as, bs) should contain only ((a1, b1))
+    implicit val api = SparklessDatasetLike
+    testMe(as, bs) should contain only ((b1, a1))
   }
 
 
   test("spark's inner join") {
-    val ss = SparkSession.builder()
-      .master("local[*]")
-      .getOrCreate()
-
-    import SparkApi._
-    import ss.implicits._
-
-    testMe(as.toDS(), bs.toDS()).collect() should contain only ((a1, b1))
-
-    ss.close()
+    implicit val api = SparkDatasetLike
+    testMe(aDs, bDs).collect() should contain only ((b1, a1))
   }
 }
