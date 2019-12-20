@@ -14,9 +14,11 @@ case class Const[T](value: T) extends Operand
 
 sealed trait Operator
 
-case class LTColumn[T, S](name: String, expr: T => S) extends Operand
+sealed trait TColumn
 
-case class  RTColumn[T, S](name: String, expr: T => S) extends Operand
+case class LTColumn[T, S](name: String, expr: T => S) extends Operand with TColumn
+
+case class RTColumn[T, S](name: String, expr: T => S) extends Operand with TColumn
 
 class LTColumnExtractor[T] {
   def apply[S](expr: T => S): LTColumn[T, S] = macro TypedColumnNameExtractorMacro.leftColumn[T, S]

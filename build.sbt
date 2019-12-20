@@ -22,7 +22,7 @@ lazy val joinwiz_core = project
 lazy val joinwiz_testkit = project
   .dependsOn(joinwiz_core)
   .settings(commonSettings: _*)
-  .settings(libraryDependencies += dependencies.scalatest)
+  .settings(libraryDependencies ++= Seq(dependencies.sparkCore, dependencies.sparkSql, dependencies.scalatest))
 
 lazy val dependencies = new {
   val sparkV = "2.3.0"
