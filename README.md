@@ -6,6 +6,11 @@ Spark API enhancements for Dataset's joins.
 * Specify join condition with lambdas instead of strings
 * Opportunity for joining expression analysis for skewed data fixes, statistics collection etc
 
+## Try it
+```scala
+libraryDependencies += "io.github.salamahin" %% "joinwiz_core" % "0.1.0"
+```
+
 ## Usage
 
 ```scala

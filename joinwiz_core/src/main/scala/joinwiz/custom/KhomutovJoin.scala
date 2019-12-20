@@ -10,20 +10,20 @@ import scala.language.postfixOps
 // Named in honor of our former TeamLead, who taught us how to deal with skewed data
 object KhomutovJoin {
 
-  private def nullableField(e: Operator): Option[LeftField] = e match {
-    case Equality(left: LeftField, _: RightField) => Some(left)
+  private def nullableField(e: Operator): Option[String] = e match {
+    case Equality(left: LTColumn[_, _], _: RTColumn[_, _]) => Some(left.name)
     case _ => None
   }
 
   implicit class KhomutovJoinSyntax[T: Encoder](ds: Dataset[T]) {
     def khomutovJoin[U: Encoder](other: Dataset[U])(joinBy: JOIN_CONDITION[T, U]): Dataset[(T, U)] = {
       val operator = joinBy(new LTColumnExtractor[T], new RTColumnExtractor[U])
-      val nullableField = KhomutovJoin
+      val nullableFieldName = KhomutovJoin
         .nullableField(operator)
         .getOrElse(throw new UnsupportedOperationException(s"Expression $operator is not supported yet"))
 
-      val dsWithoutNulls = ds.filter(col(nullableField.name) isNotNull)
-      val dsWithNulls = ds.filter(col(nullableField.name) isNull)
+      val dsWithoutNulls = ds.filter(col(nullableFieldName) isNotNull)
+      val dsWithNulls = ds.filter(col(nullableFieldName) isNull)
 
       implicit val tuEnc: Encoder[(T, U)] = Encoders.tuple(implicitly[Encoder[T]], implicitly[Encoder[U]])
 
