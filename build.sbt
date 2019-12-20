@@ -1,48 +1,21 @@
 name := "joinwiz"
-organization in ThisBuild := "joinwiz"
+organization in ThisBuild := "io.github.salamahin"
 scalaVersion in ThisBuild := "2.11.12"
-homepage := Some(url("https://github.com/salamahin/joinwiz"))
-publishMavenStyle := true
-
-publishTo := Some(
-  if (isSnapshot.value)
-    Opts.resolver.sonatypeSnapshots
-  else
-    Opts.resolver.sonatypeStaging
-)
-
-lazy val global = project
-  .in(file("."))
-  .aggregate(
-    joinwiz_core,
-    joinwiz_macros,
-    joinwiz_testkit
-  )
 
 lazy val commonSettings = Seq(
-  scalacOptions ++= Seq(
-    "-encoding",
-    "utf8"
-  )
+  scalacOptions ++= Seq("-encoding", "utf8")
 )
 
-lazy val joinwiz_macros = project
+lazy val joinwiz_macro = project
+  .settings(commonSettings: _*)
   .settings(
-    commonSettings,
     libraryDependencies += "org.scala-lang" % "scala-reflect" % scalaVersion.value
   )
 
 lazy val joinwiz_core = project
-  .dependsOn(joinwiz_macros)
+  .dependsOn(joinwiz_macro)
+  .settings(commonSettings: _*)
   .settings(
-    commonSettings,
-    libraryDependencies ++= Seq(dependencies.sparkCore, dependencies.sparkSql, dependencies.scalatest)
-  )
-
-lazy val joinwiz_testkit = project
-  .dependsOn(joinwiz_core)
-  .settings(
-    commonSettings,
     libraryDependencies ++= Seq(dependencies.sparkCore, dependencies.sparkSql, dependencies.scalatest)
   )
 
@@ -54,10 +27,35 @@ lazy val dependencies = new {
   val scalatest = "org.scalatest" %% "scalatest" % "3.1.0" % Test
 }
 
-lazy val assemblySettings = Seq(
-  assemblyJarName in assembly := name.value + ".jar",
-  assemblyMergeStrategy in assembly := {
-    case PathList("META-INF", _*) => MergeStrategy.discard
-    case _ => MergeStrategy.first
-  }
+import sbtrelease.ReleasePlugin.autoImport.ReleaseTransformations._
+import xerial.sbt.Sonatype.GitHubHosting
+
+ThisBuild / publishMavenStyle := true
+ThisBuild / publishTo := sonatypePublishToBundle.value
+ThisBuild / licenses := Seq("Apache 2" -> new URL("http://www.apache.org/licenses/LICENSE-2.0.txt"))
+ThisBuild / homepage := Some(url("https://github.com/Salamahin/joinwiz"))
+ThisBuild / scmInfo := Some(
+  ScmInfo(
+    url("https://github.com/Salamahin/joinwiz"),
+    "scm:git@github.com:Salamahin/joinwiz.git"
+  )
+)
+ThisBuild / developers := List(
+  Developer(id="Salamahin", name="Danila Goloshchapov", email="danilasergeevich@gmail.com", url=url("https://github.com/Salamahin"))
+)
+
+releaseIgnoreUntrackedFiles := true
+releaseProcess := Seq[ReleaseStep](
+  checkSnapshotDependencies,
+  inquireVersions,
+  runClean,
+  runTest,
+  setReleaseVersion,
+  commitReleaseVersion,
+  tagRelease,
+  releaseStepCommandAndRemaining("publishSigned"),
+  releaseStepCommand("sonatypeBundleRelease"),
+  setNextVersion,
+  commitNextVersion,
+  pushChanges
 )
