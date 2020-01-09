@@ -1,5 +1,6 @@
-package joinwiz
+package joinwiz.sparkless
 
+import joinwiz._
 
 class SeqOperatorEvaluator[T, U](op: Operator) {
   def evaluate(left: T, right: U): Boolean = op match {
@@ -13,5 +14,7 @@ class SeqOperatorEvaluator[T, U](op: Operator) {
 
     case And(l, r) =>
       new SeqOperatorEvaluator(l).evaluate(left, right) && new SeqOperatorEvaluator(r).evaluate(left, right)
+
+    case x => throw new UnsupportedOperationException(s"Failed to evaluate expression $x")
   }
 }

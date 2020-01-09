@@ -23,5 +23,6 @@ class ColumnEvaluator {
     case Equality(left: TColumn, right: Const[_]) => column(left) === const(right)
     case Equality(left: Const[_], right: TColumn) => column(right) === const(left)
     case And(left, right) => evaluate(left) and evaluate(right)
+    case x => throw new UnsupportedOperationException(s"Failed to evaluate expression $x")
   }
 }

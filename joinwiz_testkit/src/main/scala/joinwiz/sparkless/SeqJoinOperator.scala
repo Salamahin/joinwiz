@@ -1,4 +1,6 @@
-package joinwiz
+package joinwiz.sparkless
+
+import joinwiz.Operator
 
 class SeqJoinOperator[T, U](op: Operator, s1: Seq[T], s2: Seq[U]) {
   private val eval = new SeqOperatorEvaluator[T, U](op)
