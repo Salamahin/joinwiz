@@ -4,21 +4,31 @@ import scala.annotation.tailrec
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox
 
-case class Equality(left: Operand, right: Operand) extends Operator
+case class Equality(left: Operand, right: Operand) extends Operator {
+  override def toString: String = s"$left =:= $right"
+}
 
-case class And(left: Operator, right: Operator) extends Operator
+case class And(left: Operator, right: Operator) extends Operator {
+  override def toString: String = s"$left && $right"
+}
 
 sealed trait Operand
 
-case class Const[T](value: T) extends Operand
+case class Const[T](value: T) extends Operand {
+  override def toString: String = s"const($value)"
+}
 
 sealed trait Operator
 
 sealed trait TColumn
 
-case class LTColumn[T, S](name: String, expr: T => S) extends Operand with TColumn
+case class LTColumn[T, S](name: String, expr: T => S) extends Operand with TColumn {
+  override def toString: String = s"left($name)"
+}
 
-case class RTColumn[T, S](name: String, expr: T => S) extends Operand with TColumn
+case class RTColumn[T, S](name: String, expr: T => S) extends Operand with TColumn {
+  override def toString: String = s"right($name)"
+}
 
 class LTColumnExtractor[T] {
   def apply[S](expr: T => S): LTColumn[T, S] = macro TypedColumnNameExtractorMacro.leftColumn[T, S]
