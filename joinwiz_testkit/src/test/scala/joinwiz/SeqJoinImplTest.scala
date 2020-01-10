@@ -52,7 +52,7 @@ class SeqJoinImplTest extends AnyFunSuite with Matchers with AllLaws with Before
   }
 
   private def testMe[F[_] : DatasetOperations](ft: F[A], fu: F[B]) = {
-    import joinwiz.testkit._
+    import joinwiz.testkit.syntax._
 
     ft
       .innerJoin(fu)(
@@ -64,13 +64,13 @@ class SeqJoinImplTest extends AnyFunSuite with Matchers with AllLaws with Before
   }
 
   test("sparkless inner join") {
-    import joinwiz.testkit.sparkless._
+    import joinwiz.testkit.sparkless.implicits._
     testMe(as, bs) should contain only ((b1, a1))
   }
 
 
   test("spark's inner join") {
-    import joinwiz.testkit.spark._
+    import joinwiz.testkit.spark.implicits._
     testMe(aDs, bDs).collect() should contain only ((b1, a1))
   }
 }

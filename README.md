@@ -43,7 +43,7 @@ object Runner extends App {
   val dsA = Seq(A("pk1")).toDS()
   val dsB = Seq(B(Some("pk1"))).toDS()I
     
-  import joinwiz._
+  import joinwiz.syntax._
     
   dsA
     .innerJoin(dsB)((left, right) => left(_.pk) =:= right(_.fk))
@@ -69,7 +69,7 @@ val bDs = bs.toDS()
 
 
 private def testMe[F[_] : DatasetOperations](ft: F[A], fu: F[B]) = {
-  import joinwiz.testkit._
+  import joinwiz.testkit.syntax._
     
   ft
     .innerJoin(fu)(
@@ -82,13 +82,13 @@ private def testMe[F[_] : DatasetOperations](ft: F[A], fu: F[B]) = {
 
 //takes millis to run
 test("sparkless inner join") { 
-  import joinwiz.testkit.sparkless._
+  import joinwiz.testkit.sparkless.implicits._
   testMe(as, bs) should contain only ((b1, a1))
 }
 
 //takes seconds to run + some spark initialization overhead
 test("spark's inner join") {
-  import joinwiz.testkit.spark._
+  import joinwiz.testkit.spark.implicits._
   testMe(aDs, bDs).collect() should contain only ((b1, a1))
 }
 ```

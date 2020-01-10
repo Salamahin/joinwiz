@@ -1,8 +1,9 @@
 package joinwiz.testkit.sparkless
 
+import joinwiz.syntax.JOIN_CONDITION
 import joinwiz.testkit.DatasetOperations
 import joinwiz.testkit.ops._
-import joinwiz.{JOIN_CONDITION, LTColumnExtractor, RTColumnExtractor}
+import joinwiz.{LTColumnExtractor, RTColumnExtractor}
 
 import scala.reflect.runtime.universe
 

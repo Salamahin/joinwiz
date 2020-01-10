@@ -1,9 +1,11 @@
-package joinwiz
+package joinwiz.testkit
+
+import joinwiz.syntax.JOIN_CONDITION
 
 import scala.language.higherKinds
 import scala.reflect.runtime.universe.TypeTag
 
-package object testkit {
+object syntax {
 
   implicit class DatasetOperationsSyntax[F[_] : DatasetOperations, T](ft: F[T]) {
     def innerJoin[U](fu: F[U])(expr: JOIN_CONDITION[T, U]): F[(T, U)] =

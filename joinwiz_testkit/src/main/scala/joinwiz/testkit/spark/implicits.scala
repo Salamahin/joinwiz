@@ -1,7 +1,8 @@
-package joinwiz.testkit
+package joinwiz.testkit.spark
 
+import joinwiz.testkit.DatasetOperations
 import org.apache.spark.sql.Dataset
 
-package object spark {
+object implicits {
   implicit val api: DatasetOperations[Dataset] = SparkOperations
 }

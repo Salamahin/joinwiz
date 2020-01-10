@@ -1,5 +1,6 @@
 package joinwiz
 
+import joinwiz.syntax.{LEFT_DS_ALIAS, RIGHT_DS_ALIAS}
 import org.apache.spark.sql.Column
 
 class ColumnEvaluator {

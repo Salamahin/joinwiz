@@ -1,10 +1,11 @@
-import joinwiz.law.AllLaws
+package joinwiz
+
+import joinwiz.law._
 import org.apache.spark.sql.Dataset
 
 import scala.language.{implicitConversions, postfixOps}
 
-
-package object joinwiz extends AllLaws {
+object syntax extends AllLaws {
   type JOIN_CONDITION[T, U] = (LTColumnExtractor[T], RTColumnExtractor[U]) => Operator
   val LEFT_DS_ALIAS = "left"
   val RIGHT_DS_ALIAS = "right"

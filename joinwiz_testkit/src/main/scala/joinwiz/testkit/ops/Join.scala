@@ -1,7 +1,7 @@
 package joinwiz.testkit.ops
 
 
-import joinwiz.JOIN_CONDITION
+import joinwiz.syntax.JOIN_CONDITION
 
 import scala.language.higherKinds
 

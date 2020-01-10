@@ -1,18 +1,23 @@
 package law
 
-import joinwiz._
+import joinwiz.{LTColumnExtractor, RTColumnExtractor}
+import law.EqualityLawTest.{A, B}
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
+
+object EqualityLawTest {
+
+  case class A(aString: String, aOptString: Option[String], aDecimal: BigDecimal)
+
+  case class B(bString: String, bOptString: Option[String], bDecimal: BigDecimal)
+
+}
 
 class EqualityLawTest extends AnyFunSuite with Matchers {
 
   private val testee = (new LTColumnExtractor[A], new RTColumnExtractor[B])
 
-  case class A(aString: String, aOptString: Option[String], aDecimal: BigDecimal)
-
-  import joinwiz._
-
-  case class B(bString: String, bOptString: Option[String], bDecimal: BigDecimal)
+  import joinwiz.syntax._
 
   test("left T and right T can build an equality") {
     (testee match {
@@ -42,5 +47,11 @@ class EqualityLawTest extends AnyFunSuite with Matchers {
     (testee match {
       case (left, _) => "hello" =:= left(_.aString)
     }).toString should be("left(aString) =:= const(hello)")
+  }
+
+  test("equality is contravariant") {
+    (testee match {
+      case (left, _) => left(_.aOptString) =:= None
+    }).toString should be("left(aOptString) =:= const(None)")
   }
 }

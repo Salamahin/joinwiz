@@ -1,6 +1,6 @@
 package joinwiz.testkit.spark
 
-import joinwiz.JOIN_CONDITION
+import joinwiz.syntax.JOIN_CONDITION
 import joinwiz.testkit.ops._
 import joinwiz.testkit.DatasetOperations
 import org.apache.spark.sql.{Dataset, Encoders}
@@ -10,12 +10,12 @@ import scala.reflect.runtime.universe.TypeTag
 object SparkOperations extends DatasetOperations[Dataset] {
   override def join[T]: Join[Dataset, T] = new Join[Dataset, T] {
     override def inner[U](ft: Dataset[T], fu: Dataset[U])(expr: JOIN_CONDITION[T, U]): Dataset[(T, U)] = {
-      import joinwiz._
+      import joinwiz.syntax._
       ft.innerJoin(fu)(expr)
     }
 
     override def left[U](ft: Dataset[T], fu: Dataset[U])(expr: JOIN_CONDITION[T, U]): Dataset[(T, U)] = {
-      import joinwiz._
+      import joinwiz.syntax._
       ft.leftJoin(fu)(expr)
     }
   }
