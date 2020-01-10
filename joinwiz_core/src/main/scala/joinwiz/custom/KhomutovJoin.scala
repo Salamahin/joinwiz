@@ -1,6 +1,5 @@
 package joinwiz.custom
 
-import joinwiz.JoinWiz.JOIN_CONDITION
 import joinwiz._
 import org.apache.spark.sql.functions.col
 import org.apache.spark.sql.{Dataset, Encoder, Encoders}
@@ -27,7 +26,9 @@ object KhomutovJoin {
 
       implicit val tuEnc: Encoder[(T, U)] = Encoders.tuple(implicitly[Encoder[T]], implicitly[Encoder[U]])
 
-      new JoinWiz.JoinWizSyntax[T](dsWithoutNulls)
+      import joinwiz._
+
+      dsWithoutNulls
         .leftJoin(other)(joinBy)
         .unionByName(dsWithNulls.map((_, null.asInstanceOf[U])).map(identity))
     }

@@ -1,8 +1,8 @@
-package joinwiz.sparkless
+package joinwiz.testkit.sparkless
 
 import joinwiz.Operator
 
-class SeqJoinOperator[T, U](op: Operator, s1: Seq[T], s2: Seq[U]) {
+class SeqJoinImpl[T, U](op: Operator, s1: Seq[T], s2: Seq[U]) {
   private val eval = new SeqOperatorEvaluator[T, U](op)
 
   def innerJoin(): Seq[(T, U)] = for {

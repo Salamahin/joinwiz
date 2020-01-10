@@ -6,13 +6,13 @@ import org.scalatest.matchers.should.Matchers
 
 class EqualityLawTest extends AnyFunSuite with Matchers {
 
-  case class A(aString: String, aOptString: Option[String], aDecimal: BigDecimal)
+  private val testee = (new LTColumnExtractor[A], new RTColumnExtractor[B])
 
-  case class B(bString: String, bOptString: Option[String], bDecimal: BigDecimal)
+  case class A(aString: String, aOptString: Option[String], aDecimal: BigDecimal)
 
   import JoinWiz._
 
-  private val testee = (new LTColumnExtractor[A], new RTColumnExtractor[B])
+  case class B(bString: String, bOptString: Option[String], bDecimal: BigDecimal)
 
   test("left T and right T can build an equality") {
     (testee match {

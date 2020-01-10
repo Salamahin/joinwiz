@@ -14,4 +14,5 @@ trait AndLaws {
   implicit class AndSyntax[T](left: T) {
     def &&[S](right: S)(implicit and: AndLaw[T, S]): And = and.build(left, right)
   }
+
 }

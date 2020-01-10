@@ -1,4 +1,4 @@
-package joinwiz.sparkless
+package joinwiz.testkit.sparkless
 
 import joinwiz._
 
