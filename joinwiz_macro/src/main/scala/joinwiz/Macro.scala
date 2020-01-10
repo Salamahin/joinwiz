@@ -51,18 +51,6 @@ private object TypedColumnNameExtractorMacro {
     c.Expr(q"joinwiz.LTColumn[$tType, $sType]($name, $expr)")
   }
 
-  def rightColumn[T: c.WeakTypeTag, S: c.WeakTypeTag]
-  (c: blackbox.Context)
-  (expr: c.Expr[T => S]): c.Expr[RTColumn[T, S]] = {
-    import c.universe._
-
-    val sType = c.weakTypeOf[S]
-    val tType = c.weakTypeOf[T]
-    val name = extractArgName[T, S](c)(expr)
-
-    c.Expr(q"joinwiz.RTColumn[$tType, $sType]($name, $expr)")
-  }
-
   private def extractArgName[T: c.WeakTypeTag, S: c.WeakTypeTag]
   (c: blackbox.Context)
   (expr: c.Expr[T => S]): String = {
@@ -79,6 +67,18 @@ private object TypedColumnNameExtractorMacro {
     }
 
     extract(expr.tree, Nil).mkString(".")
+  }
+
+  def rightColumn[T: c.WeakTypeTag, S: c.WeakTypeTag]
+  (c: blackbox.Context)
+  (expr: c.Expr[T => S]): c.Expr[RTColumn[T, S]] = {
+    import c.universe._
+
+    val sType = c.weakTypeOf[S]
+    val tType = c.weakTypeOf[T]
+    val name = extractArgName[T, S](c)(expr)
+
+    c.Expr(q"joinwiz.RTColumn[$tType, $sType]($name, $expr)")
   }
 }
 

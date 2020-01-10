@@ -51,24 +51,26 @@ val aDs = as.toDS()
 val bDs = bs.toDS()
 
 
-private def testMe[F[_] : DSLike](ft: F[A], fu: F[B]) = DSLike
-  .wrap(ft)
-  .innerJoin(fu)((l, r) =>
-    l(_.pk) =:= r(_.fk) && l(_.value) =:= "val1" && r(_.value) =:= Some(BigDecimal(0L))
-  )
-  .map {
-    case (a, b) => (b, a)
-  }
- .unwrap
+private def testMe[F[_] : DatasetOperations](ft: F[A], fu: F[B]) = {
+  import joinwiz.testkit._
     
+  ft
+    .innerJoin(fu)(
+      (l, r) => l(_.pk) =:= r(_.fk) && l(_.value) =:= "val1" && r(_.value) =:= Some(BigDecimal(0L))
+    )
+    .map {
+      case (a, b) => (b, a)
+    }
+}
+
 test("sparkless inner join") {
-  implicit val api = SparklessDS
+  import joinwiz.testkit.sparkless._
   testMe(as, bs) should contain only ((b1, a1))
 }
 
 
 test("spark's inner join") {
-    implicit val api = SparkDS
-    testMe(aDs, bDs).collect() should contain only ((b1, a1))
+  import joinwiz.testkit.spark._
+  testMe(aDs, bDs).collect() should contain only ((b1, a1))
 }
 ```

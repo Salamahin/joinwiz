@@ -33,7 +33,6 @@ lazy val dependencies = new {
 }
 
 import sbtrelease.ReleasePlugin.autoImport.ReleaseTransformations._
-import xerial.sbt.Sonatype.GitHubHosting
 
 ThisBuild / publishMavenStyle := true
 ThisBuild / publishTo := sonatypePublishToBundle.value
@@ -46,7 +45,7 @@ ThisBuild / scmInfo := Some(
   )
 )
 ThisBuild / developers := List(
-  Developer(id="Salamahin", name="Danila Goloshchapov", email="danilasergeevich@gmail.com", url=url("https://github.com/Salamahin"))
+  Developer(id = "Salamahin", name = "Danila Goloshchapov", email = "danilasergeevich@gmail.com", url = url("https://github.com/Salamahin"))
 )
 
 releaseIgnoreUntrackedFiles := true

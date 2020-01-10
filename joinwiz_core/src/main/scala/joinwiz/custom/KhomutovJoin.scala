@@ -1,6 +1,5 @@
 package joinwiz.custom
 
-import joinwiz.JoinWiz.JOIN_CONDITION
 import joinwiz._
 import org.apache.spark.sql.functions.col
 import org.apache.spark.sql.{Dataset, Encoder, Encoders}

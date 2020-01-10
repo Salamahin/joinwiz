@@ -1,16 +1,17 @@
 package joinwiz
 
-import joinwiz.SeqJoinOperatorTest.{A, B}
+import joinwiz.SeqJoinImplTest.{A, B}
 import joinwiz.law.AllLaws
-import joinwiz.spark.SparkDS
-import joinwiz.sparkless.SparklessDS
+import joinwiz.testkit.DatasetOperations
 import org.apache.spark.sql.{Dataset, SparkSession}
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
 
+import scala.language.higherKinds
 
-object SeqJoinOperatorTest {
+
+object SeqJoinImplTest {
 
   case class A(pk: String, value: String)
 
@@ -18,7 +19,7 @@ object SeqJoinOperatorTest {
 
 }
 
-class SeqJoinOperatorTest extends AnyFunSuite with Matchers with AllLaws with BeforeAndAfterAll {
+class SeqJoinImplTest extends AnyFunSuite with Matchers with AllLaws with BeforeAndAfterAll {
 
   private val a1 = A("pk1", "val1")
   private val a2 = A("pk1", "val2")
@@ -50,27 +51,26 @@ class SeqJoinOperatorTest extends AnyFunSuite with Matchers with AllLaws with Be
     ss.close()
   }
 
-  private def testMe[F[_] : DSLike](ft: F[A], fu: F[B]) = DSLike
-    .wrap(ft)
-    .innerJoin(fu)(
-      (l, r) =>
-        l(_.pk) =:= r(_.fk) &&
-          l(_.value) =:= "val1" &&
-          r(_.value) =:= Some(BigDecimal(0L))
-    )
-    .map {
-      case (a, b) => (b, a)
-    }
-    .unwrap
+  private def testMe[F[_] : DatasetOperations](ft: F[A], fu: F[B]) = {
+    import joinwiz.testkit._
+
+    ft
+      .innerJoin(fu)(
+        (l, r) => l(_.pk) =:= r(_.fk) && l(_.value) =:= "val1" && r(_.value) =:= Some(BigDecimal(0L))
+      )
+      .map {
+        case (a, b) => (b, a)
+      }
+  }
 
   test("sparkless inner join") {
-    implicit val api = SparklessDS
+    import joinwiz.testkit.sparkless._
     testMe(as, bs) should contain only ((b1, a1))
   }
 
 
   test("spark's inner join") {
-    implicit val api = SparkDS
+    import joinwiz.testkit.spark._
     testMe(aDs, bDs).collect() should contain only ((b1, a1))
   }
 }
