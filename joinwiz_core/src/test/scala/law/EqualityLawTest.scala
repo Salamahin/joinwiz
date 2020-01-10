@@ -10,7 +10,7 @@ class EqualityLawTest extends AnyFunSuite with Matchers {
 
   case class A(aString: String, aOptString: Option[String], aDecimal: BigDecimal)
 
-  import JoinWiz._
+  import joinwiz._
 
   case class B(bString: String, bOptString: Option[String], bDecimal: BigDecimal)
 
