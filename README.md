@@ -11,9 +11,13 @@ Spark API enhancements for Dataset's joins.
 * Write Dataset transformations and test them in pure-unit style without running spark (testkit)
 
 
-## Latest version
+## Released version
 
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.github.salamahin/joinwiz_2.11/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.github.salamahin/joinwiz_2.11)
+
+
+## Current version build status
+[![Build Status](https://travis-ci.com/Salamahin/joinwiz.svg?branch=master)](https://travis-ci.com/Salamahin/joinwiz)
 
 
 ## Try it
