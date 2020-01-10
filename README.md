@@ -1,15 +1,27 @@
 # joinwiz
 Spark API enhancements for Dataset's joins.
 
+**Note the API is evolving and thus may be unstable**
+
+
 ## Motivation
 * Prevent from joining by conflicting types like string-decimal
 * Specify join condition with lambdas instead of strings
 * Opportunity for joining expression analysis for skewed data fixes, statistics collection etc
+* Write Dataset transformations and test them in pure-unit style without running spark (testkit)
+
+
+## Latest version
+
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.github.salamahin/joinwiz_2.11/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.github.salamahin/joinwiz_2.11)
+
 
 ## Try it
 ```scala
-libraryDependencies += "io.github.salamahin" %% "joinwiz_core" % "0.1.0"
+libraryDependencies += "io.github.salamahin" %% "joinwiz_core" % joinwiz_version
+libraryDependencies += "io.github.salamahin" %% "joinwiz_testkit" % joinwiz_version //for testkit
 ```
+
 
 ## Usage
 
@@ -27,7 +39,7 @@ object Runner extends App {
   val dsA = Seq(A("pk1")).toDS()
   val dsB = Seq(B(Some("pk1"))).toDS()I
     
-  import JoinWiz._
+  import joinwiz._
     
   dsA
     .innerJoin(dsB)((left, right) => left(_.pk) =:= right(_.fk))
@@ -38,6 +50,7 @@ object Runner extends App {
     .show()
 }
 ```
+
 
 ## Testkit
 
@@ -63,12 +76,13 @@ private def testMe[F[_] : DatasetOperations](ft: F[A], fu: F[B]) = {
     }
 }
 
-test("sparkless inner join") {
+//takes millis to run
+test("sparkless inner join") { 
   import joinwiz.testkit.sparkless._
   testMe(as, bs) should contain only ((b1, a1))
 }
 
-
+//takes seconds to run + some spark initialization overhead
 test("spark's inner join") {
   import joinwiz.testkit.spark._
   testMe(aDs, bDs).collect() should contain only ((b1, a1))
