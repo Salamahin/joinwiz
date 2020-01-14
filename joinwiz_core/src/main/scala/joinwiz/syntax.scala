@@ -22,7 +22,7 @@ object syntax extends AllLaws {
         .as(LEFT_DS_ALIAS)
         .joinWith(
           other.as(RIGHT_DS_ALIAS),
-          new ColumnEvaluator().evaluate(joinBy(new LTColumnExtractor[T, T](extractor = identity), new RTColumnExtractor[U])),
+          new ColumnEvaluator().evaluate(joinBy(LTColumnExtractor[T], new RTColumnExtractor[U])),
           joinType
         )
     }

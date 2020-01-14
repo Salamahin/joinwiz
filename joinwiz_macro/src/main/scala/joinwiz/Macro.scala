@@ -42,6 +42,10 @@ class LTColumnExtractor[O, E](val prefix: Seq[String] = Nil, val extractor: O =>
   def apply[T](expr: E => T): LTColumn[O, E, T] = macro TypedColumnNameExtractorMacro.leftColumn[O, E, T]
 }
 
+object LTColumnExtractor {
+  def apply[T] = new LTColumnExtractor[T, T](extractor = identity)
+}
+
 class RTColumnExtractor[T](val level: Int = 0) {
   def apply[S](expr: T => S): RTColumn[T, S] = macro TypedColumnNameExtractorMacro.rightColumn[T, S]
 }

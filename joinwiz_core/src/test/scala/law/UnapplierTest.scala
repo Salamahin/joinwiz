@@ -23,7 +23,7 @@ class UnapplierTest extends AnyFunSuite with Matchers {
   private val cval = "cval"
   private val abc = ((A(aval), B(bval)), C(cval))
 
-  private val testee = (new LTColumnExtractor[ABC, ABC](extractor = identity), new RTColumnExtractor[C])
+  private val testee = (LTColumnExtractor[ABC], new RTColumnExtractor[C])
 
   test("unapplying left A for ((a, b), c) should yield _1._1.a") {
     val tCol = testee match {

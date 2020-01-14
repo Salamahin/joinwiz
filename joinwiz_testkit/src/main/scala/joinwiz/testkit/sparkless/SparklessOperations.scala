@@ -11,11 +11,11 @@ object SparklessOperations extends DatasetOperations[Seq] {
 
   override def join[T]: Join[Seq, T] = new Join[Seq, T] {
     override def inner[U](ft: Seq[T], fu: Seq[U])(expr: JOIN_CONDITION[T, U]): Seq[(T, U)] = {
-      new SeqJoinImpl[T, U](expr(new LTColumnExtractor[T, T](extractor = identity), new RTColumnExtractor[U]), ft, fu).innerJoin()
+      new SeqJoinImpl[T, U](expr(LTColumnExtractor[T], new RTColumnExtractor[U]), ft, fu).innerJoin()
     }
 
     override def left[U](ft: Seq[T], fu: Seq[U])(expr: JOIN_CONDITION[T, U]): Seq[(T, U)] = {
-      new SeqJoinImpl[T, U](expr(new LTColumnExtractor[T, T](extractor = identity), new RTColumnExtractor[U]), ft, fu).leftJoin()
+      new SeqJoinImpl[T, U](expr(LTColumnExtractor[T], new RTColumnExtractor[U]), ft, fu).leftJoin()
     }
   }
 
