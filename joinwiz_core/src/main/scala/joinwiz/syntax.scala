@@ -6,7 +6,7 @@ import org.apache.spark.sql.Dataset
 import scala.language.{implicitConversions, postfixOps}
 
 object syntax extends AllLaws {
-  type JOIN_CONDITION[T, U] = (LTColumnExtractor[T], RTColumnExtractor[U]) => Operator
+  type JOIN_CONDITION[T, U] = (LTColumnExtractor[T, T], RTColumnExtractor[U]) => Operator
   val LEFT_DS_ALIAS = "left"
   val RIGHT_DS_ALIAS = "right"
 
@@ -22,7 +22,7 @@ object syntax extends AllLaws {
         .as(LEFT_DS_ALIAS)
         .joinWith(
           other.as(RIGHT_DS_ALIAS),
-          new ColumnEvaluator().evaluate(joinBy(new LTColumnExtractor[T], new RTColumnExtractor[U])),
+          new ColumnEvaluator().evaluate(joinBy(new LTColumnExtractor[T, T](extractor = identity), new RTColumnExtractor[U])),
           joinType
         )
     }

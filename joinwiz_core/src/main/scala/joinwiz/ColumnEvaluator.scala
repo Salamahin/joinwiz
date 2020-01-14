@@ -16,7 +16,7 @@ class ColumnEvaluator {
   }
 
   private def column(o: TColumn) = o match {
-    case LTColumn(name, _) => col(s"$LEFT_DS_ALIAS.$name")
+    case LTColumn(name) => col(s"$LEFT_DS_ALIAS.$name")
     case RTColumn(name, _) => col(s"$RIGHT_DS_ALIAS.$name")
   }
 

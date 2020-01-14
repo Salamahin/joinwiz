@@ -15,7 +15,7 @@ object EqualityLawTest {
 
 class EqualityLawTest extends AnyFunSuite with Matchers {
 
-  private val testee = (new LTColumnExtractor[A], new RTColumnExtractor[B])
+  private val testee = (new LTColumnExtractor[A, A](extractor = identity), new RTColumnExtractor[B])
 
   import joinwiz.syntax._
 

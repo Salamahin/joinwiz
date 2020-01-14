@@ -19,20 +19,20 @@ trait LowPriorityEqualityLaws {
 }
 
 trait EqualityLaws extends LowPriorityEqualityLaws {
-  implicit def sameTypeCanEqual[T, U, V]: EqualityLaw[LTColumn[U, T], RTColumn[V, T]] = equalityLaw {
-    (left: LTColumn[U, T], right: RTColumn[V, T]) => Equality(left, right)
+  implicit def sameTypeCanEqual[T, U, V]: EqualityLaw[LTColumn[U, U, T], RTColumn[V, T]] = equalityLaw {
+    (left: LTColumn[U, U, T], right: RTColumn[V, T]) => Equality(left, right)
   }
 
-  implicit def rightNullableTypeCanEqual[T, U, V]: EqualityLaw[LTColumn[U, T], RTColumn[V, Option[T]]] = equalityLaw {
-    (left: LTColumn[_, T], right: RTColumn[_, Option[T]]) => Equality(left, right)
+  implicit def rightNullableTypeCanEqual[T, U, V]: EqualityLaw[LTColumn[U, U, T], RTColumn[V, Option[T]]] = equalityLaw {
+    (left: LTColumn[U, U, T], right: RTColumn[_, Option[T]]) => Equality(left, right)
   }
 
-  implicit def leftNullableTypeCanEqual[T, U, V]: EqualityLaw[LTColumn[U, Option[T]], RTColumn[V, T]] = equalityLaw {
-    (left: LTColumn[_, Option[T]], right: RTColumn[_, T]) => Equality(left, right)
+  implicit def leftNullableTypeCanEqual[T, U, V]: EqualityLaw[LTColumn[U, U, Option[T]], RTColumn[V, T]] = equalityLaw {
+    (left: LTColumn[U, U, Option[T]], right: RTColumn[_, T]) => Equality(left, right)
   }
 
-  implicit def leftConstCanEqual[T, U]: EqualityLaw[LTColumn[U, T], T] = equalityLaw {
-    (col: LTColumn[U, T], const: T) => Equality(col, Const(const))
+  implicit def leftConstCanEqual[T, U]: EqualityLaw[LTColumn[U, U, T], T] = equalityLaw {
+    (col: LTColumn[U, U, T], const: T) => Equality(col, Const(const))
   }
 
   implicit def rightConstCanEqual[T, V]: EqualityLaw[RTColumn[V, T], T] = equalityLaw {
