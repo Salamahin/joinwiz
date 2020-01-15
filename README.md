@@ -88,7 +88,7 @@ test("sparkless inner join") {
 
 //takes seconds to run + some spark initialization overhead
 test("spark's inner join") {
-  import joinwiz.testkit.spark.implicits._
+  import joinwiz.spark.implicits._
   testMe(aDs, bDs).collect() should contain only ((b1, a1))
 }
 ```

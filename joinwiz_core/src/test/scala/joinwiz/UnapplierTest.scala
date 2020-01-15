@@ -1,11 +1,10 @@
-package law
+package joinwiz
 
-import joinwiz.{LTColumnExtractor, RTColumnExtractor, Un}
-import law.UnapplierTest.{A, B, C}
+import joinwiz.UnapplierTest.{A, B, C}
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
 
-object UnapplierTest {
+private object UnapplierTest {
 
   case class A(a: String)
 
@@ -23,23 +22,24 @@ class UnapplierTest extends AnyFunSuite with Matchers {
   private val cval = "cval"
   private val abc = ((A(aval), B(bval)), C(cval))
 
-  private val testee = (LTColumnExtractor[ABC], new RTColumnExtractor[C])
+  private val testee = (LTColumnExtractor[ABC], RTColumnExtractor[C])
 
-  test("unapplying left A for ((a, b), c) should yield _1._1.a") {
+  test("unapplying a from ABC is not affecting scope") {
     val tCol = testee match {
-      case (Un(Un(a, _), _), _) => a(_.a)
+      case (left(left(a, _), _), _) => a(_.a)
     }
 
     tCol.toString should be("left(_1._1.a)")
     tCol(abc) should be(aval)
   }
 
-  test("unapplying left B for ((a, b), c) should yield _1._2.b") {
+  test("unapplying b from ABC is not affecting scope") {
     val tCol = testee match {
-      case (Un(Un(_, b), _), _) => b(_.b)
+      case (left(left(_, b), _), _) => b(_.b)
     }
 
     tCol.toString should be("left(_1._2.b)")
     tCol(abc) should be(bval)
   }
+
 }

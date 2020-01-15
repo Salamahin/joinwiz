@@ -1,6 +1,6 @@
-package joinwiz.testkit
+package joinwiz
 
-import joinwiz.testkit.ops.{Filter, FlatMap, Join, Map}
+import joinwiz.ops.{Filter, FlatMap, Join, Map}
 
 import scala.language.higherKinds
 

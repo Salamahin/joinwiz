@@ -1,11 +1,11 @@
-package law
+package joinwiz.law
 
 import joinwiz.{LTColumnExtractor, RTColumnExtractor}
-import law.EqualityLawTest.{A, B}
+import joinwiz.law.EqualityLawTest.{A, B}
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
 
-object EqualityLawTest {
+private object EqualityLawTest {
 
   case class A(aString: String, aOptString: Option[String], aDecimal: BigDecimal)
 
@@ -15,7 +15,7 @@ object EqualityLawTest {
 
 class EqualityLawTest extends AnyFunSuite with Matchers {
 
-  private val testee = (LTColumnExtractor[A], new RTColumnExtractor[B])
+  private val testee = (LTColumnExtractor[A], RTColumnExtractor[B])
 
   import joinwiz.syntax._
 

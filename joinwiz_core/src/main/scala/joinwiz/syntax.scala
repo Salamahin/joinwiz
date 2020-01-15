@@ -1,31 +1,28 @@
 package joinwiz
 
 import joinwiz.law._
-import org.apache.spark.sql.Dataset
 
-import scala.language.{implicitConversions, postfixOps}
+import scala.language.{higherKinds, implicitConversions, postfixOps}
+import scala.reflect.runtime.universe.TypeTag
 
 object syntax extends AllLaws {
-  type JOIN_CONDITION[T, U] = (LTColumnExtractor[T, T], RTColumnExtractor[U]) => Operator
-  val LEFT_DS_ALIAS = "left"
-  val RIGHT_DS_ALIAS = "right"
+  type JOIN_CONDITION[L, R] = (LTColumnExtractor[L, L], RTColumnExtractor[R, R]) => Operator
 
-  implicit class JoinWizSyntax[T](ds: Dataset[T]) {
-    def leftJoin[U](other: Dataset[U])(joinBy: JOIN_CONDITION[T, U]): Dataset[(T, U)] =
-      ds.joinWiz(other, "left_outer")(joinBy)
+  implicit class DatasetOperationsSyntax[F[_] : DatasetOperations, T](ft: F[T]) {
+    def innerJoin[U](fu: F[U])(expr: JOIN_CONDITION[T, U]): F[(T, U)] =
+      implicitly[DatasetOperations[F]].join.inner(ft, fu)(expr)
 
-    def innerJoin[U](other: Dataset[U])(joinBy: JOIN_CONDITION[T, U]): Dataset[(T, U)] =
-      ds.joinWiz(other, "inner")(joinBy)
+    def leftJoin[U](fu: F[U])(expr: JOIN_CONDITION[T, U]): F[(T, U)] =
+      implicitly[DatasetOperations[F]].join.left(ft, fu)(expr)
 
-    def joinWiz[U](other: Dataset[U], joinType: String)(joinBy: JOIN_CONDITION[T, U]): Dataset[(T, U)] = {
-      ds
-        .as(LEFT_DS_ALIAS)
-        .joinWith(
-          other.as(RIGHT_DS_ALIAS),
-          new ColumnEvaluator().evaluate(joinBy(LTColumnExtractor[T], new RTColumnExtractor[U])),
-          joinType
-        )
-    }
+    def map[U <: Product : TypeTag](func: T => U): F[U] =
+      implicitly[DatasetOperations[F]].map(ft)(func)
+
+    def flatMap[U <: Product : TypeTag](func: T => Seq[U]): F[U] =
+      implicitly[DatasetOperations[F]].flatMap(ft)(func)
+
+    def filter(func: T => Boolean): F[T] =
+      implicitly[DatasetOperations[F]].filter(ft)(func)
   }
 
 }

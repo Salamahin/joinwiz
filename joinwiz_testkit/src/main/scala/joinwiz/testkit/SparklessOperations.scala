@@ -1,9 +1,8 @@
-package joinwiz.testkit.sparkless
+package joinwiz.testkit
 
 import joinwiz.syntax.JOIN_CONDITION
-import joinwiz.testkit.DatasetOperations
-import joinwiz.testkit.ops._
-import joinwiz.{LTColumnExtractor, RTColumnExtractor}
+import joinwiz.ops._
+import joinwiz.{DatasetOperations, LTColumnExtractor, RTColumnExtractor}
 
 import scala.reflect.runtime.universe
 
@@ -11,11 +10,11 @@ object SparklessOperations extends DatasetOperations[Seq] {
 
   override def join[T]: Join[Seq, T] = new Join[Seq, T] {
     override def inner[U](ft: Seq[T], fu: Seq[U])(expr: JOIN_CONDITION[T, U]): Seq[(T, U)] = {
-      new SeqJoinImpl[T, U](expr(LTColumnExtractor[T], new RTColumnExtractor[U]), ft, fu).innerJoin()
+      new SeqJoinImpl[T, U](expr(LTColumnExtractor[T], RTColumnExtractor[U]), ft, fu).innerJoin()
     }
 
     override def left[U](ft: Seq[T], fu: Seq[U])(expr: JOIN_CONDITION[T, U]): Seq[(T, U)] = {
-      new SeqJoinImpl[T, U](expr(LTColumnExtractor[T], new RTColumnExtractor[U]), ft, fu).leftJoin()
+      new SeqJoinImpl[T, U](expr(LTColumnExtractor[T], RTColumnExtractor[U]), ft, fu).leftJoin()
     }
   }
 

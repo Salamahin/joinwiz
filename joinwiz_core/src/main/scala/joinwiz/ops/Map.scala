@@ -1,4 +1,4 @@
-package joinwiz.testkit.ops
+package joinwiz.ops
 
 import scala.language.higherKinds
 import scala.reflect.runtime.universe.TypeTag
