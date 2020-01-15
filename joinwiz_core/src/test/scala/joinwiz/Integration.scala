@@ -1,7 +1,6 @@
 package joinwiz
 
 import joinwiz.Integration.{A, B, C}
-import joinwiz.law.AllLaws
 import org.apache.spark.sql.{Dataset, SparkSession}
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.funsuite.AnyFunSuite
@@ -17,7 +16,7 @@ object Integration {
 
 }
 
-class Integration extends AnyFunSuite with Matchers with AllLaws with BeforeAndAfterAll {
+class Integration extends AnyFunSuite with Matchers with BeforeAndAfterAll {
   private val a1 = A("v1")
   private val a2 = A("v2")
   private val a3 = A("v3")
@@ -89,6 +88,6 @@ class Integration extends AnyFunSuite with Matchers with AllLaws with BeforeAndA
       .innerJoin(abDs) {
         case (c, right(a, _)) => c(_.c) =:= a(_.a)
       }
-      .collect() should contain only(((a1, b1), c1), ((a2, b2), c2), ((a3, b3), c3))
+      .collect() should contain only((c1, (a1, b1)), (c2, (a2, b2)), (c3, (a3, b3)))
   }
 }

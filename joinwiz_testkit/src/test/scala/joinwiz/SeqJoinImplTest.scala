@@ -1,7 +1,6 @@
 package joinwiz
 
 import joinwiz.SeqJoinImplTest.{A, B}
-import joinwiz.law.AllLaws
 import org.apache.spark.sql.{Dataset, SparkSession}
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.funsuite.AnyFunSuite
@@ -18,7 +17,7 @@ object SeqJoinImplTest {
 
 }
 
-class SeqJoinImplTest extends AnyFunSuite with Matchers with AllLaws with BeforeAndAfterAll {
+class SeqJoinImplTest extends AnyFunSuite with Matchers with BeforeAndAfterAll {
 
   private val a1 = A("pk1", "val1")
   private val a2 = A("pk1", "val2")

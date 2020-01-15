@@ -1,7 +1,10 @@
 # joinwiz
+
 Spark API enhancements for Dataset's joins.
 
 **Note the API is evolving and thus may be unstable**
+
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.github.salamahin/joinwiz_2.11/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.github.salamahin/joinwiz_2.11) [![Build Status](https://travis-ci.com/Salamahin/joinwiz.svg?branch=master)](https://travis-ci.com/Salamahin/joinwiz)
 
 
 ## Motivation
@@ -11,13 +14,6 @@ Spark API enhancements for Dataset's joins.
 * Write Dataset transformations and test them in pure-unit style without running spark (testkit)
 
 
-## Released version
-
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.github.salamahin/joinwiz_2.11/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.github.salamahin/joinwiz_2.11)
-
-
-## Current version build status
-[![Build Status](https://travis-ci.com/Salamahin/joinwiz.svg?branch=master)](https://travis-ci.com/Salamahin/joinwiz)
 
 
 ## Try it
@@ -37,20 +33,26 @@ object Runner extends App {
     
   import ss.implicits._
     
-  case class A(pk: String)
-  case class B(fk: Option[String])
+  case class A(a: String)
+  case class B(b: String)
+  case class C(c: String)
     
-  val dsA = Seq(A("pk1")).toDS()
-  val dsB = Seq(B(Some("pk1"))).toDS()I
+  val aDs: Dataset[A] = ???
+  val bDs: Dataset[B] = ???
+  val cDs: Dataset[C] = ???
     
+  import joinwiz.spark.implicits._
   import joinwiz.syntax._
-    
-  dsA
-    .innerJoin(dsB)((left, right) => left(_.pk) =:= right(_.fk))
+   
+  aDs
+    .innerJoin(bDs)((l, r) => l(_.a) =:= r(_.b)) //specify joining columns by types
+    .innerJoin(cDs) {
+      case (left(_, b), c) => b(_.b) =:= c(_.c)  //or unapply previously joined tuple
+    }
     .show()
     
-  dsA
-    .khomutovJoin(dsB)((left, right) => left(_.pk) =:= right(_.fk))
+  aDs
+    .khomutovJoin(dsB)((left, right) => left(_.a) =:= right(_.b))
     .show()
 }
 ```
@@ -67,12 +69,11 @@ val bs = Seq(b1, b2)
 val aDs = as.toDS()
 val bDs = bs.toDS()
 
-
-private def testMe[F[_] : DatasetOperations](ft: F[A], fu: F[B]) = {
-  import joinwiz.testkit.syntax._
+private def testMe[F[_] : DatasetOperations](fa: F[A], fb: F[B]) = {
+  import joinwiz.syntax._
     
-  ft
-    .innerJoin(fu)(
+  fa
+    .innerJoin(fb)(
       (l, r) => l(_.pk) =:= r(_.fk) && l(_.value) =:= "val1" && r(_.value) =:= Some(BigDecimal(0L))
     )
     .map {
@@ -81,13 +82,13 @@ private def testMe[F[_] : DatasetOperations](ft: F[A], fu: F[B]) = {
 }
 
 //takes millis to run
-test("sparkless inner join") { 
-  import joinwiz.testkit.sparkless.implicits._
+test("with sparkless API") { 
+  import joinwiz.testkit.implicits._
   testMe(as, bs) should contain only ((b1, a1))
 }
 
 //takes seconds to run + some spark initialization overhead
-test("spark's inner join") {
+test("with spark API") {
   import joinwiz.spark.implicits._
   testMe(aDs, bDs).collect() should contain only ((b1, a1))
 }
