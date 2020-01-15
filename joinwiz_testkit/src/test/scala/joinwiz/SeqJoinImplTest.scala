@@ -1,8 +1,6 @@
 package joinwiz
 
 import joinwiz.SeqJoinImplTest.{A, B}
-import joinwiz.law.AllLaws
-import joinwiz.testkit.DatasetOperations
 import org.apache.spark.sql.{Dataset, SparkSession}
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.funsuite.AnyFunSuite
@@ -19,7 +17,7 @@ object SeqJoinImplTest {
 
 }
 
-class SeqJoinImplTest extends AnyFunSuite with Matchers with AllLaws with BeforeAndAfterAll {
+class SeqJoinImplTest extends AnyFunSuite with Matchers with BeforeAndAfterAll {
 
   private val a1 = A("pk1", "val1")
   private val a2 = A("pk1", "val2")
@@ -52,7 +50,7 @@ class SeqJoinImplTest extends AnyFunSuite with Matchers with AllLaws with Before
   }
 
   private def testMe[F[_] : DatasetOperations](ft: F[A], fu: F[B]) = {
-    import joinwiz.testkit.syntax._
+    import joinwiz.syntax._
 
     ft
       .innerJoin(fu)(
@@ -64,13 +62,13 @@ class SeqJoinImplTest extends AnyFunSuite with Matchers with AllLaws with Before
   }
 
   test("sparkless inner join") {
-    import joinwiz.testkit.sparkless.implicits._
+    import joinwiz.testkit.implicits._
     testMe(as, bs) should contain only ((b1, a1))
   }
 
 
   test("spark's inner join") {
-    import joinwiz.testkit.spark.implicits._
+    import joinwiz.spark.implicits._
     testMe(aDs, bDs).collect() should contain only ((b1, a1))
   }
 }

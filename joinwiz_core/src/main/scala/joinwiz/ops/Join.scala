@@ -1,4 +1,4 @@
-package joinwiz.testkit.ops
+package joinwiz.ops
 
 
 import joinwiz.syntax.JOIN_CONDITION

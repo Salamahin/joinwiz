@@ -3,7 +3,10 @@ organization in ThisBuild := "io.github.salamahin"
 scalaVersion in ThisBuild := "2.11.12"
 
 lazy val commonSettings = Seq(
-  scalacOptions ++= Seq("-encoding", "utf8")
+  scalacOptions ++= Seq(
+    "-encoding", "utf8",
+    "-Xlog-implicits"
+  )
 )
 
 lazy val joinwiz_macro = project

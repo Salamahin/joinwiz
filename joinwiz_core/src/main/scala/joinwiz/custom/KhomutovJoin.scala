@@ -11,13 +11,13 @@ import scala.language.postfixOps
 object KhomutovJoin {
 
   private def nullableField(e: Operator): Option[String] = e match {
-    case Equality(left: LTColumn[_, _], _: RTColumn[_, _]) => Some(left.name)
+    case Equality(left: LTColumn[_, _, _], _: RTColumn[_, _, _]) => Some(left.name)
     case _ => None
   }
 
   implicit class KhomutovJoinSyntax[T: Encoder](ds: Dataset[T]) {
     def khomutovJoin[U: Encoder](other: Dataset[U])(joinBy: JOIN_CONDITION[T, U]): Dataset[(T, U)] = {
-      val operator = joinBy(new LTColumnExtractor[T], new RTColumnExtractor[U])
+      val operator = joinBy(LTColumnExtractor[T], RTColumnExtractor[U])
       val nullableFieldName = KhomutovJoin
         .nullableField(operator)
         .getOrElse(throw new UnsupportedOperationException(s"Expression $operator is not supported yet"))
@@ -28,6 +28,7 @@ object KhomutovJoin {
       implicit val tuEnc: Encoder[(T, U)] = Encoders.tuple(implicitly[Encoder[T]], implicitly[Encoder[U]])
 
       import joinwiz.syntax._
+      import joinwiz.spark.implicits._
 
       dsWithoutNulls
         .leftJoin(other)(joinBy)

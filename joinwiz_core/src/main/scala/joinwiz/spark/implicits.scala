@@ -1,6 +1,6 @@
-package joinwiz.testkit.spark
+package joinwiz.spark
 
-import joinwiz.testkit.DatasetOperations
+import joinwiz.DatasetOperations
 import org.apache.spark.sql.Dataset
 
 object implicits {

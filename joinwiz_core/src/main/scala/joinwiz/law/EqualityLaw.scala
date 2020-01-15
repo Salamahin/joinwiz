@@ -3,44 +3,44 @@ package joinwiz.law
 import joinwiz.{Const, Equality, LTColumn, RTColumn}
 
 
-trait EqualityLaw[-T, -S] {
-  def build(left: T, right: S): Equality
+trait EqualityLaw[-L, -R] {
+  def build(left: L, right: R): Equality
 }
 
 trait LowPriorityEqualityLaws {
-  def equalityLaw[T, S](func: (T, S) => Equality): EqualityLaw[T, S] = new EqualityLaw[T, S] {
-    override def build(left: T, right: S): Equality = func(left, right)
+  def equalityLaw[L, R](func: (L, R) => Equality): EqualityLaw[L, R] = new EqualityLaw[L, R] {
+    override def build(left: L, right: R): Equality = func(left, right)
   }
 
-  implicit def equalityIsCommutative[T, S]
-  (implicit e: EqualityLaw[S, T]): EqualityLaw[T, S] = equalityLaw {
-    (left: T, right: S) => e.build(right, left)
+  implicit def equalityIsCommutative[L, R]
+  (implicit e: EqualityLaw[R, L]): EqualityLaw[L, R] = equalityLaw {
+    (left: L, right: R) => e.build(right, left)
   }
 }
 
 trait EqualityLaws extends LowPriorityEqualityLaws {
-  implicit def sameTypeCanEqual[T, U, V]: EqualityLaw[LTColumn[U, T], RTColumn[V, T]] = equalityLaw {
-    (left: LTColumn[U, T], right: RTColumn[V, T]) => Equality(left, right)
+  implicit def sameTypeCanEqual[LO, RO, T, L, R]: EqualityLaw[LTColumn[LO, L, T], RTColumn[RO, R, T]] = equalityLaw {
+    (left: LTColumn[LO, L, T], right: RTColumn[RO, R, T]) => Equality(left, right)
   }
 
-  implicit def rightNullableTypeCanEqual[T, U, V]: EqualityLaw[LTColumn[U, T], RTColumn[V, Option[T]]] = equalityLaw {
-    (left: LTColumn[_, T], right: RTColumn[_, Option[T]]) => Equality(left, right)
+  implicit def rightNullableTypeCanEqual[LO, RO, T, L, R]: EqualityLaw[LTColumn[LO, L, T], RTColumn[RO, R, Option[T]]] = equalityLaw {
+    (left: LTColumn[LO, L, T], right: RTColumn[RO, R, Option[T]]) => Equality(left, right)
   }
 
-  implicit def leftNullableTypeCanEqual[T, U, V]: EqualityLaw[LTColumn[U, Option[T]], RTColumn[V, T]] = equalityLaw {
-    (left: LTColumn[_, Option[T]], right: RTColumn[_, T]) => Equality(left, right)
+  implicit def leftNullableTypeCanEqual[LO, RO, T, L, R]: EqualityLaw[LTColumn[LO, L, Option[T]], RTColumn[RO, R, T]] = equalityLaw {
+    (left: LTColumn[LO, L, Option[T]], right: RTColumn[RO, R, T]) => Equality(left, right)
   }
 
-  implicit def leftConstCanEqual[T, U]: EqualityLaw[LTColumn[U, T], T] = equalityLaw {
-    (col: LTColumn[U, T], const: T) => Equality(col, Const(const))
+  implicit def leftConstCanEqual[LO, T, L]: EqualityLaw[LTColumn[LO, L, T], T] = equalityLaw {
+    (col: LTColumn[LO, L, T], const: T) => Equality(col, Const(const))
   }
 
-  implicit def rightConstCanEqual[T, V]: EqualityLaw[RTColumn[V, T], T] = equalityLaw {
-    (right: RTColumn[V, T], const: T) => Equality(right, Const(const))
+  implicit def rightConstCanEqual[RO, T, R]: EqualityLaw[RTColumn[RO, R, T], T] = equalityLaw {
+    (right: RTColumn[RO, R, T], const: T) => Equality(right, Const(const))
   }
 
-  implicit class EqualitySyntax[T](left: T) {
-    def =:=[S](right: S)(implicit eq: EqualityLaw[T, S]): Equality = eq.build(left, right)
+  implicit class EqualitySyntax[L](left: L) {
+    def =:=[R](right: R)(implicit eq: EqualityLaw[L, R]): Equality = eq.build(left, right)
   }
 
 }
