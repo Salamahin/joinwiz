@@ -23,7 +23,7 @@ lazy val joinwiz_core = project
   )
 
 lazy val joinwiz_testkit = project
-  .dependsOn(joinwiz_core)
+  .dependsOn(joinwiz_core, joinwiz_core % Test)
   .settings(commonSettings: _*)
   .settings(
     libraryDependencies ++= Seq(dependencies.sparkCore, dependencies.sparkSql, dependencies.scalatest, dependencies.shapeless)
@@ -34,7 +34,7 @@ lazy val dependencies = new {
 
   val sparkCore = "org.apache.spark" %% "spark-core" % sparkV % Provided
   val sparkSql = "org.apache.spark" %% "spark-sql" % sparkV % Provided
-  val shapeless = "com.chuusai" %% "shapeless" % "2.3.2" % Provided
+  val shapeless = "com.chuusai" %% "shapeless" % "2.3.3"
   val scalatest = "org.scalatest" %% "scalatest" % "3.1.0" % Test
 }
 

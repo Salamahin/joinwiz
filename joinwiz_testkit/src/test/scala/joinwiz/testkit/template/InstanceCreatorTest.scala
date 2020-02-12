@@ -2,7 +2,6 @@ package joinwiz.testkit.template
 
 import joinwiz.testkit.template.InstanceCreatorTest.Outer
 import org.scalatest.funsuite.AnyFunSuite
-import org.scalatest.matchers.should.Matchers
 
 object InstanceCreatorTest {
   case class Inner(str: String, optStr: Option[String], seqStrs: Seq[String])

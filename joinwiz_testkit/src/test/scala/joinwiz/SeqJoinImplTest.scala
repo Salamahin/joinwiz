@@ -1,8 +1,7 @@
 package joinwiz
 
 import joinwiz.SeqJoinImplTest.{A, B}
-import org.apache.spark.sql.{Dataset, SparkSession}
-import org.scalatest.BeforeAndAfterAll
+import org.apache.spark.sql.Dataset
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
 
@@ -17,7 +16,7 @@ object SeqJoinImplTest {
 
 }
 
-class SeqJoinImplTest extends AnyFunSuite with Matchers with BeforeAndAfterAll {
+class SeqJoinImplTest extends AnyFunSuite with Matchers with SparkSuite {
 
   private val a1 = A("pk1", "val1")
   private val a2 = A("pk1", "val2")
@@ -29,24 +28,17 @@ class SeqJoinImplTest extends AnyFunSuite with Matchers with BeforeAndAfterAll {
   private val as = Seq(a1, a2, a3)
   private val bs = Seq(b1, b2)
 
-  private var ss: SparkSession = _
   private var aDs: Dataset[A] = _
   private var bDs: Dataset[B] = _
 
   override def beforeAll() {
-    val sparkSession = SparkSession.builder()
-      .master("local[*]")
-      .getOrCreate()
+    super.beforeAll()
 
-    import sparkSession.implicits._
+    val spark = ss
+    import spark.implicits._
 
-    ss = sparkSession
     aDs = as.toDS()
     bDs = bs.toDS()
-  }
-
-  override def afterAll() {
-    ss.close()
   }
 
   private def testMe[F[_] : DatasetOperations](ft: F[A], fu: F[B]) = {

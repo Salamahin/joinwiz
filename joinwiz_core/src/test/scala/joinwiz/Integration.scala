@@ -2,7 +2,6 @@ package joinwiz
 
 import joinwiz.Integration.{A, B, C}
 import org.apache.spark.sql.{Dataset, SparkSession}
-import org.scalatest.BeforeAndAfterAll
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
 
@@ -16,7 +15,7 @@ object Integration {
 
 }
 
-class Integration extends AnyFunSuite with Matchers with BeforeAndAfterAll {
+class Integration extends AnyFunSuite with Matchers with SparkSuite {
   private val a1 = A("v1")
   private val a2 = A("v2")
   private val a3 = A("v3")
@@ -33,27 +32,19 @@ class Integration extends AnyFunSuite with Matchers with BeforeAndAfterAll {
   private val bs = Seq(b1, b2, b3)
   private val cs = Seq(c1, c2, c3)
 
-  private var ss: SparkSession = _
   private var aDs: Dataset[A] = _
   private var bDs: Dataset[B] = _
   private var cDs: Dataset[C] = _
 
   override def beforeAll() {
-    val sparkSession = SparkSession.builder()
-      .master("local[*]")
-      .config("spark.driver.host", "127.0.0.1")
-      .getOrCreate()
+    super.beforeAll()
 
-    import sparkSession.implicits._
+    val spark = ss
+    import spark.implicits._
 
-    ss = sparkSession
     aDs = as.toDS()
     bDs = bs.toDS()
     cDs = cs.toDS()
-  }
-
-  override def afterAll() {
-    ss.close()
   }
 
   test("can join without unapplying") {
