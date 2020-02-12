@@ -12,7 +12,7 @@ lazy val commonSettings = Seq(
 lazy val joinwiz_macro = project
   .settings(commonSettings: _*)
   .settings(
-    libraryDependencies += "org.scala-lang" % "scala-reflect" % scalaVersion.value
+    libraryDependencies += ("org.scala-lang" % "scala-reflect" % scalaVersion.value)
   )
 
 lazy val joinwiz_core = project
@@ -25,13 +25,16 @@ lazy val joinwiz_core = project
 lazy val joinwiz_testkit = project
   .dependsOn(joinwiz_core)
   .settings(commonSettings: _*)
-  .settings(libraryDependencies ++= Seq(dependencies.sparkCore, dependencies.sparkSql, dependencies.scalatest))
+  .settings(
+    libraryDependencies ++= Seq(dependencies.sparkCore, dependencies.sparkSql, dependencies.scalatest, dependencies.shapeless)
+  )
 
 lazy val dependencies = new {
   val sparkV = "2.3.0"
 
   val sparkCore = "org.apache.spark" %% "spark-core" % sparkV % Provided
   val sparkSql = "org.apache.spark" %% "spark-sql" % sparkV % Provided
+  val shapeless = "com.chuusai" %% "shapeless" % "2.3.2" % Provided
   val scalatest = "org.scalatest" %% "scalatest" % "3.1.0" % Test
 }
 
