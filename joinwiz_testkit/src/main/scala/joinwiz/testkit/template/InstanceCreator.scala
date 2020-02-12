@@ -2,7 +2,7 @@ package joinwiz.testkit.template
 
 import java.sql.{Date, Timestamp}
 
-import shapeless.{::, Generic, HList, HNil}
+import shapeless.{::, Generic, HList, HNil, Lazy}
 
 trait Filler[Out] {
   def fill(): Out
@@ -42,17 +42,17 @@ class InstanceCreator {
   implicit def hConsTemplate[H, T <: HList]
   (implicit
    hFiller: Filler[H],
-   tFiller: Filler[T]
+   tFiller: Lazy[Filler[T]]
   ): Filler[H :: T] = new Filler[H :: T] {
-    override def fill(): H :: T = hFiller.fill() :: tFiller.fill()
+    override def fill(): H :: T = hFiller.fill() :: tFiller.value.fill()
   }
 
   implicit def genericTemplate[P, PL <: HList]
   (implicit
    gen: Generic.Aux[P, PL],
-   filler: Filler[PL]
+   filler: Lazy[Filler[PL]]
   ): Filler[P] = new Filler[P] {
-    override def fill(): P = gen.from(filler.fill())
+    override def fill(): P = gen.from(filler.value.fill())
   }
 
   def apply[P](implicit s: Filler[P]): P = s.fill()
