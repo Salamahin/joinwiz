@@ -41,6 +41,7 @@ class Integration extends AnyFunSuite with Matchers with BeforeAndAfterAll {
   override def beforeAll() {
     val sparkSession = SparkSession.builder()
       .master("local[*]")
+      .config("spark.driver.host", "127.0.0.1")
       .getOrCreate()
 
     import sparkSession.implicits._
