@@ -1,6 +1,7 @@
-package joinwiz
+package joinwiz.testkit
 
-import joinwiz.SeqJoinImplTest.{A, B}
+import joinwiz.testkit.SeqJoinImplTest.{A, B}
+import joinwiz.{DatasetOperations, SparkSuite}
 import org.apache.spark.sql.Dataset
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
@@ -41,11 +42,11 @@ class SeqJoinImplTest extends AnyFunSuite with Matchers with SparkSuite {
     bDs = bs.toDS()
   }
 
-  private def testMe[F[_] : DatasetOperations](ft: F[A], fu: F[B]) = {
+  private def testMe[F[_] : DatasetOperations](fa: F[A], fb: F[B]) = {
     import joinwiz.syntax._
 
-    ft
-      .innerJoin(fu)(
+    fa
+      .innerJoin(fb)(
         (l, r) => l(_.pk) =:= r(_.fk) && l(_.value) =:= "val1" && r(_.value) =:= Some(BigDecimal(0L))
       )
       .map {
