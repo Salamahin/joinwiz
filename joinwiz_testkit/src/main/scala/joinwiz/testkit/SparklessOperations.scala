@@ -1,10 +1,9 @@
 package joinwiz.testkit
 
-import joinwiz.ops._
+import joinwiz.dataset._
 import joinwiz.syntax.JOIN_CONDITION
 import joinwiz.{ApplyToLeftColumn, ApplyToRightColumn, DatasetOperations}
 
-import scala.reflect.runtime.universe
 import scala.reflect.runtime.universe.TypeTag
 
 object SparklessOperations extends DatasetOperations[Seq] {
@@ -20,12 +19,11 @@ object SparklessOperations extends DatasetOperations[Seq] {
   }
 
   override def map[T]: Map[Seq, T] = new Map[Seq, T] {
-    def apply[U <: Product: reflect.runtime.universe.TypeTag](ft: Seq[T])(func: T => U): Seq[U] =
-      ft.map(func)
+    override def apply[U: TypeTag](ft: Seq[T])(func: T => U): Seq[U] = ft.map(func)
   }
 
   override def flatMap[T]: FlatMap[Seq, T] = new FlatMap[Seq, T] {
-    override def apply[U <: Product: universe.TypeTag](ft: Seq[T])(func: T => TraversableOnce[U]): Seq[U] =
+    override def apply[U: TypeTag](ft: Seq[T])(func: T => TraversableOnce[U]): Seq[U] =
       ft.flatMap(func)
   }
 
@@ -39,9 +37,9 @@ object SparklessOperations extends DatasetOperations[Seq] {
   }
 
   override def groupByKey[T]: GroupByKey[Seq, T] = new GroupByKey[Seq, T] {
-    override def apply[K <: Product: TypeTag](ft: Seq[T])(func: T => K): GrouppedByKeySyntax[Seq, T, K] =
+    override def apply[K: TypeTag](ft: Seq[T])(func: T => K): GrouppedByKeySyntax[Seq, T, K] =
       new GrouppedByKeySyntax[Seq, T, K] {
-        override def mapGroups[U <: Product: TypeTag](f: (K, Iterator[T]) => U): Seq[U] =
+        override def mapGroups[U: TypeTag](f: (K, Iterator[T]) => U): Seq[U] =
           ft.groupBy(func)
             .map {
               case (k, vals) => f(k, vals.iterator)

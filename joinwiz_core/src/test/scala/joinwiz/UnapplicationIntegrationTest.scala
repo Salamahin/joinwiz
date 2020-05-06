@@ -1,11 +1,11 @@
 package joinwiz
 
-import joinwiz.Integration.{A, B, C}
+import joinwiz.UnapplicationIntegrationTest.{A, B, C}
 import org.apache.spark.sql.Dataset
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
 
-object Integration {
+object UnapplicationIntegrationTest {
 
   case class A(a: String)
 
@@ -15,7 +15,7 @@ object Integration {
 
 }
 
-class Integration extends AnyFunSuite with Matchers with SparkSuite {
+class UnapplicationIntegrationTest extends AnyFunSuite with Matchers with SparkSuite {
   private val a1 = A("v1")
   private val a2 = A("v2")
   private val a3 = A("v3")

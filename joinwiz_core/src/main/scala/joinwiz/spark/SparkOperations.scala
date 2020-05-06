@@ -1,11 +1,11 @@
 package joinwiz.spark
 
-import joinwiz.ops._
+import joinwiz.dataset._
 import joinwiz.syntax.JOIN_CONDITION
 import joinwiz.{ApplyToLeftColumn, ApplyToRightColumn, DatasetOperations}
-import org.apache.spark.sql.{Dataset, Encoders}
+import org.apache.spark.sql.Dataset
+import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder
 
-import scala.reflect.runtime.universe
 import scala.reflect.runtime.universe.TypeTag
 
 object SparkOperations extends DatasetOperations[Dataset] {
@@ -33,13 +33,13 @@ object SparkOperations extends DatasetOperations[Dataset] {
   }
 
   override def map[T]: Map[Dataset, T] = new Map[Dataset, T] {
-    override def apply[U <: Product: universe.TypeTag](ft: Dataset[T])(func: T => U): Dataset[U] =
-      ft.map(func)(Encoders.product)
+    override def apply[U: TypeTag](ft: Dataset[T])(func: T => U): Dataset[U] =
+      ft.map(func)(ExpressionEncoder())
   }
 
   override def flatMap[L]: FlatMap[Dataset, L] = new FlatMap[Dataset, L] {
-    override def apply[R <: Product: TypeTag](ft: Dataset[L])(func: L => TraversableOnce[R]): Dataset[R] =
-      ft.flatMap(func)(Encoders.product)
+    override def apply[R: TypeTag](ft: Dataset[L])(func: L => TraversableOnce[R]): Dataset[R] =
+      ft.flatMap(func)(ExpressionEncoder())
   }
 
   override def filter[L]: Filter[Dataset, L] = new Filter[Dataset, L] {
@@ -52,10 +52,10 @@ object SparkOperations extends DatasetOperations[Dataset] {
   }
 
   override def groupByKey[T]: GroupByKey[Dataset, T] = new GroupByKey[Dataset, T] {
-    override def apply[K <: Product: TypeTag](ft: Dataset[T])(func: T => K): GrouppedByKeySyntax[Dataset, T, K] =
+    override def apply[K: TypeTag](ft: Dataset[T])(func: T => K): GrouppedByKeySyntax[Dataset, T, K] =
       new GrouppedByKeySyntax[Dataset, T, K] {
-        override def mapGroups[U <: Product: TypeTag](f: (K, Iterator[T]) => U): Dataset[U] =
-          ft.groupByKey(func)(Encoders.product[K]).mapGroups(f)(Encoders.product[U])
+        override def mapGroups[U: TypeTag](f: (K, Iterator[T]) => U): Dataset[U] =
+          ft.groupByKey(func)(ExpressionEncoder()).mapGroups(f)(ExpressionEncoder())
       }
   }
 }

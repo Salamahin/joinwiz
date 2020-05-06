@@ -1,6 +1,6 @@
 package joinwiz
 
-import joinwiz.ops.{Distinct, Filter, FlatMap, GroupByKey, Join, Map}
+import joinwiz.dataset.{Distinct, Filter, FlatMap, GroupByKey, Join, Map}
 
 import scala.language.higherKinds
 
