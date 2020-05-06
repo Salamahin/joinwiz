@@ -93,3 +93,10 @@ test("with spark API") {
   testMe(aDs, bDs).collect() should contain only ((b1, a1))
 }
 ```
+
+Supported dataset API
+ * inner/left outer joins
+ * map
+ * flatMap
+ * distinct
+ * groupByKey + mapGroups

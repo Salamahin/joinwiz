@@ -4,7 +4,8 @@ scalaVersion in ThisBuild := "2.11.12"
 
 lazy val commonSettings = Seq(
   scalacOptions ++= Seq(
-    "-encoding", "utf8"
+    "-encoding",
+    "utf8"
   )
 )
 
@@ -37,9 +38,9 @@ lazy val dependencies = new {
   val sparkV = "2.3.0"
 
   val sparkCore = "org.apache.spark" %% "spark-core" % sparkV
-  val sparkSql = "org.apache.spark" %% "spark-sql" % sparkV
-  val shapeless = "com.chuusai" %% "shapeless" % "2.3.2"
-  val scalatest = "org.scalatest" %% "scalatest" % "3.1.0" % Test
+  val sparkSql  = "org.apache.spark" %% "spark-sql"  % sparkV
+  val shapeless = "com.chuusai"      %% "shapeless"  % "2.3.2"
+  val scalatest = "org.scalatest"    %% "scalatest"  % "3.1.0" % Test
 }
 
 import sbtrelease.ReleasePlugin.autoImport.ReleaseTransformations._
@@ -55,7 +56,12 @@ ThisBuild / scmInfo := Some(
   )
 )
 ThisBuild / developers := List(
-  Developer(id = "Salamahin", name = "Danila Goloshchapov", email = "danilasergeevich@gmail.com", url = url("https://github.com/Salamahin"))
+  Developer(
+    id = "Salamahin",
+    name = "Danila Goloshchapov",
+    email = "danilasergeevich@gmail.com",
+    url = url("https://github.com/Salamahin")
+  )
 )
 
 releaseIgnoreUntrackedFiles := true
