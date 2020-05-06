@@ -19,12 +19,4 @@ trait SparkSuite extends BeforeAndAfterAll {
       .config("spark.driver.host", "127.0.0.1")
       .getOrCreate()
   }
-
-  override def afterAll() {
-    try {
-      _ss.close()
-    } finally {
-      super.afterAll()
-    }
-  }
 }

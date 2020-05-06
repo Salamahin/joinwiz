@@ -15,6 +15,8 @@ class SparkExpressionEvaluator extends ExpressionEvaluator[Any, Any, Column] {
   }
 
   private def constant(o: Const) = o match {
+    case Const(Some(x)) => lit(x)
+    case Const(None)    => lit(null)
     case Const(x) => lit(x)
   }
 
