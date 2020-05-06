@@ -1,6 +1,6 @@
 package joinwiz
 
-import joinwiz.ops.{Filter, FlatMap, Join, Map}
+import joinwiz.ops.{Distinct, Filter, FlatMap, GroupByKey, Join, Map}
 
 import scala.language.higherKinds
 
@@ -14,4 +14,7 @@ trait DatasetOperations[F[_]] {
 
   def filter[T]: Filter[F, T]
 
+  def distinct[T]: Distinct[F, T]
+
+  def groupByKey[T]: GroupByKey[F, T]
 }

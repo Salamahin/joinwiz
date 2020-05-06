@@ -20,7 +20,7 @@ class UnapplierTest extends AnyFunSuite with Matchers {
   private val aval = "aval"
   private val bval = "bval"
   private val cval = "cval"
-  private val abc = ((A(aval), B(bval)), C(cval))
+  private val abc  = ((A(aval), B(bval)), C(cval))
 
   private val testee = (LTColumnExtractor[ABC], RTColumnExtractor[C])
 

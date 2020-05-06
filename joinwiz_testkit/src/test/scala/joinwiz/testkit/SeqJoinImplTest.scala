@@ -8,7 +8,6 @@ import org.scalatest.matchers.should.Matchers
 
 import scala.language.higherKinds
 
-
 object SeqJoinImplTest {
 
   case class A(pk: String, value: String)
@@ -42,11 +41,10 @@ class SeqJoinImplTest extends AnyFunSuite with Matchers with SparkSuite {
     bDs = bs.toDS()
   }
 
-  private def testMe[F[_] : DatasetOperations](fa: F[A], fb: F[B]) = {
+  private def testMe[F[_]: DatasetOperations](fa: F[A], fb: F[B]) = {
     import joinwiz.syntax._
 
-    fa
-      .innerJoin(fb)(
+    fa.innerJoin(fb)(
         (l, r) => l(_.pk) =:= r(_.fk) && l(_.value) =:= "val1" && r(_.value) =:= Some(BigDecimal(0L))
       )
       .map {
@@ -58,7 +56,6 @@ class SeqJoinImplTest extends AnyFunSuite with Matchers with SparkSuite {
     import joinwiz.testkit.implicits._
     testMe(as, bs) should contain only ((b1, a1))
   }
-
 
   test("spark's inner join") {
     import joinwiz.spark.implicits._

@@ -1,6 +1,5 @@
 package joinwiz.ops
 
-
 import joinwiz.syntax.JOIN_CONDITION
 
 import scala.language.higherKinds

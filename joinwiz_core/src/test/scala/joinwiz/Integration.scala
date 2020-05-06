@@ -1,7 +1,7 @@
 package joinwiz
 
 import joinwiz.Integration.{A, B, C}
-import org.apache.spark.sql.{Dataset, SparkSession}
+import org.apache.spark.sql.Dataset
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
 
@@ -54,7 +54,7 @@ class Integration extends AnyFunSuite with Matchers with SparkSuite {
     aDs
       .innerJoin(bDs)((l, r) => l(_.a) =:= r(_.b))
       .innerJoin(cDs)((l, r) => l(_._1.a) =:= r(_.c))
-      .collect() should contain only(((a1, b1), c1), ((a2, b2), c2), ((a3, b3), c3))
+      .collect() should contain only (((a1, b1), c1), ((a2, b2), c2), ((a3, b3), c3))
   }
 
   test("can join unapplying left") {
@@ -66,7 +66,7 @@ class Integration extends AnyFunSuite with Matchers with SparkSuite {
       .innerJoin(cDs) {
         case (left(_, b), c) => b(_.b) =:= c(_.c)
       }
-      .collect() should contain only(((a1, b1), c1), ((a2, b2), c2), ((a3, b3), c3))
+      .collect() should contain only (((a1, b1), c1), ((a2, b2), c2), ((a3, b3), c3))
   }
 
   test("can join unapplying right") {
@@ -80,6 +80,6 @@ class Integration extends AnyFunSuite with Matchers with SparkSuite {
       .innerJoin(abDs) {
         case (c, right(a, _)) => c(_.c) =:= a(_.a)
       }
-      .collect() should contain only((c1, (a1, b1)), (c2, (a2, b2)), (c3, (a3, b3)))
+      .collect() should contain only ((c1, (a1, b1)), (c2, (a2, b2)), (c3, (a3, b3)))
   }
 }

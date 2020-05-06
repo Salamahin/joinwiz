@@ -2,7 +2,7 @@ package joinwiz.testkit
 
 import joinwiz._
 
-class SeqOperatorEvaluator[L, R](op: Operator) {
+class SeqOperatorEvaluator[L, R](op: Expression) {
   def evaluate(left: L, right: R): Boolean = op match {
     case Equality(l: LTColumn[L, _, _], r: RTColumn[R, _, _]) => l(left) == r(right)
 

@@ -1,7 +1,7 @@
 package joinwiz.law
 
-import joinwiz.{LTColumnExtractor, RTColumnExtractor}
 import joinwiz.law.EqualityLawTest.{A, B}
+import joinwiz.{LTColumnExtractor, RTColumnExtractor}
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
 

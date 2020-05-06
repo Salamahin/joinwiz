@@ -13,7 +13,8 @@ trait SparkSuite extends BeforeAndAfterAll {
   override def beforeAll() {
     super.beforeAll()
 
-    _ss = SparkSession.builder()
+    _ss = SparkSession
+      .builder()
       .master("local[*]")
       .config("spark.driver.host", "127.0.0.1")
       .getOrCreate()

@@ -8,7 +8,6 @@ trait Filler[Out] {
   def fill(): Out
 }
 
-
 trait ZeroTemplates {
   self: InstanceCreator =>
 
@@ -39,18 +38,18 @@ class InstanceCreator {
 
   implicit val hnilTemplate: Filler[HNil] = fillerInstance[HNil](HNil)
 
-  implicit def hConsTemplate[H, T <: HList]
-  (implicit
-   hFiller: Filler[H],
-   tFiller: Lazy[Filler[T]]
+  implicit def hConsTemplate[H, T <: HList](
+    implicit
+    hFiller: Filler[H],
+    tFiller: Lazy[Filler[T]]
   ): Filler[H :: T] = new Filler[H :: T] {
     override def fill(): H :: T = hFiller.fill() :: tFiller.value.fill()
   }
 
-  implicit def genericTemplate[P, PL <: HList]
-  (implicit
-   gen: Generic.Aux[P, PL],
-   filler: Lazy[Filler[PL]]
+  implicit def genericTemplate[P, PL <: HList](
+    implicit
+    gen: Generic.Aux[P, PL],
+    filler: Lazy[Filler[PL]]
   ): Filler[P] = new Filler[P] {
     override def fill(): P = gen.from(filler.value.fill())
   }
