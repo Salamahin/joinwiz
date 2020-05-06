@@ -22,7 +22,7 @@ class UnapplierTest extends AnyFunSuite with Matchers {
   private val cval = "cval"
   private val abc  = ((A(aval), B(bval)), C(cval))
 
-  private val testee = (LTColumnExtractor[ABC], RTColumnExtractor[C])
+  private val testee = (ApplyToLeftColumn[ABC], ApplyToRightColumn[C])
 
   test("unapplying a from ABC is not affecting scope") {
     val tCol = testee match {

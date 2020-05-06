@@ -3,7 +3,7 @@ package joinwiz.testkit
 import joinwiz.Expression
 
 class SeqJoinImpl[T, U](op: Expression, s1: Seq[T], s2: Seq[U]) {
-  private val eval = new SeqOperatorEvaluator[T, U](op)
+  private val eval = new SeqExpressionEvaluator[T, U](op)
 
   def innerJoin(): Seq[(T, U)] =
     for {

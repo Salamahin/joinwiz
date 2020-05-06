@@ -8,7 +8,7 @@ sealed trait Value
 sealed trait Expression
 sealed trait TypedCol extends Value
 
-case class Const[T](value: T) extends Value {
+case class Const(value: Any) extends Value {
   override def toString: String = s"const($value)"
 }
 
@@ -23,7 +23,7 @@ case class Const[T](value: T) extends Value {
   * @tparam E decomposed type, is used when unapplying original extractor
   * @tparam T column type
   */
-trait LTColumn[O, E, T] extends TypedCol {
+trait LeftTypedColumn[O, E, T] extends TypedCol {
   def apply(source: O): T
 
   val name: String
@@ -42,7 +42,7 @@ trait LTColumn[O, E, T] extends TypedCol {
   * @tparam E decomposed type, is used when unapplying original extractor
   * @tparam T column type
   */
-trait RTColumn[O, E, T] extends TypedCol {
+trait RightTypedColumn[O, E, T] extends TypedCol {
   def apply(source: O): T
 
   val name: String
@@ -74,34 +74,34 @@ case class GreaterOrEq(left: Value, right: Value) extends Expression {
   override def toString: String = s"$left >= $right"
 }
 
-object LTColumn {
-  def unapply(c: LTColumn[_, _, _]): Option[String] = Some(c.name)
+object LeftTypedColumn {
+  def unapply(c: LeftTypedColumn[_, _, _]): Option[String] = Some(c.name)
 }
 
-object RTColumn {
-  def unapply(c: RTColumn[_, _, _]): Option[String] = Some(c.name)
+object RightTypedColumn {
+  def unapply(c: RightTypedColumn[_, _, _]): Option[String] = Some(c.name)
 }
 
-class LTColumnExtractor[O, E](val prefixes: Seq[String], val extractor: O => E) {
-  def apply[T](expr: E => T): LTColumn[O, E, T] = macro TypedColumnNameExtractorMacro.leftColumn[O, E, T]
+class ApplyToLeftColumn[O, E](val prefixes: Seq[String], val extractor: O => E) {
+  def apply[T](expr: E => T): LeftTypedColumn[O, E, T] = macro ApplyToColumn.leftColumn[O, E, T]
 }
 
-class RTColumnExtractor[O, E](val prefixes: Seq[String], val extractor: O => E) {
-  def apply[T](expr: E => T): RTColumn[O, E, T] = macro TypedColumnNameExtractorMacro.rightColumn[O, E, T]
+class ApplyToRightColumn[O, E](val prefixes: Seq[String], val extractor: O => E) {
+  def apply[T](expr: E => T): RightTypedColumn[O, E, T] = macro ApplyToColumn.rightColumn[O, E, T]
 }
 
-object LTColumnExtractor {
-  def apply[T] = new LTColumnExtractor[T, T](prefixes = Nil, extractor = identity)
+object ApplyToLeftColumn {
+  def apply[T] = new ApplyToLeftColumn[T, T](prefixes = Nil, extractor = identity)
 }
 
-object RTColumnExtractor {
-  def apply[T] = new RTColumnExtractor[T, T](prefixes = Nil, extractor = identity)
+object ApplyToRightColumn {
+  def apply[T] = new ApplyToRightColumn[T, T](prefixes = Nil, extractor = identity)
 }
 
-private object TypedColumnNameExtractorMacro {
+private object ApplyToColumn {
   def leftColumn[O: c.WeakTypeTag, E: c.WeakTypeTag, T: c.WeakTypeTag](
     c: blackbox.Context
-  )(expr: c.Expr[E => T]): c.Expr[LTColumn[O, E, T]] = {
+  )(expr: c.Expr[E => T]): c.Expr[LeftTypedColumn[O, E, T]] = {
     import c.universe._
 
     val tType = c.weakTypeOf[T]
@@ -110,7 +110,7 @@ private object TypedColumnNameExtractorMacro {
 
     val name = extractArgName[E, T](c)(expr)
 
-    c.Expr(q"""new joinwiz.LTColumn[$oType, $eType, $tType] {
+    c.Expr(q"""new joinwiz.LeftTypedColumn[$oType, $eType, $tType] {
             override def apply(source: $oType): $tType = $expr(${c.prefix}.extractor(source))
 
             override val name: String = (${c.prefix}.prefixes :+ $name).mkString(".")
@@ -135,7 +135,7 @@ private object TypedColumnNameExtractorMacro {
 
   def rightColumn[O: c.WeakTypeTag, E: c.WeakTypeTag, T: c.WeakTypeTag](
     c: blackbox.Context
-  )(expr: c.Expr[E => T]): c.Expr[RTColumn[O, E, T]] = {
+  )(expr: c.Expr[E => T]): c.Expr[RightTypedColumn[O, E, T]] = {
     import c.universe._
 
     val tType = c.weakTypeOf[T]
@@ -144,7 +144,7 @@ private object TypedColumnNameExtractorMacro {
 
     val name = extractArgName[E, T](c)(expr)
 
-    c.Expr(q"""new joinwiz.RTColumn[$oType, $eType, $tType] {
+    c.Expr(q"""new joinwiz.RightTypedColumn[$oType, $eType, $tType] {
             override def apply(source: $oType): $tType = $expr(${c.prefix}.extractor(source))
 
             override val name: String = (${c.prefix}.prefixes :+ $name).mkString(".")

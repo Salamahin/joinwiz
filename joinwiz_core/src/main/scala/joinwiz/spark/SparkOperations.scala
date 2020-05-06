@@ -2,8 +2,8 @@ package joinwiz.spark
 
 import joinwiz.ops._
 import joinwiz.syntax.JOIN_CONDITION
-import joinwiz.{DatasetOperations, LTColumnExtractor, RTColumnExtractor}
-import org.apache.spark.sql.{Dataset, Encoder, Encoders}
+import joinwiz.{ApplyToLeftColumn, ApplyToRightColumn, DatasetOperations}
+import org.apache.spark.sql.{Dataset, Encoders}
 
 import scala.reflect.runtime.universe
 import scala.reflect.runtime.universe.TypeTag
@@ -18,7 +18,7 @@ object SparkOperations extends DatasetOperations[Dataset] {
       fl.as(LEFT_DS_ALIAS)
         .joinWith(
           fr.as(RIGHT_DS_ALIAS),
-          new ColumnEvaluator().evaluate(joinBy(LTColumnExtractor[L], RTColumnExtractor[R])),
+          new SparkExpressionEvaluator().evaluate(joinBy(ApplyToLeftColumn[L], ApplyToRightColumn[R])),
           joinType
         )
     }
@@ -52,9 +52,10 @@ object SparkOperations extends DatasetOperations[Dataset] {
   }
 
   override def groupByKey[T]: GroupByKey[Dataset, T] = new GroupByKey[Dataset, T] {
-    override def apply[K: Encoder](ft: Dataset[T])(func: T => K): GrouppedByKeyOps[Dataset, T, K] =
-      new GrouppedByKeyOps[Dataset, T, K] {
-        override def mapGroups[U: Encoder](f: (K, Iterator[T]) => U): Dataset[U] = ft.groupByKey(func).mapGroups(f)
+    override def apply[K <: Product: TypeTag](ft: Dataset[T])(func: T => K): GrouppedByKeySyntax[Dataset, T, K] =
+      new GrouppedByKeySyntax[Dataset, T, K] {
+        override def mapGroups[U <: Product: TypeTag](f: (K, Iterator[T]) => U): Dataset[U] =
+          ft.groupByKey(func)(Encoders.product[K]).mapGroups(f)(Encoders.product[U])
       }
   }
 }

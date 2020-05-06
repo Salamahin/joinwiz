@@ -1,13 +1,12 @@
 package joinwiz.ops
 
-import org.apache.spark.sql.Encoder
-
 import scala.language.higherKinds
+import scala.reflect.runtime.universe.TypeTag
 
 trait GroupByKey[F[_], T] {
-  def apply[K: Encoder](ft: F[T])(func: T => K): GrouppedByKeyOps[F, T, K]
+  def apply[K <: Product: TypeTag](ft: F[T])(func: T => K): GrouppedByKeySyntax[F, T, K]
 }
 
-trait GrouppedByKeyOps[F[_], T, K] {
-  def mapGroups[U: Encoder](f: (K, Iterator[T]) => U): F[U]
+trait GrouppedByKeySyntax[F[_], T, K] {
+  def mapGroups[U <: Product: TypeTag](f: (K, Iterator[T]) => U): F[U]
 }
