@@ -9,21 +9,18 @@ import org.scalatest.matchers.should.Matchers
 import scala.language.higherKinds
 
 object SeqJoinImplTest {
-
-  case class A(pk: String, value: String)
-
-  case class B(fk: String, value: Option[BigDecimal])
-
+  case class A(pk: String)
+  case class B(fk: String)
 }
 
 class SeqJoinImplTest extends AnyFunSuite with Matchers with SparkSuite {
 
-  private val a1 = A("pk1", "val1")
-  private val a2 = A("pk1", "val2")
-  private val a3 = A("pk2", "val3")
+  private val a1 = A("pk1")
+  private val a2 = A("pk2")
+  private val a3 = A("pk3")
 
-  private val b1 = B("pk1", Some(BigDecimal(0)))
-  private val b2 = B("pk2", None)
+  private val b1 = B("pk1")
+  private val b2 = B("pk2")
 
   private val as = Seq(a1, a2, a3)
   private val bs = Seq(b1, b2)
@@ -41,24 +38,53 @@ class SeqJoinImplTest extends AnyFunSuite with Matchers with SparkSuite {
     bDs = bs.toDS()
   }
 
-  private def testMe[F[_]: DatasetOperations](fa: F[A], fb: F[B]) = {
+  private def testMeInnerJoin[F[_]: DatasetOperations](fa: F[A], fb: F[B]) = {
     import joinwiz.syntax._
 
     fa.innerJoin(fb)(
-        (l, r) => l(_.pk) =:= r(_.fk) && l(_.value) =:= "val1" && r(_.value) =:= Some(BigDecimal(0L))
-      )
-      .map {
-        case (a, b) => (b, a)
-      }
+      (l, r) => l(_.pk) =:= r(_.fk)
+    )
+  }
+
+  private def testMeLeftJoin[F[_]: DatasetOperations](fa: F[A], fb: F[B]) = {
+    import joinwiz.syntax._
+
+    fa.leftJoin(fb)(
+      (l, r) => l(_.pk) =:= r(_.fk)
+    )
   }
 
   test("sparkless inner join") {
     import joinwiz.testkit.implicits._
-    testMe(as, bs) should contain only ((b1, a1))
+    testMeInnerJoin(as, bs) should contain only (
+      (a1, b1),
+      (a2, b2)
+    )
   }
 
   test("spark's inner join") {
     import joinwiz.spark.implicits._
-    testMe(aDs, bDs).collect() should contain only ((b1, a1))
+    testMeInnerJoin(aDs, bDs).collect() should contain only (
+      (a1, b1),
+      (a2, b2)
+    )
+  }
+
+  test("sparkless left join") {
+    import joinwiz.testkit.implicits._
+    testMeLeftJoin(as, bs) should contain only (
+      (a1, b1),
+      (a2, b2),
+      (a3, null)
+    )
+  }
+
+  test("spark's left join") {
+    import joinwiz.spark.implicits._
+    testMeLeftJoin(aDs, bDs).collect() should contain only (
+      (a1, b1),
+      (a2, b2),
+      (a3, null)
+    )
   }
 }
