@@ -100,3 +100,4 @@ Supported dataset API
  * flatMap
  * distinct
  * groupByKey + mapGroups
+ * filter
