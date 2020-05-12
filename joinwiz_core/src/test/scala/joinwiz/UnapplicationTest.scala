@@ -5,15 +5,10 @@ import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
 
 private object UnapplicationTest {
-
   case class A(aString: String, aOptString: Option[String])
-
   case class B(bString: String, bOptString: Option[String])
-
   case class C(cString: String, cOptString: Option[String])
-
   case class D(dString: String, dOptString: Option[String])
-
 }
 
 class UnapplicationTest extends AnyFunSuite with Matchers {
@@ -27,7 +22,7 @@ class UnapplicationTest extends AnyFunSuite with Matchers {
 
   test("left unapplication of the joined entity does not affect the scope") {
     (leftTestee match {
-      case (joined(joined(a, _), _), d) => a(_.aString) =:= d(_.dString)
+      case (a joined _ joined _, d) => a(_.aString) =:= d(_.dString)
     }) should be(Equality(LeftTypedColumn(Seq("_1", "_1", "aString")), RightTypedColumn(Seq("dString"))))
   }
 
