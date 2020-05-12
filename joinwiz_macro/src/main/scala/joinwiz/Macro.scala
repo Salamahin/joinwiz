@@ -2,119 +2,62 @@ package joinwiz
 
 import scala.annotation.tailrec
 import scala.language.experimental.macros
+import scala.language.higherKinds
 import scala.reflect.macros.blackbox
 
 sealed trait Value
 sealed trait Expression
-sealed trait TypedCol extends Value
 
-case class Const(value: Any) extends Value {
-  override def toString: String = s"const($value)"
+sealed trait TypedCol              extends Value
+final case class Const(value: Any) extends Value
+
+final case class And(left: Expression, right: Expression) extends Expression
+final case class Equality(left: Value, right: Value)      extends Expression
+final case class Less(left: Value, right: Value)          extends Expression
+final case class Greater(left: Value, right: Value)       extends Expression
+final case class LessOrEq(left: Value, right: Value)      extends Expression
+final case class GreaterOrEq(left: Value, right: Value)   extends Expression
+
+final case class LeftTypedColumn[T](prefixes: Seq[String])  extends TypedCol
+final case class RightTypedColumn[T](prefixes: Seq[String]) extends TypedCol
+
+class ApplyToLeftColumn[E](val prefixes: Seq[String]) {
+  def apply[T](expr: E => T): LeftTypedColumn[T] = macro ApplyToColumn.leftColumn[E, T]
 }
 
-/**
-  * Left typed column. Contains info about column name and extractor
-  * When joining F[L] and F[R], to unsure type safety several types are required.
-  * First of all we need to know the original type L to extract value from F container.
-  * Second, if L is a tuple of (A, b), we can de-compose extractor into 2 extractors - for A and for B respectively
-  * Third, we need to know the column type itself to prevent joining by incompatible types
-  *
-  * @tparam O original type of left operand in join
-  * @tparam E decomposed type, is used when unapplying original extractor
-  * @tparam T column type
-  */
-trait LeftTypedColumn[O, E, T] extends TypedCol {
-  def apply(source: O): T
-
-  val name: String
-
-  override def toString: String = s"left($name)"
-}
-
-/**
-  * Right typed column. Contains info about column name and extractor
-  * When joining F[L] and F[R], to unsure type safety several types are required.
-  * First of all we need to know the original type R to extract value from F container.
-  * Second, if R is a tuple of (A, b), we can de-compose extractor into 2 extractors - for A and for B respectively
-  * Third, we need to know the column type itself to prevent joining by incompatible types
-  *
-  * @tparam O original type of right operand in join
-  * @tparam E decomposed type, is used when unapplying original extractor
-  * @tparam T column type
-  */
-trait RightTypedColumn[O, E, T] extends TypedCol {
-  def apply(source: O): T
-
-  val name: String
-
-  override def toString: String = s"right($name)"
-}
-
-case class And(left: Expression, right: Expression) extends Expression {
-  override def toString: String = s"$left && $right"
-}
-
-case class Equality(left: Value, right: Value) extends Expression {
-  override def toString: String = s"$left =:= $right"
-}
-
-case class Less(left: Value, right: Value) extends Expression {
-  override def toString: String = s"$left < $right"
-}
-
-case class Greater(left: Value, right: Value) extends Expression {
-  override def toString: String = s"$left > $right"
-}
-
-case class LessOrEq(left: Value, right: Value) extends Expression {
-  override def toString: String = s"$left <= $right"
-}
-
-case class GreaterOrEq(left: Value, right: Value) extends Expression {
-  override def toString: String = s"$left >= $right"
-}
-
-object LeftTypedColumn {
-  def unapply(c: LeftTypedColumn[_, _, _]): Option[String] = Some(c.name)
-}
-
-object RightTypedColumn {
-  def unapply(c: RightTypedColumn[_, _, _]): Option[String] = Some(c.name)
-}
-
-class ApplyToLeftColumn[O, E](val prefixes: Seq[String], val extractor: O => E) {
-  def apply[T](expr: E => T): LeftTypedColumn[O, E, T] = macro ApplyToColumn.leftColumn[O, E, T]
-}
-
-class ApplyToRightColumn[O, E](val prefixes: Seq[String], val extractor: O => E) {
-  def apply[T](expr: E => T): RightTypedColumn[O, E, T] = macro ApplyToColumn.rightColumn[O, E, T]
+class ApplyToRightColumn[E](val prefixes: Seq[String]) {
+  def apply[T](expr: E => T): RightTypedColumn[T] = macro ApplyToColumn.rightColumn[E, T]
 }
 
 object ApplyToLeftColumn {
-  def apply[T] = new ApplyToLeftColumn[T, T](prefixes = Nil, extractor = identity)
+  def apply[E] = new ApplyToLeftColumn[E](prefixes = Nil)
 }
 
 object ApplyToRightColumn {
-  def apply[T] = new ApplyToRightColumn[T, T](prefixes = Nil, extractor = identity)
+  def apply[E] = new ApplyToRightColumn[E](prefixes = Nil)
 }
 
 private object ApplyToColumn {
-  def leftColumn[O: c.WeakTypeTag, E: c.WeakTypeTag, T: c.WeakTypeTag](
+  def leftColumn[E: c.WeakTypeTag, T: c.WeakTypeTag](
     c: blackbox.Context
-  )(expr: c.Expr[E => T]): c.Expr[LeftTypedColumn[O, E, T]] = {
+  )(expr: c.Expr[E => T]): c.Expr[LeftTypedColumn[T]] = {
     import c.universe._
 
     val tType = c.weakTypeOf[T]
-    val eType = c.weakTypeOf[E]
-    val oType = c.weakTypeOf[O]
+    val name  = extractArgName[E, T](c)(expr)
 
-    val name = extractArgName[E, T](c)(expr)
+    c.Expr(q"joinwiz.LeftTypedColumn[$tType](${c.prefix}.prefixes :+ $name)")
+  }
 
-    c.Expr(q"""new joinwiz.LeftTypedColumn[$oType, $eType, $tType] {
-            override def apply(source: $oType): $tType = $expr(${c.prefix}.extractor(source))
+  def rightColumn[E: c.WeakTypeTag, T: c.WeakTypeTag](
+    c: blackbox.Context
+  )(expr: c.Expr[E => T]): c.Expr[RightTypedColumn[T]] = {
+    import c.universe._
 
-            override val name: String = (${c.prefix}.prefixes :+ $name).mkString(".")
-          }""")
+    val tType = c.weakTypeOf[T]
+    val name  = extractArgName[E, T](c)(expr)
+
+    c.Expr(q"joinwiz.RightTypedColumn[$tType](${c.prefix}.prefixes :+ $name)")
   }
 
   private def extractArgName[E: c.WeakTypeTag, T: c.WeakTypeTag](c: blackbox.Context)(func: c.Expr[E => T]): String = {
@@ -131,23 +74,5 @@ private object ApplyToColumn {
     }
 
     extract(func.tree, Nil).mkString(".")
-  }
-
-  def rightColumn[O: c.WeakTypeTag, E: c.WeakTypeTag, T: c.WeakTypeTag](
-    c: blackbox.Context
-  )(expr: c.Expr[E => T]): c.Expr[RightTypedColumn[O, E, T]] = {
-    import c.universe._
-
-    val tType = c.weakTypeOf[T]
-    val eType = c.weakTypeOf[E]
-    val oType = c.weakTypeOf[O]
-
-    val name = extractArgName[E, T](c)(expr)
-
-    c.Expr(q"""new joinwiz.RightTypedColumn[$oType, $eType, $tType] {
-            override def apply(source: $oType): $tType = $expr(${c.prefix}.extractor(source))
-
-            override val name: String = (${c.prefix}.prefixes :+ $name).mkString(".")
-          }""")
   }
 }

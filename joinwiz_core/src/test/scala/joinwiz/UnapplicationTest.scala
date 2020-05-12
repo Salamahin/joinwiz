@@ -27,26 +27,26 @@ class UnapplicationTest extends AnyFunSuite with Matchers {
 
   test("left unapplication of the joined entity does not affect the scope") {
     (leftTestee match {
-      case (left(left(a, _), _), d) => a(_.aString) =:= d(_.dString)
-    }).toString should be("left(_1._1.aString) =:= right(dString)")
+      case (joined(joined(a, _), _), d) => a(_.aString) =:= d(_.dString)
+    }) should be(Equality(LeftTypedColumn(Seq("_1", "_1", "aString")), RightTypedColumn(Seq("dString"))))
   }
 
   test("right unapplication of the joined entity does not affect the scope") {
     (rightTestee match {
-      case (a, right(_, right(_, d))) => a(_.aString) =:= d(_.dString)
-    }).toString should be("left(aString) =:= right(_2._2.dString)")
+      case (a, joined(_, joined(_, d))) => a(_.aString) =:= d(_.dString)
+    }) should be(Equality(LeftTypedColumn(Seq("aString")), RightTypedColumn(Seq("_2", "_2", "dString"))))
   }
 
   test("lifting left to some does not affect the scope") {
     (leftTestee match {
-      case (left(left(a, _), _), d) => a(_.aString).some =:= d(_.dOptString)
-    }).toString should be("left(_1._1.aString) =:= right(dOptString)")
+      case (joined(joined(a, _), _), d) => a(_.aString).some =:= d(_.dOptString)
+    }) should be(Equality(LeftTypedColumn(Seq("_1", "_1", "aString")), RightTypedColumn(Seq("dOptString"))))
   }
 
   test("lifting right to some does not affect the scope") {
     (rightTestee match {
-      case (a, right(_, right(_, d))) => a(_.aString).some =:= d(_.dOptString)
-    }).toString should be("left(aString) =:= right(_2._2.dOptString)")
+      case (a, joined(_, joined(_, d))) => a(_.aString).some =:= d(_.dOptString)
+    }) should be(Equality(LeftTypedColumn(Seq("aString")), RightTypedColumn(Seq("_2", "_2", "dOptString"))))
   }
 
 }

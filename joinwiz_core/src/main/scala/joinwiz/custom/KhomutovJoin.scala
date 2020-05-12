@@ -9,10 +9,11 @@ import scala.language.postfixOps
 
 // Named in honor of our former TeamLead, who taught us how to deal with skewed data
 object KhomutovJoin {
+  import joinwiz.spark.SparkExpressionEvaluator._
 
   private def nullableField(e: Expression): Option[String] = e match {
-    case Equality(left: LeftTypedColumn[_, _, _], _: RightTypedColumn[_, _, _]) => Some(left.name)
-    case _                                                       => None
+    case Equality(left: LeftTypedColumn[_], _: RightTypedColumn[_]) => Some(left.name)
+    case _                                                          => None
   }
 
   implicit class KhomutovJoinSyntax[T: Encoder](ds: Dataset[T]) {
@@ -35,5 +36,4 @@ object KhomutovJoin {
         .unionByName(dsWithNulls.map((_, null.asInstanceOf[U])).map(identity))
     }
   }
-
 }

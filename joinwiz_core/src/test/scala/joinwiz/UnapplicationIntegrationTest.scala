@@ -6,13 +6,9 @@ import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
 
 object UnapplicationIntegrationTest {
-
   case class A(a: String)
-
   case class B(b: String)
-
   case class C(c: String)
-
 }
 
 class UnapplicationIntegrationTest extends AnyFunSuite with Matchers with SparkSuite {
@@ -64,7 +60,7 @@ class UnapplicationIntegrationTest extends AnyFunSuite with Matchers with SparkS
     aDs
       .innerJoin(bDs)((l, r) => l(_.a) =:= r(_.b))
       .innerJoin(cDs) {
-        case (left(_, b), c) => b(_.b) =:= c(_.c)
+        case (joined(_, b), c) => b(_.b) =:= c(_.c)
       }
       .collect() should contain only (((a1, b1), c1), ((a2, b2), c2), ((a3, b3), c3))
   }
@@ -78,7 +74,7 @@ class UnapplicationIntegrationTest extends AnyFunSuite with Matchers with SparkS
 
     cDs
       .innerJoin(abDs) {
-        case (c, right(a, _)) => c(_.c) =:= a(_.a)
+        case (c, joined(a, _)) => c(_.c) =:= a(_.a)
       }
       .collect() should contain only ((c1, (a1, b1)), (c2, (a2, b2)), (c3, (a3, b3)))
   }

@@ -47,7 +47,7 @@ object Runner extends App {
   aDs
     .innerJoin(bDs)((l, r) => l(_.a) =:= r(_.b)) //specify joining columns by types
     .innerJoin(cDs) {
-      case (left(_, b), c) => b(_.b) =:= c(_.c)  //or unapply previously joined tuple
+      case (joined(_, b), c) => b(_.b) =:= c(_.c)  //or unapply previously joined tuple
     }
     .show()
     

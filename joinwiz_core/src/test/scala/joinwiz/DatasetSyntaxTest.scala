@@ -10,7 +10,6 @@ import scala.language.higherKinds
 object DatasetSyntaxTest {
   case class A(uuid: Int, value: String)
   case class B(uuid: Int, value: String)
-  case class C(uuid: Int, value: String)
 }
 
 trait DatasetSyntaxTest {
@@ -22,17 +21,12 @@ trait DatasetSyntaxTest {
   private val b2 = B(2, "duplicated value of b")
   private val b3 = B(2, "unique value of b")
 
-  private val c1 = C(1, "c1")
-  private val c2 = C(2, "c2")
-  private val c3 = C(3, "c3")
-
   val as = Seq(a1, a2, a3)
   val bs = Seq(b1, b2, b3)
-  val cs = Seq(c1, c2, c3)
 
   protected val expected = Seq("duplicated", "unique")
 
-  def testee[F[_]: DatasetOperations](as: F[A], bs: F[B], cs: F[C]) = {
+  def testee[F[_]: DatasetOperations](as: F[A], bs: F[B]) = {
     import joinwiz.syntax._
 
     as.distinct()
@@ -63,7 +57,6 @@ trait DatasetSyntaxTest {
 class SparkDatasetSyntaxTest extends AnyFunSuite with DatasetSyntaxTest with Matchers with SparkSuite {
   private var aDs: Dataset[A] = _
   private var bDs: Dataset[B] = _
-  private var cDs: Dataset[C] = _
 
   override def beforeAll() {
     super.beforeAll()
@@ -73,11 +66,10 @@ class SparkDatasetSyntaxTest extends AnyFunSuite with DatasetSyntaxTest with Mat
 
     aDs = as.toDS()
     bDs = bs.toDS()
-    cDs = cs.toDS()
   }
 
   test("has dataset-like syntax") {
     import joinwiz.spark.implicits._
-    testee(aDs, bDs, cDs).collect() should contain only ("duplicated", "unique")
+    testee(aDs, bDs).collect() should contain only ("duplicated", "unique")
   }
 }

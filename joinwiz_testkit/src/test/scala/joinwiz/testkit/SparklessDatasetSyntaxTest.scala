@@ -8,6 +8,6 @@ class SparklessDatasetSyntaxTest extends AnyFunSuite with DatasetSyntaxTest with
 
   test("has dataset-like syntax") {
     import joinwiz.testkit.implicits._
-    testee(as, bs, cs) should contain only ("duplicated", "unique")
+    testee(as, bs) should contain only ("duplicated", "unique")
   }
 }
