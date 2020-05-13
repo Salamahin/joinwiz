@@ -181,15 +181,6 @@ class SeqExpressionEvaluatorTest extends AnyFunSuite with Matchers {
     )
   }
 
-  test("can join lifted to some with const when eq") {
-    as.innerJoin(bs) {
-      case (a, _) => a(_.value).some =:= Some(1)
-    } should contain only (
-      (a1, b1),
-      (a1, b2)
-    )
-  }
-
   test("can join on const when less") {
     as.innerJoin(bs) {
       case (a, _) => a(_.value) < 1
