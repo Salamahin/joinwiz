@@ -1,5 +1,7 @@
 package joinwiz
 
+import java.sql.{Date, Timestamp}
+
 import joinwiz.dataset.GrouppedByKeySyntax
 import joinwiz.expression.ExpressionSyntax
 
@@ -9,6 +11,14 @@ import scala.reflect.runtime.universe.TypeTag
 object syntax extends ExpressionSyntax {
 
   type JOIN_CONDITION[L, R] = (ApplyToLeftColumn[L], ApplyToRightColumn[R]) => Expression
+
+  implicit val dateOrdering: Ordering[Date] = new Ordering[Date] {
+    override def compare(x: Date, y: Date): Int = Ordering[Long].compare(x.getTime, y.getTime)
+  }
+
+  implicit val timestampOrdering: Ordering[Timestamp] = new Ordering[Timestamp] {
+    override def compare(x: Timestamp, y: Timestamp): Int = Ordering[Long].compare(x.getTime, y.getTime)
+  }
 
   implicit class DatasetOperationsSyntax[F[_]: DatasetOperations, T](ft: F[T]) {
     def innerJoin[U](fu: F[U])(expr: JOIN_CONDITION[T, U]): F[(T, U)] =
