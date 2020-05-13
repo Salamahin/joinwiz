@@ -6,8 +6,6 @@ import joinwiz.expression.ExpressionSyntax
 import scala.language.{higherKinds, implicitConversions, postfixOps}
 import scala.reflect.runtime.universe.TypeTag
 
-
-
 object syntax extends ExpressionSyntax {
 
   type JOIN_CONDITION[L, R] = (ApplyToLeftColumn[L], ApplyToRightColumn[R]) => Expression
@@ -32,6 +30,9 @@ object syntax extends ExpressionSyntax {
 
     def groupByKey[K: TypeTag](func: T => K): GrouppedByKeySyntax[F, T, K] =
       implicitly[DatasetOperations[F]].groupByKey(ft)(func)
+
+    def unionByName(other: F[T]): F[T] =
+      implicitly[DatasetOperations[F]].unionByName(ft)(other)
   }
 
 }

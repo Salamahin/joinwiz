@@ -62,4 +62,9 @@ object SparkOperations extends DatasetOperations[Dataset] {
           ft.groupByKey(func)(ExpressionEncoder()).reduceGroups(f)
       }
   }
+
+  override def unionByName[T]: UnionByName[Dataset, T] =
+    new UnionByName[Dataset, T] {
+      override def apply(ft1: Dataset[T])(ft2: Dataset[T]): Dataset[T] = ft1 unionByName ft2
+    }
 }

@@ -52,4 +52,8 @@ object SparklessOperations extends DatasetOperations[Seq] {
             .toSeq
       }
   }
+
+  override def unionByName[T]: UnionByName[Seq, T] = new UnionByName[Seq, T] {
+    override def apply(ft1: Seq[T])(ft2: Seq[T]): Seq[T] = ft1 ++ ft2
+  }
 }
