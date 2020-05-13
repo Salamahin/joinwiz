@@ -45,6 +45,11 @@ object SparklessOperations extends DatasetOperations[Seq] {
               case (k, vals) => f(k, vals.iterator)
             }
             .toSeq
+
+        override def reduceGroups(f: (T, T) => T): Seq[(K, T)] =
+          ft.groupBy(func)
+            .mapValues(_.reduce(f))
+            .toSeq
       }
   }
 }

@@ -6,6 +6,7 @@ import joinwiz.{ApplyToLeftColumn, ApplyToRightColumn, DatasetOperations}
 import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder
 
+import scala.reflect.runtime.universe
 import scala.reflect.runtime.universe.TypeTag
 
 object SparkOperations extends DatasetOperations[Dataset] {
@@ -56,6 +57,9 @@ object SparkOperations extends DatasetOperations[Dataset] {
       new GrouppedByKeySyntax[Dataset, T, K] {
         override def mapGroups[U: TypeTag](f: (K, Iterator[T]) => U): Dataset[U] =
           ft.groupByKey(func)(ExpressionEncoder()).mapGroups(f)(ExpressionEncoder())
+
+        override def reduceGroups(f: (T, T) => T): Dataset[(K, T)] =
+          ft.groupByKey(func)(ExpressionEncoder()).reduceGroups(f)
       }
   }
 }

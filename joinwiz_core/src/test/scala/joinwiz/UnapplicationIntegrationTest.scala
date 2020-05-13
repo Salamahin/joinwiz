@@ -60,7 +60,7 @@ class UnapplicationIntegrationTest extends AnyFunSuite with Matchers with SparkS
     aDs
       .innerJoin(bDs)((l, r) => l(_.a) =:= r(_.b))
       .innerJoin(cDs) {
-        case (_ joined b, c) => b(_.b) =:= c(_.c)
+        case (_ wiz b, c) => b(_.b) =:= c(_.c)
       }
       .collect() should contain only (((a1, b1), c1), ((a2, b2), c2), ((a3, b3), c3))
   }
@@ -74,7 +74,7 @@ class UnapplicationIntegrationTest extends AnyFunSuite with Matchers with SparkS
 
     cDs
       .innerJoin(abDs) {
-        case (c, a joined _) => c(_.c) =:= a(_.a)
+        case (c, a wiz _) => c(_.c) =:= a(_.a)
       }
       .collect() should contain only ((c1, (a1, b1)), (c2, (a2, b2)), (c3, (a3, b3)))
   }

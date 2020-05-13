@@ -2,7 +2,7 @@ package joinwiz
 
 import scala.language.higherKinds
 
-object joined {
+object wiz {
   def unapply[F[_]: Tupled, A, B](tupled: F[(A, B)]): Option[(F[A], F[B])] = {
     val t = implicitly[Tupled[F]]
     Some(t.left(tupled), t.right(tupled))

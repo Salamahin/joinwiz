@@ -9,4 +9,5 @@ trait GroupByKey[F[_], T] {
 
 trait GrouppedByKeySyntax[F[_], T, K] {
   def mapGroups[U: TypeTag](f: (K, Iterator[T]) => U): F[U]
+  def reduceGroups(f: (T, T) => T): F[(K, T)]
 }
