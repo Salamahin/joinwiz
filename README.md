@@ -50,10 +50,6 @@ object Runner extends App {
       case (_ wiz b, c) => b(_.b) =:= c(_.c)  //or unapply previously joined tuple
     }
     .show()
-    
-  aDs
-    .khomutovJoin(dsB)((left, right) => left(_.a) =:= right(_.b))
-    .show()
 }
 ```
 

@@ -8,68 +8,96 @@ import org.scalatest.matchers.should.Matchers
 import scala.language.higherKinds
 
 object DatasetSyntaxTest {
-  case class A(uuid: Int, value: String)
-  case class B(uuid: Int, value: String)
+  case class Entity(uuid: Int, value: String)
 }
 
-trait DatasetSyntaxTest {
-  private val a1 = A(1, "unique a")
-  private val a2 = A(2, "duplicated a")
-  private val a3 = A(2, "duplicated a")
+abstract class DatasetSyntaxTest[F[_]: ComputationEngine] extends AnyFunSuite with Matchers {
+  import joinwiz.syntax._
 
-  private val b1 = B(1, "duplicated value of b")
-  private val b2 = B(2, "duplicated value of b")
-  private val b3 = B(2, "unique value of b")
+  def entities(a: Entity*): F[Entity]
 
-  val as = Seq(a1, a2, a3)
-  val bs = Seq(b1, b2, b3)
+  test("can inner join") {
+    val l1 = Entity(1, "skipme-left")
+    val l2 = Entity(2, "joinme-left")
 
-  protected val expected = Seq("duplicated", "unique")
+    val r1 = Entity(2, "joinme-right")
+    val r2 = Entity(3, "skipme-right")
 
-  def testee[F[_]: DatasetOperations](as: F[A], bs: F[B]) = {
-    import joinwiz.syntax._
+    val left  = entities(l1, l2)
+    val right = entities(r1, r2)
 
-    as.distinct()
-      //a1, a2
-      .innerJoin(bs) { (l, r) =>
-        l(_.uuid) =:= r(_.uuid)
-      }
-      //(a1, b1)
-      //(a2, b2)
-      //(a2, b3)
-      .groupByKey {
-        case (_, b) => b.value
-      }
-      //duplicated value of b, it((a1, b1), (a2, b2))
-      //unique value of b, it(a2, b3)
+    left
+      .innerJoin(right)((l, r) => l(_.uuid) =:= r(_.uuid))
+      .collect() should contain only ((l2, r1))
+  }
+
+  test("can left join") {
+    val l1 = Entity(1, "joinme-left-1")
+    val l2 = Entity(2, "joinme-left-2")
+
+    val r1 = Entity(2, "joinme-right")
+    val r2 = Entity(3, "skipme-right")
+
+    val left  = entities(l1, l2)
+    val right = entities(r1, r2)
+
+    left
+      .leftJoin(right)((l, r) => l(_.uuid) =:= r(_.uuid))
+      .collect() should contain only ((l1, null), (l2, r1))
+  }
+
+  test("can map") {
+    entities(Entity(1, "* -1"), Entity(2, "* -1"))
+      .map(x => x.uuid * -1)
+      .collect() should contain only (-1, -2)
+  }
+
+  test("can flatMap") {
+    entities(Entity(1, "a b c d"))
+      .flatMap(x => x.value.split(" "))
+      .collect() should contain only ("a", "b", "c", "d")
+  }
+
+  test("can filter") {
+    val even = Entity(2, "pass")
+    val odd  = Entity(3, "skip")
+
+    entities(even, odd)
+      .filter(x => x.uuid % 2 == 0)
+      .collect() should contain only (even)
+  }
+
+  test("can distinct") {
+    val e = Entity(1, "hello world")
+
+    entities(e, e.copy(), e.copy())
+      .distinct()
+      .collect()
+      .size should be(1)
+  }
+
+  test("can group by key: map groups") {
+    val e1 = Entity(1, "hello")
+    val e2 = Entity(1, "world")
+    val e3 = Entity(2, "waa")
+    val e4 = Entity(2, "zzz")
+    val e5 = Entity(2, "up")
+
+    entities(e1, e2, e3, e4, e5)
+      .groupByKey(_.uuid)
       .mapGroups {
-        case (key, _) => key
+        case (key, entities) => key -> entities.map(_.value)
       }
-      //duplicated value of b
-      //unique value of b
-      .flatMap(_.split(" "))
-      .filter(_.length > 5)
-    //duplicated
-    //unique
+      .collect() should contain only (
+      1 -> Iterator("hello", "world"),
+      2 -> Iterator("waa", "zzz", "up")
+    )
   }
+
 }
+import joinwiz.spark._
+class SparkDatasetSyntaxTest extends DatasetSyntaxTest[Dataset] with Matchers with SparkSuite {
+  import ss.implicits._
 
-class SparkDatasetSyntaxTest extends AnyFunSuite with DatasetSyntaxTest with Matchers with SparkSuite {
-  private var aDs: Dataset[A] = _
-  private var bDs: Dataset[B] = _
-
-  override def beforeAll() {
-    super.beforeAll()
-
-    val spark = ss
-    import spark.implicits._
-
-    aDs = as.toDS()
-    bDs = bs.toDS()
-  }
-
-  test("has dataset-like syntax") {
-    import joinwiz.spark.implicits._
-    testee(aDs, bDs).collect() should contain only ("duplicated", "unique")
-  }
+  override def entities(a: Entity*): Dataset[Entity] = a.toDS
 }

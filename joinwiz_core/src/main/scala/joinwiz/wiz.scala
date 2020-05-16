@@ -1,7 +1,5 @@
 package joinwiz
 
-import scala.language.higherKinds
-
 object wiz {
   def unapply[F[_]: Tupled, A, B](tupled: F[(A, B)]): Option[(F[A], F[B])] = {
     val t = implicitly[Tupled[F]]
@@ -13,20 +11,20 @@ object wiz {
     def right[A, B](t: F[(A, B)]): F[B]
   }
 
-  implicit val applyToLeftTupled = new Tupled[ApplyToLeftColumn] {
-    override def left[A, B](t: ApplyToLeftColumn[(A, B)]): ApplyToLeftColumn[A] =
-      new ApplyToLeftColumn[A](t.prefixes :+ "_1")
+  implicit val applyToLeftTupled = new Tupled[ApplyLeft] {
+    override def left[A, B](t: ApplyLeft[(A, B)]): ApplyLeft[A] =
+      new ApplyLeft[A](t.names :+ "_1")
 
-    override def right[A, B](t: ApplyToLeftColumn[(A, B)]): ApplyToLeftColumn[B] =
-      new ApplyToLeftColumn[B](t.prefixes :+ "_2")
+    override def right[A, B](t: ApplyLeft[(A, B)]): ApplyLeft[B] =
+      new ApplyLeft[B](t.names :+ "_2")
   }
 
-  implicit val applyToRightTupled = new Tupled[ApplyToRightColumn] {
-    override def left[A, B](t: ApplyToRightColumn[(A, B)]): ApplyToRightColumn[A] =
-      new ApplyToRightColumn[A](t.prefixes :+ "_1")
+  implicit val applyToRightTupled = new Tupled[ApplyRight] {
+    override def left[A, B](t: ApplyRight[(A, B)]): ApplyRight[A] =
+      new ApplyRight[A](t.names :+ "_1")
 
-    override def right[A, B](t: ApplyToRightColumn[(A, B)]): ApplyToRightColumn[B] =
-      new ApplyToRightColumn[B](t.prefixes :+ "_2")
+    override def right[A, B](t: ApplyRight[(A, B)]): ApplyRight[B] =
+      new ApplyRight[B](t.names :+ "_2")
   }
 
 }

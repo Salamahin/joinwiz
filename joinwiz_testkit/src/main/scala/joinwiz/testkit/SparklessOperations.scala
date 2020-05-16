@@ -2,19 +2,19 @@ package joinwiz.testkit
 
 import joinwiz.dataset._
 import joinwiz.syntax.JOIN_CONDITION
-import joinwiz.{ApplyToLeftColumn, ApplyToRightColumn, DatasetOperations}
+import joinwiz.{ApplyLeft, ApplyRight, ComputationEngine}
 
 import scala.reflect.runtime.universe.TypeTag
 
-object SparklessOperations extends DatasetOperations[Seq] {
+object SparklessOperations extends ComputationEngine[Seq] {
 
   override def join[T]: Join[Seq, T] = new Join[Seq, T] {
     override def inner[U](ft: Seq[T], fu: Seq[U])(expr: JOIN_CONDITION[T, U]): Seq[(T, U)] = {
-      new SeqJoinImpl[T, U](expr(ApplyToLeftColumn[T], ApplyToRightColumn[U]), ft, fu).innerJoin()
+      new SeqJoinImpl[T, U](expr(ApplyLeft[T], ApplyRight[U]), ft, fu).innerJoin()
     }
 
     override def left[U](ft: Seq[T], fu: Seq[U])(expr: JOIN_CONDITION[T, U]): Seq[(T, U)] = {
-      new SeqJoinImpl[T, U](expr(ApplyToLeftColumn[T], ApplyToRightColumn[U]), ft, fu).leftJoin()
+      new SeqJoinImpl[T, U](expr(ApplyLeft[T], ApplyRight[U]), ft, fu).leftJoin()
     }
   }
 
@@ -55,5 +55,9 @@ object SparklessOperations extends DatasetOperations[Seq] {
 
   override def unionByName[T]: UnionByName[Seq, T] = new UnionByName[Seq, T] {
     override def apply(ft1: Seq[T])(ft2: Seq[T]): Seq[T] = ft1 ++ ft2
+  }
+
+  override def collect[T]: Collect[Seq, T] = new Collect[Seq, T] {
+    override def apply(ft: Seq[T]): Seq[T] = ft
   }
 }
