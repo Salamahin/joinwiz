@@ -2,8 +2,6 @@ package joinwiz
 
 import joinwiz.dataset.{Collect, Distinct, Filter, FlatMap, GroupByKey, Join, Map, UnionByName}
 
-import scala.reflect.ClassTag
-
 trait ComputationEngine[F[_]] {
 
   def join[T]: Join[F, T]

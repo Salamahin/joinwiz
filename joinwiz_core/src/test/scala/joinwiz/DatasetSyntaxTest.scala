@@ -86,12 +86,40 @@ abstract class DatasetSyntaxTest[F[_]: ComputationEngine] extends AnyFunSuite wi
     entities(e1, e2, e3, e4, e5)
       .groupByKey(_.uuid)
       .mapGroups {
-        case (key, entities) => key -> entities.map(_.value)
+        case (key, entities) => key -> entities.size
       }
       .collect() should contain only (
-      1 -> Iterator("hello", "world"),
-      2 -> Iterator("waa", "zzz", "up")
+      1 -> 2,
+      2 -> 3
     )
+  }
+
+  test("can group by key: reduce groups") {
+    val e1 = Entity(1, "looooooong")
+    val e2 = Entity(1, "short")
+    val e3 = Entity(2, "looooooong")
+    val e4 = Entity(2, "shorter")
+    val e5 = Entity(2, "short")
+
+    entities(e1, e2, e3, e4, e5)
+      .groupByKey(_.uuid)
+      .reduceGroups {
+        case (e1, e2) => if (e1.value.length > e2.value.length) e1 else e2
+      }
+      .collect() should contain only (
+      1 -> e1,
+      2 -> e3
+    )
+  }
+
+  test("can union") {
+    val e1 = Entity(1, "hello")
+    val e2 = Entity(1, "world")
+    val e3 = Entity(2, "waa")
+    val e4 = Entity(2, "zzz")
+    val e5 = Entity(2, "up")
+
+    (entities(e1, e2) unionByName entities(e3, e4, e5)).collect() should contain only (e1, e2, e3, e4, e5)
   }
 
 }
