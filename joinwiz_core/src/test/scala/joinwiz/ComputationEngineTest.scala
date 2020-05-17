@@ -1,17 +1,17 @@
 package joinwiz
 
-import joinwiz.DatasetSyntaxTest._
+import joinwiz.ComputationEngineTest._
 import org.apache.spark.sql.Dataset
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
 
 import scala.language.higherKinds
 
-object DatasetSyntaxTest {
+object ComputationEngineTest {
   case class Entity(uuid: Int, value: String)
 }
 
-abstract class DatasetSyntaxTest[F[_]: ComputationEngine] extends AnyFunSuite with Matchers {
+abstract class ComputationEngineTest[F[_]: ComputationEngine] extends AnyFunSuite with Matchers {
   import joinwiz.syntax._
 
   def entities(a: Entity*): F[Entity]
@@ -124,7 +124,7 @@ abstract class DatasetSyntaxTest[F[_]: ComputationEngine] extends AnyFunSuite wi
 
 }
 import joinwiz.spark._
-class SparkDatasetSyntaxTest extends DatasetSyntaxTest[Dataset] with Matchers with SparkSuite {
+class SparkComputationEngineTest extends ComputationEngineTest[Dataset] with Matchers with SparkSuite {
   import ss.implicits._
 
   override def entities(a: Entity*): Dataset[Entity] = a.toDS

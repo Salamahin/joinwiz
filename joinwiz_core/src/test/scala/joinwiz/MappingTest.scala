@@ -31,12 +31,11 @@ class MappingTest extends AnyFunSuite with SparkSuite with Matchers {
     val as = ss.createDataset(List(a))
     val bs = ss.createDataset(List(b))
 
-    ???
 
-//    as.innerJoin(bs)((l, r) => l(_.pk).some =:= r(_.fk))
-//      .collect() should contain only ((a, b))
-//
-//    bs.innerJoin(as)((l, r) => l(_.fk) =:= r(_.pk).some)
-//      .collect() should contain only ((b, a))
+    as.innerJoin(bs)((l, r) => l(_.pk).some =:= r(_.fk))
+      .collect() should contain only ((a, b))
+
+    bs.innerJoin(as)((l, r) => l(_.fk) =:= r(_.pk).some)
+      .collect() should contain only ((b, a))
   }
 }
