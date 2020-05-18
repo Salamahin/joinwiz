@@ -18,6 +18,7 @@ final case class Const[T](value: T) extends Value {
 }
 
 sealed trait TCol[K, +T] extends Value {
+  type K0 = K
   def apply(value: K): T
 }
 
