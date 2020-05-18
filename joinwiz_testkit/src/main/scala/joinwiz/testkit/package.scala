@@ -12,9 +12,9 @@ package object testkit {
         new SeqJoinImpl[T, U](expr(ApplyLeft[T], ApplyRight[U]), ft, fu).innerJoin()
       }
 
-      override def left[U](ft: Seq[T], fu: Seq[U])
-                          (expr: JOIN_CONDITION[T, U])
-                          (implicit tt: universe.TypeTag[T], ut: universe.TypeTag[U]): Seq[(T, Option[U])] = ???
+      override def left[U](ft: Seq[T], fu: Seq[U])(expr: JOIN_CONDITION[T, U]): Seq[(T, U)] = {
+        new SeqJoinImpl[T, U](expr(ApplyLeft[T], ApplyRight[U]), ft, fu).leftJoin()
+      }
     }
 
     override def map[T]: Map[Seq, T] = new Map[Seq, T] {
