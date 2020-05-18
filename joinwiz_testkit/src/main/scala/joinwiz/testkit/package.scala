@@ -2,6 +2,7 @@ package joinwiz
 import joinwiz.dataset.{Collect, Distinct, Filter, FlatMap, GroupByKey, GrouppedByKeySyntax, Join, Map, UnionByName}
 import joinwiz.syntax.JOIN_CONDITION
 
+import scala.reflect.runtime.universe
 import scala.reflect.runtime.universe.TypeTag
 
 package object testkit {
@@ -11,9 +12,9 @@ package object testkit {
         new SeqJoinImpl[T, U](expr(ApplyLeft[T], ApplyRight[U]), ft, fu).innerJoin()
       }
 
-      override def left[U](ft: Seq[T], fu: Seq[U])(expr: JOIN_CONDITION[T, U]): Seq[(T, U)] = {
-        new SeqJoinImpl[T, U](expr(ApplyLeft[T], ApplyRight[U]), ft, fu).leftJoin()
-      }
+      override def left[U](ft: Seq[T], fu: Seq[U])
+                          (expr: JOIN_CONDITION[T, U])
+                          (implicit tt: universe.TypeTag[T], ut: universe.TypeTag[U]): Seq[(T, Option[U])] = ???
     }
 
     override def map[T]: Map[Seq, T] = new Map[Seq, T] {

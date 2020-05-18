@@ -65,7 +65,7 @@ val bs = Seq(b1, b2)
 val aDs = as.toDS()
 val bDs = bs.toDS()
 
-private def testMe[F[_] : DatasetOperations](fa: F[A], fb: F[B]) = {
+private def testMe[F[_] : ComputationEngine](fa: F[A], fb: F[B]) = {
   import joinwiz.syntax._
     
   fa
@@ -79,13 +79,13 @@ private def testMe[F[_] : DatasetOperations](fa: F[A], fb: F[B]) = {
 
 //takes millis to run
 test("with sparkless API") { 
-  import joinwiz.testkit.implicits._
+  import joinwiz.testkit._
   testMe(as, bs) should contain only ((b1, a1))
 }
 
 //takes seconds to run + some spark initialization overhead
 test("with spark API") {
-  import joinwiz.spark.implicits._
+  import joinwiz.spark._
   testMe(aDs, bDs).collect() should contain only ((b1, a1))
 }
 ```
@@ -95,5 +95,6 @@ Supported dataset API
  * map
  * flatMap
  * distinct
- * groupByKey + mapGroups
+ * groupByKey + mapGroups, reduceGroups
  * filter
+ * collect
