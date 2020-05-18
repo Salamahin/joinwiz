@@ -1,10 +1,8 @@
 package joinwiz
 
-import joinwiz.dataset.{Distinct, Filter, FlatMap, GroupByKey, Join, Map, UnionByName}
+import joinwiz.dataset.{Collect, Distinct, Filter, FlatMap, GroupByKey, Join, Map, UnionByName}
 
-import scala.language.higherKinds
-
-trait DatasetOperations[F[_]] {
+trait ComputationEngine[F[_]] {
 
   def join[T]: Join[F, T]
 
@@ -19,4 +17,6 @@ trait DatasetOperations[F[_]] {
   def groupByKey[T]: GroupByKey[F, T]
 
   def unionByName[T]: UnionByName[F, T]
+
+  def collect[T]: Collect[F, T]
 }

@@ -1,6 +1,5 @@
 package joinwiz.dataset
 
-import scala.language.higherKinds
 import scala.reflect.runtime.universe.TypeTag
 
 trait GroupByKey[F[_], T] {

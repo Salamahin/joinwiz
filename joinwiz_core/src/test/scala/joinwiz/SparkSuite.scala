@@ -4,11 +4,11 @@ import org.apache.spark.sql.SparkSession
 import org.scalatest.{BeforeAndAfterAll, Suite}
 
 trait SparkSuite extends BeforeAndAfterAll {
-  self: Suite =>
+  this: Suite =>
 
   @transient private var _ss: SparkSession = _
 
-  def ss: SparkSession = _ss
+  lazy val ss: SparkSession = _ss
 
   override def beforeAll() {
     super.beforeAll()

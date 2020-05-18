@@ -5,14 +5,22 @@ scalaVersion in ThisBuild := "2.11.12"
 lazy val commonSettings = Seq(
   scalacOptions ++= Seq(
     "-encoding",
-    "utf8"
+    "utf8",
+    "-Xfatal-warnings",
+    "-deprecation",
+    "-language:postfixOps",
+    "-language:higherKinds"
   )
 )
 
 lazy val joinwiz_macro = project
   .settings(commonSettings: _*)
   .settings(
-    libraryDependencies += ("org.scala-lang" % "scala-reflect" % scalaVersion.value)
+    libraryDependencies ++= Seq(
+      "org.scala-lang" % "scala-reflect" % scalaVersion.value,
+      dependencies.sparkCore,
+      dependencies.sparkSql
+    )
   )
 
 lazy val joinwiz_core = project

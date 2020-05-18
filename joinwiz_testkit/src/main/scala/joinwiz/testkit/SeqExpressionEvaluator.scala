@@ -2,111 +2,49 @@ package joinwiz.testkit
 
 import java.sql.{Date, Timestamp}
 
-import joinwiz._
 import joinwiz.expression.ExpressionEvaluator
-
-import scala.annotation.tailrec
+import joinwiz.{Const, LTCol, RTCol, Value}
 
 class SeqExpressionEvaluator[L, R] {
 
-  @tailrec
-  private def value(from: Any, remained: Seq[String]): Any =
-    remained match {
-      case Seq()        => from
-      case head +: tail => value(from.getClass.getDeclaredMethod(head).invoke(from), tail)
-    }
-
-  private def recoverOptionType(value: Any) = value match {
-    case x: Option[Any] => x.orNull
-    case x              => x
+  private def value[_](left: Any, right: Any, value: Value) = value match {
+    case Const(value)      => value
+    case lcol: LTCol[_, _] => lcol(left.asInstanceOf[lcol.K0])
+    case rcol: RTCol[_, _] => rcol(right.asInstanceOf[rcol.K0])
   }
 
-  private def canCompareCols(first: Any, second: Any): Boolean = {
-    first != null && second != null
+  private def compare(left: Any, right: Any): Option[Int] = (left, right) match {
+    case (None, None)                   => None
+    case (Some(x), Some(y))             => compare(x, y)
+    case (Some(_), None)                => None
+    case (None, Some(_))                => None
+    case (x: Int, y: Int)               => Some(Ordering[Int].compare(x, y))
+    case (x: Long, y: Long)             => Some(Ordering[Long].compare(x, y))
+    case (x: Short, y: Short)           => Some(Ordering[Short].compare(x, y))
+    case (x: Byte, y: Byte)             => Some(Ordering[Byte].compare(x, y))
+    case (x: Float, y: Float)           => Some(Ordering[Float].compare(x, y))
+    case (x: Double, y: Double)         => Some(Ordering[Double].compare(x, y))
+    case (x: BigDecimal, y: BigDecimal) => Some(Ordering[BigDecimal].compare(x, y))
+    case (x: Date, y: Date)             => Some(Ordering[Long].compare(x.getTime, y.getTime))
+    case (x: Timestamp, y: Timestamp)   => Some(Ordering[Long].compare(x.getTime, y.getTime))
+    case (x, y)                         => throw new IllegalStateException(s"Can't compare $x and $y")
   }
 
-  import joinwiz.syntax._
-  private def compare(first: Any, second: Any): Int = {
-    (first, second) match {
-      case (f: Int, s: Int)               => Ordering[Int].compare(f, s)
-      case (f: Long, s: Long)             => Ordering[Long].compare(f, s)
-      case (f: BigInt, s: BigInt)         => Ordering[BigInt].compare(f, s)
-      case (f: BigDecimal, s: BigDecimal) => Ordering[BigDecimal].compare(f, s)
-      case (f: String, s: String)         => Ordering[String].compare(f, s)
-      case (f: Date, s: Date)             => Ordering[Date].compare(f, s)
-      case (f: Timestamp, s: Timestamp)   => Ordering[Timestamp].compare(f, s)
+  def apply(l: L, r: R): ExpressionEvaluator[Boolean] = new ExpressionEvaluator[Boolean] {
+    override protected def and(left: Boolean, right: Boolean) = left && right
 
-      case _ => throw new IllegalStateException(s"Comparision of $first, $second is not supported")
-    }
+    override protected def equal(left: Value, right: Value) = value(l, r, left) == value(l, r, right)
+
+    override protected def less(left: Value, right: Value) =
+      compare(value[L](l, r, left), value[R](l, r, right)).exists(_ < 0)
+
+    override protected def greater(left: Value, right: Value) =
+      compare(value[L](l, r, left), value[R](l, r, right)).exists(_ > 0)
+
+    override protected def greaterOrEqual(left: Value, right: Value) =
+      compare(value[L](l, r, left), value[R](l, r, right)).exists(_ >= 0)
+
+    override protected def lessOrEqual(left: Value, right: Value) =
+      compare(value[L](l, r, left), value[R](l, r, right)).exists(_ <= 0)
   }
-
-  def apply(l: L, r: R) =
-    new ExpressionEvaluator[L, R, Boolean] {
-      override protected def and(left: Boolean, right: Boolean): Boolean = left && right
-
-      override protected def colEqCol(left: LeftTypedColumn[_], right: RightTypedColumn[_]): Boolean = {
-        val leftVal  = recoverOptionType(value(l, left.prefixes))
-        val rightVal = recoverOptionType(value(r, right.prefixes))
-
-        canCompareCols(leftVal, rightVal) && leftVal == rightVal
-      }
-
-      override protected def leftColEqConst(left: LeftTypedColumn[_], const: Const): Boolean =
-        value(l, left.prefixes) == const.value
-
-      override protected def rightColEqConst(right: RightTypedColumn[_], const: Const): Boolean =
-        value(r, right.prefixes) == const.value
-
-      override protected def colLessCol(left: LeftTypedColumn[_], right: RightTypedColumn[_]): Boolean = {
-        val leftVal  = recoverOptionType(value(l, left.prefixes))
-        val rightVal = recoverOptionType(value(r, right.prefixes))
-
-        canCompareCols(leftVal, rightVal) && compare(leftVal, rightVal) < 0
-      }
-
-      override protected def colGreatCol(left: LeftTypedColumn[_], right: RightTypedColumn[_]): Boolean = {
-        val leftVal  = recoverOptionType(value(l, left.prefixes))
-        val rightVal = recoverOptionType(value(r, right.prefixes))
-
-        canCompareCols(leftVal, rightVal) && compare(leftVal, rightVal) > 0
-      }
-
-      override protected def leftColLessConst(left: LeftTypedColumn[_], const: Const): Boolean =
-        compare(value(l, left.prefixes), const.value) < 0
-
-      override protected def leftColGreatConst(left: LeftTypedColumn[_], const: Const): Boolean =
-        compare(value(l, left.prefixes), const.value) > 0
-
-      override protected def colLessOrEqCol(left: LeftTypedColumn[_], right: RightTypedColumn[_]): Boolean = {
-        val leftVal  = recoverOptionType(value(l, left.prefixes))
-        val rightVal = recoverOptionType(value(r, right.prefixes))
-
-        canCompareCols(leftVal, rightVal) && compare(leftVal, rightVal) <= 0
-      }
-
-      override protected def colGreatOrEqCol(left: LeftTypedColumn[_], right: RightTypedColumn[_]): Boolean = {
-        val leftVal  = recoverOptionType(value(l, left.prefixes))
-        val rightVal = recoverOptionType(value(r, right.prefixes))
-
-        canCompareCols(leftVal, rightVal) && compare(leftVal, rightVal) >= 0
-      }
-
-      override protected def rightColLessConst(right: RightTypedColumn[_], const: Const): Boolean =
-        compare(value(r, right.prefixes), const.value) < 0
-
-      override protected def rightColGreatConst(right: RightTypedColumn[_], const: Const): Boolean =
-        compare(value(r, right.prefixes), const.value) > 0
-
-      override protected def leftColLessOrEqConst(left: LeftTypedColumn[_], const: Const): Boolean =
-        compare(value(l, left.prefixes), const.value) <= 0
-
-      override protected def leftCollGreatOrEqConst(left: LeftTypedColumn[_], const: Const): Boolean =
-        compare(value(l, left.prefixes), const.value) >= 0
-
-      override protected def rightColLessOrEqConst(right: RightTypedColumn[_], const: Const): Boolean =
-        compare(value(r, right.prefixes), const.value) <= 0
-
-      override protected def rightCollGreatOrEqConst(right: RightTypedColumn[_], const: Const): Boolean =
-        compare(value(r, right.prefixes), const.value) >= 0
-    }
 }

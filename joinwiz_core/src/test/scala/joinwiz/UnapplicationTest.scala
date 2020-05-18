@@ -1,6 +1,7 @@
 package joinwiz
 
 import joinwiz.UnapplicationTest._
+import joinwiz.spark.SparkExpressionEvaluator
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
 
@@ -15,33 +16,20 @@ class UnapplicationTest extends AnyFunSuite with Matchers {
   private type ABC = ((A, B), C)
   private type BCD = (B, (C, D))
 
-  private val leftTestee  = (ApplyToLeftColumn[ABC], ApplyToRightColumn[D])
-  private val rightTestee = (ApplyToLeftColumn[A], ApplyToRightColumn[BCD])
+  private val leftTestee  = (ApplyLeft[ABC], ApplyRight[D])
+  private val rightTestee = (ApplyLeft[A], ApplyRight[BCD])
 
   import joinwiz.syntax._
 
   test("left unapplication of the joined entity does not affect the scope") {
-    (leftTestee match {
+    SparkExpressionEvaluator.evaluate(leftTestee match {
       case (a wiz _ wiz _, d) => a(_.aString) =:= d(_.dString)
-    }) should be(Equality(LeftTypedColumn(Seq("_1", "_1", "aString")), RightTypedColumn(Seq("dString"))))
+    }).expr.toString() should be("('LEFT._1._1.aString = 'RIGHT.dString)")
   }
 
   test("right unapplication of the joined entity does not affect the scope") {
-    (rightTestee match {
+    SparkExpressionEvaluator.evaluate(rightTestee match {
       case (a, wiz(_, wiz(_, d))) => a(_.aString) =:= d(_.dString)
-    }) should be(Equality(LeftTypedColumn(Seq("aString")), RightTypedColumn(Seq("_2", "_2", "dString"))))
+    }).expr.toString() should be("('LEFT.aString = 'RIGHT._2._2.dString)")
   }
-
-  test("lifting left to some does not affect the scope") {
-    (leftTestee match {
-      case (wiz(wiz(a, _), _), d) => a(_.aString).some =:= d(_.dOptString)
-    }) should be(Equality(LeftTypedColumn(Seq("_1", "_1", "aString")), RightTypedColumn(Seq("dOptString"))))
-  }
-
-  test("lifting right to some does not affect the scope") {
-    (rightTestee match {
-      case (a, wiz(_, wiz(_, d))) => a(_.aString).some =:= d(_.dOptString)
-    }) should be(Equality(LeftTypedColumn(Seq("aString")), RightTypedColumn(Seq("_2", "_2", "dOptString"))))
-  }
-
 }

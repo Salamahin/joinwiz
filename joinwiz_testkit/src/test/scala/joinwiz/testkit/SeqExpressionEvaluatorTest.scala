@@ -25,7 +25,6 @@ class SeqExpressionEvaluatorTest extends AnyFunSuite with Matchers {
   val cs = Seq(c1, c3, cminus1, cnone)
 
   import joinwiz.syntax._
-  import joinwiz.testkit.implicits._
 
   test("can check left == right") {
     as.innerJoin(bs)((l, r) => l(_.value) =:= r(_.value)) should contain only ((a1, b1))
@@ -220,5 +219,4 @@ class SeqExpressionEvaluatorTest extends AnyFunSuite with Matchers {
       (a1, b2)
     )
   }
-
 }
