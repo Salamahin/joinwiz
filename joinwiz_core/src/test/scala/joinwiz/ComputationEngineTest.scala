@@ -112,6 +112,46 @@ abstract class ComputationEngineTest[F[_]: ComputationEngine] extends AnyFunSuit
     )
   }
 
+  test("can group by key: count") {
+    val e1 = Entity(1, "val1")
+    val e2 = Entity(1, "val2")
+    val e3 = Entity(2, "val3")
+    val e4 = Entity(2, "val4")
+    val e5 = Entity(2, "val5")
+
+    entities(e1, e2, e3, e4, e5)
+      .groupByKey(_.uuid)
+      .count()
+      .collect() should contain only (
+      1 -> 2L,
+      2 -> 3L
+    )
+  }
+
+  test("can group by key: cogroup") {
+    val e1 = Entity(1, "val1")
+    val e2 = Entity(2, "val2")
+    val e3 = Entity(2, "val3")
+    val e4 = Entity(3, "val4")
+
+    val collected = entities(e1, e2, e3)
+      .groupByKey(_.uuid)
+      .cogroup(entities(e2, e3, e4).groupByKey(_.uuid)) {
+        case (k, it1, it2) =>
+          val left  = it1.map(_.value).toSeq.sorted.mkString(",")
+          val right = it2.map(_.value).toSeq.sorted.mkString(",")
+
+          s"key=$k left=$left right=$right" :: Nil
+      }
+      .collect()
+
+    collected should contain only (
+      "key=1 left=val1 right=",
+      "key=2 left=val2,val3 right=val2,val3",
+      "key=3 left= right=val4"
+    )
+  }
+
   test("can union") {
     val e1 = Entity(1, "hello")
     val e2 = Entity(1, "world")

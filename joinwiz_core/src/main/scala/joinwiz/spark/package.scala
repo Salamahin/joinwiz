@@ -1,6 +1,6 @@
 package joinwiz
 
-import joinwiz.dataset.{Collect, Distinct, Filter, FlatMap, GroupByKey, GrouppedByKeySyntax, Join, Map, UnionByName}
+import joinwiz.dataset.{Collect, Distinct, Filter, FlatMap, GroupByKey, Join, KeyValueGroupped, Map, UnionByName}
 import joinwiz.syntax.JOIN_CONDITION
 import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder
@@ -52,13 +52,28 @@ package object spark {
     }
 
     override def groupByKey[T]: GroupByKey[Dataset, T] = new GroupByKey[Dataset, T] {
-      override def apply[K: TypeTag](ft: Dataset[T])(func: T => K): GrouppedByKeySyntax[Dataset, T, K] =
-        new GrouppedByKeySyntax[Dataset, T, K] {
+      override def apply[K: TypeTag](ft: Dataset[T])(func: T => K): KeyValueGroupped[Dataset, T, K] =
+        new KeyValueGroupped[Dataset, T, K] {
           override def mapGroups[U: TypeTag](f: (K, Iterator[T]) => U): Dataset[U] =
             ft.groupByKey(func)(ExpressionEncoder()).mapGroups(f)(ExpressionEncoder())
 
           override def reduceGroups(f: (T, T) => T): Dataset[(K, T)] =
             ft.groupByKey(func)(ExpressionEncoder()).reduceGroups(f)
+
+          override def count(): Dataset[(K, Long)] = ft.groupByKey(func)(ExpressionEncoder()).count()
+
+          override def cogroup[U, R: TypeTag](
+            other: KeyValueGroupped[Dataset, U, K]
+          )(f: (K, Iterator[T], Iterator[U]) => TraversableOnce[R]): Dataset[R] = {
+            val otherDs = other.underlying.groupByKey(other.keyFunc)(ExpressionEncoder())
+
+            ft.groupByKey(func)(ExpressionEncoder())
+              .cogroup(otherDs)(f)(ExpressionEncoder[R]())
+          }
+
+          override def underlying: Dataset[T] = ft
+
+          override def keyFunc: T => K = func
         }
     }
 

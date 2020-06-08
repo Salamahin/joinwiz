@@ -1,5 +1,5 @@
 package joinwiz
-import joinwiz.dataset.{Collect, Distinct, Filter, FlatMap, GroupByKey, GrouppedByKeySyntax, Join, Map, UnionByName}
+import joinwiz.dataset.{Collect, Distinct, Filter, FlatMap, GroupByKey, Join, KeyValueGroupped, Map, UnionByName}
 import joinwiz.syntax.JOIN_CONDITION
 
 import scala.reflect.runtime.universe
@@ -36,8 +36,8 @@ package object testkit {
     }
 
     override def groupByKey[T]: GroupByKey[Seq, T] = new GroupByKey[Seq, T] {
-      override def apply[K: TypeTag](ft: Seq[T])(func: T => K): GrouppedByKeySyntax[Seq, T, K] =
-        new GrouppedByKeySyntax[Seq, T, K] {
+      override def apply[K: TypeTag](ft: Seq[T])(func: T => K): KeyValueGroupped[Seq, T, K] =
+        new KeyValueGroupped[Seq, T, K] {
           override def mapGroups[U: TypeTag](f: (K, Iterator[T]) => U): Seq[U] =
             ft.groupBy(func)
               .map {
@@ -49,6 +49,28 @@ package object testkit {
             ft.groupBy(func)
               .mapValues(_.reduce(f))
               .toSeq
+
+          override def underlying: Seq[T] = ft
+
+          override def keyFunc: T => K = func
+
+          override def count(): Seq[(K, Long)] = ft.groupBy(func).mapValues(_.size: Long).toSeq
+
+          override def cogroup[U, R: universe.TypeTag](other: KeyValueGroupped[Seq, U, K])(
+            f: (K, Iterator[T], Iterator[U]) => TraversableOnce[R]
+          ): Seq[R] = {
+            val ftGroupped    = ft.groupBy(func)
+            val otherGroupped = other.underlying.groupBy(other.keyFunc)
+
+            val keys = ftGroupped.keySet ++ otherGroupped.keySet
+
+            for {
+              key    <- keys.toList
+              left   = ftGroupped.getOrElse(key, Nil)
+              right  = otherGroupped.getOrElse(key, Nil)
+              mapped <- f(key, left.iterator, right.iterator)
+            } yield mapped
+          }
         }
     }
 

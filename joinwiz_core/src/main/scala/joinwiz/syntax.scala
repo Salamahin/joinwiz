@@ -1,6 +1,6 @@
 package joinwiz
 
-import joinwiz.dataset.GrouppedByKeySyntax
+import joinwiz.dataset.KeyValueGroupped
 
 import scala.reflect.ClassTag
 import scala.reflect.runtime.universe.TypeTag
@@ -27,7 +27,7 @@ object syntax {
 
     def distinct(): F[T] = implicitly[ComputationEngine[F]].distinct(ft)
 
-    def groupByKey[K: TypeTag](func: T => K): GrouppedByKeySyntax[F, T, K] =
+    def groupByKey[K: TypeTag](func: T => K): KeyValueGroupped[F, T, K] =
       implicitly[ComputationEngine[F]].groupByKey(ft)(func)
 
     def unionByName(other: F[T]): F[T] =

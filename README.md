@@ -95,6 +95,6 @@ Supported dataset API
  * map
  * flatMap
  * distinct
- * groupByKey + mapGroups, reduceGroups
+ * groupByKey + mapGroups, reduceGroups, count, cogroup
  * filter
  * collect
