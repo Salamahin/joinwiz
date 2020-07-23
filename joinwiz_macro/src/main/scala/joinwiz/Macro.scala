@@ -48,7 +48,7 @@ final case class Greater(left: Value, right: Value)       extends Expression
 final case class LessOrEq(left: Value, right: Value)      extends Expression
 final case class GreaterOrEq(left: Value, right: Value)   extends Expression
 
-sealed class ApplyLeft[O, E](private[joinwiz] val names: Seq[String], private[joinwiz] val orig: O => E)
+sealed class ApplyLeft[O, E](val names: Seq[String],  val orig: O => E)
     extends Serializable {
   def apply[T](expr: E => T): LTCol[O, T] = macro ApplyCol.leftColumn[O, E, T]
 
@@ -56,7 +56,7 @@ sealed class ApplyLeft[O, E](private[joinwiz] val names: Seq[String], private[jo
     new ApplyLeft[O, E1](names :+ name, newOrig compose orig)
 }
 
-sealed class ApplyRight[O, E](private[joinwiz] val names: Seq[String], private[joinwiz] val orig: O => E)
+sealed class ApplyRight[O, E](val names: Seq[String], val orig: O => E)
     extends Serializable {
   def apply[T](expr: E => T): RTCol[O, T] = macro ApplyCol.rightColumn[O, E, T]
 
