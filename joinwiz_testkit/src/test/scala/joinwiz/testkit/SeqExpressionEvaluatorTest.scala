@@ -1,6 +1,7 @@
 package joinwiz.testkit
 
 import joinwiz.testkit.SeqExpressionEvaluatorTest._
+import joinwiz.wiz
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
 
@@ -218,5 +219,19 @@ class SeqExpressionEvaluatorTest extends AnyFunSuite with Matchers {
       (a1, b1),
       (a1, b2)
     )
+  }
+
+  test("can join unapplying ApplyLeft `wiz`") {
+    (as zip bs)
+      .innerJoin(cs) {
+        case (a wiz _, c) => a(_.value).some =:= c(_.optValue)
+      } should contain only (((a1, b2), c1))
+  }
+
+  test("can join unapplying ApplyRight`wiz`") {
+    as
+      .innerJoin(bs zip cs) {
+        case (a, _ wiz c) => a(_.value).some =:= c(_.optValue)
+      } should contain only ((a1, (b1, c1)))
   }
 }

@@ -9,8 +9,8 @@ class SeqExpressionEvaluator[L, R] {
 
   private def value[_](left: Any, right: Any, value: Value) = value match {
     case Const(value)      => value
-    case lcol: LTCol[_, _] => lcol(left.asInstanceOf[lcol.K0])
-    case rcol: RTCol[_, _] => rcol(right.asInstanceOf[rcol.K0])
+    case lcol: LTCol[_, _] => lcol(left.asInstanceOf[lcol.Orig])
+    case rcol: RTCol[_, _] => rcol(right.asInstanceOf[rcol.Orig])
   }
 
   private def compare(left: Any, right: Any): Option[Int] = (left, right) match {

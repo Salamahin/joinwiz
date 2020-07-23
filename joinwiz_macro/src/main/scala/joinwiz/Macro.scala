@@ -17,26 +17,26 @@ final case class Const[T](value: T) extends Value {
   override def column: Column = lit(value)
 }
 
-sealed trait TCol[K, +T] extends Value {
-  type K0 = K
-  def apply(value: K): T
+sealed trait TCol[O, +T] extends Value {
+  type Orig = O
+  def apply(value: O): T
 }
 
-abstract class LTCol[K, +T: TypeTag] extends TCol[K, T] {
+abstract class LTCol[O, +T: TypeTag] extends TCol[O, T] {
   self =>
 
-  def map[S: TypeTag](f: T => S) = new LTCol[K, S] {
+  def map[S: TypeTag](f: T => S) = new LTCol[O, S] {
     override def column: Column     = udf((x: T) => f(x)) apply self.column
-    override def apply(value: K): S = (f compose self.apply)(value)
+    override def apply(value: O): S = (f compose self.apply)(value)
   }
 }
 
-abstract class RTCol[K, +T: TypeTag] extends TCol[K, T] {
+abstract class RTCol[O, +T: TypeTag] extends TCol[O, T] {
   self =>
 
-  def map[S: TypeTag](f: T => S) = new RTCol[K, S] {
+  def map[S: TypeTag](f: T => S) = new RTCol[O, S] {
     override def column: Column     = udf((x: T) => f(x)) apply self.column
-    override def apply(value: K): S = (f compose self.apply)(value)
+    override def apply(value: O): S = (f compose self.apply)(value)
   }
 }
 
@@ -48,61 +48,69 @@ final case class Greater(left: Value, right: Value)       extends Expression
 final case class LessOrEq(left: Value, right: Value)      extends Expression
 final case class GreaterOrEq(left: Value, right: Value)   extends Expression
 
-class ApplyLeft[E](val names: Seq[String]) extends Serializable {
-  def apply[T](expr: E => T): LTCol[E, T] = macro ApplyCol.leftColumn[E, T]
+sealed class ApplyLeft[O, E](private[joinwiz] val names: Seq[String], private[joinwiz] val orig: O => E)
+    extends Serializable {
+  def apply[T](expr: E => T): LTCol[O, T] = macro ApplyCol.leftColumn[O, E, T]
+
+  private[joinwiz] def map[E1](name: String, newOrig: E => E1) =
+    new ApplyLeft[O, E1](names :+ name, newOrig compose orig)
 }
 
-class ApplyRight[E](val names: Seq[String]) extends Serializable {
-  def apply[T](expr: E => T): RTCol[E, T] = macro ApplyCol.rightColumn[E, T]
+sealed class ApplyRight[O, E](private[joinwiz] val names: Seq[String], private[joinwiz] val orig: O => E)
+    extends Serializable {
+  def apply[T](expr: E => T): RTCol[O, T] = macro ApplyCol.rightColumn[O, E, T]
+
+  private[joinwiz] def map[E1](name: String, newOrig: E => E1) =
+    new ApplyRight[O, E1](names :+ name, newOrig compose orig)
 }
 
 object ApplyLeft {
-  def apply[E] = new ApplyLeft[E](names = Left.alias :: Nil)
+  def apply[E] = new ApplyLeft[E, E](names = Left.alias :: Nil, identity)
 }
 
 object ApplyRight {
-  def apply[E] = new ApplyRight[E](names = Right.alias :: Nil)
+  def apply[E] = new ApplyRight[E, E](names = Right.alias :: Nil, identity)
 }
 
-object Left {
+private[joinwiz] object Left {
   val alias = "LEFT"
 }
-object Right {
+private[joinwiz] object Right {
   val alias = "RIGHT"
 }
 
 private object ApplyCol {
-  def leftColumn[E: c.WeakTypeTag, T: c.WeakTypeTag](
+  def leftColumn[O: c.WeakTypeTag, E: c.WeakTypeTag, T: c.WeakTypeTag](
     c: blackbox.Context
-  )(expr: c.Expr[E => T]): c.Expr[LTCol[E, T]] = {
+  )(expr: c.Expr[E => T]): c.Expr[LTCol[O, T]] = {
     import c.universe._
 
-    val eType = c.weakTypeOf[E]
+    val oType = c.weakTypeOf[O]
     val tType = c.weakTypeOf[T]
     val name  = extractArgName[E, T](c)(expr)
 
     c.Expr(
-      q"""new joinwiz.LTCol[$eType, $tType] {
+      q"""new joinwiz.LTCol[$oType, $tType] {
             import org.apache.spark.sql.functions.col
-            override def apply(value: $eType): $tType = $expr(value)
+            override def apply(value: $oType): $tType = ($expr compose ${c.prefix}.orig)(value)
             override def column = col((${c.prefix}.names :+ $name).mkString("."))
           }"""
     )
   }
 
-  def rightColumn[E: c.WeakTypeTag, T: c.WeakTypeTag](
+  def rightColumn[O: c.WeakTypeTag, E: c.WeakTypeTag, T: c.WeakTypeTag](
     c: blackbox.Context
-  )(expr: c.Expr[E => T]): c.Expr[RTCol[E, T]] = {
+  )(expr: c.Expr[E => T]): c.Expr[RTCol[O, T]] = {
     import c.universe._
 
-    val eType = c.weakTypeOf[E]
+    val oType = c.weakTypeOf[O]
     val tType = c.weakTypeOf[T]
     val name  = extractArgName[E, T](c)(expr)
 
     c.Expr(
-      q"""new joinwiz.RTCol[$eType, $tType] {
+      q"""new joinwiz.RTCol[$oType, $tType] {
             import org.apache.spark.sql.functions.col
-            override def apply(value: $eType): $tType = $expr(value)
+            override def apply(value: $oType): $tType = ($expr compose ${c.prefix}.orig)(value)
             override def column = col((${c.prefix}.names :+ $name).mkString("."))
           }"""
     )

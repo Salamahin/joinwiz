@@ -7,7 +7,7 @@ import scala.reflect.runtime.universe.TypeTag
 
 object syntax {
 
-  type JOIN_CONDITION[L, R] = (ApplyLeft[L], ApplyRight[R]) => Expression
+  type JOIN_CONDITION[L, R] = (ApplyLeft[L, L], ApplyRight[R, R]) => Expression
 
   implicit class DatasetLikeSyntax[F[_]: ComputationEngine, T: ClassTag](ft: F[T]) {
     def innerJoin[U](fu: F[U])(expr: JOIN_CONDITION[T, U]): F[(T, U)] =
