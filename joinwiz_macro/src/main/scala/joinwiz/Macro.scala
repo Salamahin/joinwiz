@@ -22,23 +22,8 @@ sealed trait TCol[O, +T] extends Value {
   def apply(value: O): T
 }
 
-abstract class LTCol[O, +T: TypeTag] extends TCol[O, T] {
-  self =>
-
-  def map[S: TypeTag](f: T => S) = new LTCol[O, S] {
-    override def column: Column     = udf((x: T) => f(x)) apply self.column
-    override def apply(value: O): S = (f compose self.apply)(value)
-  }
-}
-
-abstract class RTCol[O, +T: TypeTag] extends TCol[O, T] {
-  self =>
-
-  def map[S: TypeTag](f: T => S) = new RTCol[O, S] {
-    override def column: Column     = udf((x: T) => f(x)) apply self.column
-    override def apply(value: O): S = (f compose self.apply)(value)
-  }
-}
+abstract class LTCol[O, T: TypeTag] extends TCol[O, T]
+abstract class RTCol[O, +T: TypeTag] extends TCol[O, T]
 
 sealed trait Expression
 final case class And(left: Expression, right: Expression) extends Expression
@@ -48,16 +33,14 @@ final case class Greater(left: Value, right: Value)       extends Expression
 final case class LessOrEq(left: Value, right: Value)      extends Expression
 final case class GreaterOrEq(left: Value, right: Value)   extends Expression
 
-sealed class ApplyLeft[O, E](val names: Seq[String],  val orig: O => E)
-    extends Serializable {
+sealed class ApplyLeft[O, E](val names: Seq[String], val orig: O => E) extends Serializable {
   def apply[T](expr: E => T): LTCol[O, T] = macro ApplyCol.leftColumn[O, E, T]
 
   private[joinwiz] def map[E1](name: String, newOrig: E => E1) =
     new ApplyLeft[O, E1](names :+ name, newOrig compose orig)
 }
 
-sealed class ApplyRight[O, E](val names: Seq[String], val orig: O => E)
-    extends Serializable {
+sealed class ApplyRight[O, E](val names: Seq[String], val orig: O => E) extends Serializable {
   def apply[T](expr: E => T): RTCol[O, T] = macro ApplyCol.rightColumn[O, E, T]
 
   private[joinwiz] def map[E1](name: String, newOrig: E => E1) =

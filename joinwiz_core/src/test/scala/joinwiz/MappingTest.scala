@@ -38,4 +38,22 @@ class MappingTest extends AnyFunSuite with SparkSuite with Matchers {
     bs.innerJoin(as)((l, r) => l(_.fk) =:= r(_.pk).some)
       .collect() should contain only ((b, a))
   }
+
+  test("can map an option") {
+    import joinwiz.spark._
+    import joinwiz.syntax._
+    import ss.implicits._
+
+    val b1 = B(Some("pk"))
+    val b2 = B(Some("pk+extra"))
+
+    val b1s = ss.createDataset(List(b1))
+    val b2s = ss.createDataset(List(b2))
+
+    b1s.innerJoin(b2s)((b1, b2) => b1(_.fk).map(x => s"$x+extra") =:= b2(_.fk))
+      .collect() should contain only ((b1, b2))
+
+    b2s.innerJoin(b1s)((b2, b1) => b2(_.fk) =:= b1(_.fk).map(x => s"$x+extra"))
+      .collect() should contain only ((b2, b1))
+  }
 }
