@@ -9,12 +9,41 @@ import scala.language.higherKinds
 import scala.reflect.macros.blackbox
 import scala.reflect.runtime.universe.TypeTag
 
-sealed trait Value extends Serializable {
-  def column: Column
+sealed trait Expr[L, R] {
+  def expr: Column
+  def apply(left: L, right: R): Boolean
 }
 
-final case class Const[T](value: T) extends Value {
-  override def column: Column = lit(value)
+object Expr {
+  def expr[L, R](c: Column)(f: (L, R) => Boolean) = new Expr[L, R] {
+    override def expr: Column                      = c
+    override def apply(left: L, right: R): Boolean = f(left, right)
+  }
+}
+
+sealed trait TCol2[O, +T] {
+  def column: Column
+  def apply(value: O): T
+}
+sealed trait LTCol2[O, +T] extends TCol2[O, T]
+sealed trait RTCol2[O, +T] extends TCol2[O, T]
+
+
+sealed class ApplyLTCol2[O, E] extends Serializable {
+  def apply[T](expr: E => T): LTCol2[O, T] = ???
+}
+
+sealed class ApplyRTCol2[O, E] extends Serializable {
+  def apply[T](expr: E => T): RTCol2[O, T] = ???
+}
+
+
+
+
+
+
+sealed trait Value extends Serializable {
+  def column: Column
 }
 
 sealed trait TCol[O, +T] extends Value {
@@ -22,8 +51,11 @@ sealed trait TCol[O, +T] extends Value {
   def apply(value: O): T
 }
 
-abstract class LTCol[O, T: TypeTag] extends TCol[O, T]
+abstract class LTCol[O, +T: TypeTag] extends TCol[O, T]
 abstract class RTCol[O, +T: TypeTag] extends TCol[O, T]
+final case class Const[T](value: T) extends Value {
+  override def column: Column = lit(value)
+}
 
 sealed trait Expression
 final case class And(left: Expression, right: Expression) extends Expression
