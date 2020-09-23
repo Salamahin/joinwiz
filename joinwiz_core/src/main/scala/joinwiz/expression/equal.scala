@@ -21,7 +21,7 @@ trait LowLevelEqualSyntax {
     def =:=[R](thatCol: RTCol2W[R, T]): Expr[L, R]    = expr[L, R](thisCol.column === thatCol.wrapped.column)((l, r) => thisCol(l) == thatCol.wrapped(r))
     def =:=[R](thatCol: LTCol2OptW[L, T]): Expr[L, R] = expr[L, R](thisCol.column === thatCol.wrapped.column)((l, _) => thatCol.wrapped(l) contains thisCol(l))
     def =:=[R](thatCol: RTCol2OptW[R, T]): Expr[L, R] = expr[L, R](thisCol.column === thatCol.wrapped.column)((l, r) => thatCol.wrapped(r) contains thisCol(l))
-    def =:=[R](const: T): Expr[L, R]          = expr[L, R](thisCol.column === lit(const))((l, _) => thisCol(l) == const)
+    def =:=[R](const: T): Expr[L, R]                  = expr[L, R](thisCol.column === lit(const))((l, _) => thisCol(l) == const)
   }
 
   implicit class RTCol2EqualSyntax[R, T](thisCol: RTCol2[R, T]) {
@@ -29,7 +29,7 @@ trait LowLevelEqualSyntax {
     def =:=[L](thatCol: RTCol2W[R, T]): Expr[L, R]    = expr[L, R](thisCol.column === thatCol.wrapped.column)((_, r) => thisCol(r) == thatCol.wrapped(r))
     def =:=[L](thatCol: RTCol2OptW[R, T]): Expr[L, R] = expr[L, R](thisCol.column === thatCol.wrapped.column)((_, r) => thatCol.wrapped(r) contains thisCol(r))
     def =:=[L](thatCol: LTCol2OptW[L, T]): Expr[L, R] = expr[L, R](thisCol.column === thatCol.wrapped.column)((l, r) => thatCol.wrapped(l) contains thisCol(r))
-    def =:=[L](const: T): Expr[L, R]          = expr[L, R](thisCol.column === lit(const))((_, r) => thisCol(r) == const)
+    def =:=[L](const: T): Expr[L, R]                  = expr[L, R](thisCol.column === lit(const))((_, r) => thisCol(r) == const)
   }
 }
 
@@ -41,7 +41,7 @@ trait EqualSyntax extends LowLevelEqualSyntax {
     def =:=[R](thatCol: RTCol2W[R, T]): Expr[L, R]    = expr[L, R](thisCol.column === thatCol.wrapped.column)((l, r) => thisCol(l) contains thatCol.wrapped(r))
     def =:=[R](thatCol: LTCol2OptW[L, T]): Expr[L, R] = expr[L, R](thisCol.column === thatCol.wrapped.column)((l, _) => thisCol.wrapped(l).isDefined && thatCol.wrapped(l) == thisCol.wrapped(l))
     def =:=[R](thatCol: RTCol2OptW[R, T]): Expr[L, R] = expr[L, R](thisCol.column === thatCol.wrapped.column)((l, r) => thisCol.wrapped(l).isDefined && thatCol.wrapped(r) == thisCol.wrapped(l))
-    def =:=[R](const: T): Expr[L, R]          = expr[L, R](thisCol.column === lit(const))((l, _) => thisCol(l) contains const)
+    def =:=[R](const: T): Expr[L, R]                  = expr[L, R](thisCol.column === lit(const))((l, _) => thisCol(l) contains const)
   }
 
   implicit class OptionalRTCol2EqualOptionSyntax[R, T](thisCol: RTCol2[R, Option[T]]) {
@@ -49,6 +49,6 @@ trait EqualSyntax extends LowLevelEqualSyntax {
     def =:=[L](thatCol: RTCol2W[R, T]): Expr[L, R]    = expr[L, R](thisCol.column === thatCol.wrapped.column)((_, r) => thisCol(r) contains thatCol.wrapped(r))
     def =:=[L](thatCol: LTCol2OptW[L, T]): Expr[L, R] = expr[L, R](thisCol.column === thatCol.wrapped.column)((l, r) => thisCol.wrapped(r).isDefined && thatCol.wrapped(l) == thisCol.wrapped(r))
     def =:=[L](thatCol: RTCol2OptW[R, T]): Expr[L, R] = expr[L, R](thisCol.column === thatCol.wrapped.column)((_, r) => thisCol.wrapped(r).isDefined && thatCol.wrapped(r) == thisCol.wrapped(r))
-    def =:=[L](const: T): Expr[L, R]          = expr[L, R](thisCol.column === lit(const))((_, r) => thisCol(r) contains const)
+    def =:=[L](const: T): Expr[L, R]                  = expr[L, R](thisCol.column === lit(const))((_, r) => thisCol(r) contains const)
   }
 }
