@@ -1,6 +1,6 @@
 package joinwiz.expression
 
-import joinwiz.{ApplyLTCol2, ApplyRTCol2, Expr}
+import joinwiz.{ApplyLTCol2, ApplyRTCol2}
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
@@ -8,18 +8,18 @@ import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
 class EqualSyntaxTest extends AnyFunSuite with Matchers {
   import joinwiz.syntax2._
 
-  case class A(pk: String = null, opt: Option[String] = None)
-  case class B(pk: String = null, opt: Option[String] = None)
+  case class Left(pk: String = null, opt: Option[String] = None)
+  case class Right(pk: String = null, opt: Option[String] = None)
 
-  private val evaluate = (ApplyLTCol2[A], ApplyRTCol2[B])
+  private val evaluate = (ApplyLTCol2[Left], ApplyRTCol2[Right])
 
   test("left T and right T can equal") {
     val evaluated = evaluate match {
       case (left, right) => left(_.pk) =:= right(_.pk)
     }
 
-    evaluated(A(pk = "matching"), B(pk = "matching")) should be(true)
-    evaluated(A(pk = "matching"), B(pk = "non-matching")) should be(false)
+    evaluated(Left(pk = "matching"), Right(pk = "matching")) should be(true)
+    evaluated(Left(pk = "matching"), Right(pk = "non-matching")) should be(false)
 
     evaluated.expr.expr.toString() should be("('LEFT.pk = 'RIGHT.pk)")
   }
@@ -29,44 +29,100 @@ class EqualSyntaxTest extends AnyFunSuite with Matchers {
       case (left, right) => left(_.pk) =:= right(_.opt)
     }
 
-    evaluated(A(pk = "matching"), B(opt = Some("matching"))) should be(true)
-    evaluated(A(pk = "matching"), B(opt = Some("non-matching"))) should be(false)
-    evaluated(A(pk = "matching"), B(opt = None)) should be(false)
+    evaluated(Left(pk = "matching"), Right(opt = Some("matching"))) should be(true)
+    evaluated(Left(pk = "matching"), Right(opt = Some("non-matching"))) should be(false)
+    evaluated(Left(pk = "matching"), Right(opt = None)) should be(false)
 
     evaluated.expr.expr.toString() should be("('LEFT.pk = 'RIGHT.opt)")
   }
 
   test("left T and left T can equal") {
     val evaluated = evaluate match {
-      case (left, _) => left(_.pk).=:=[B](left(_.pk))
+      case (left, _) => left(_.pk).=:=[Right](left(_.pk))
     }
 
-    evaluated(A(pk = "matching"), B()) should be(true)
+    evaluated(Left(pk = "matching"), Right()) should be(true)
 
     evaluated.expr.expr.toString() should be("('LEFT.pk = 'LEFT.pk)")
   }
 
   test("left T and left opt T can equal") {
     val evaluated = evaluate match {
-      case (left, _) => left(_.pk).=:=[B](left(_.opt))
+      case (left, _) => left(_.pk).=:=[Right](left(_.opt))
     }
 
-    evaluated(A(pk = "matching", opt = Some("matching")), B()) should be(true)
-    evaluated(A(pk = "matching", opt = Some("non-matching")), B()) should be(false)
-    evaluated(A(pk = "matching", opt = None), B()) should be(false)
+    evaluated(Left(pk = "matching", opt = Some("matching")), Right()) should be(true)
+    evaluated(Left(pk = "matching", opt = Some("non-matching")), Right()) should be(false)
+    evaluated(Left(pk = "matching", opt = None), Right()) should be(false)
 
     evaluated.expr.expr.toString() should be("('LEFT.pk = 'LEFT.opt)")
   }
 
   test("left T and const T can equal") {
     val evaluated = evaluate match {
-      case (left, _) => left(_.pk).=:=[B]("matching")
+      case (left, _) => left(_.pk).=:=[Right]("matching")
     }
 
-    evaluated(A(pk = "matching"), B()) should be(true)
-    evaluated(A(pk = "non-matching"), B()) should be(false)
+    evaluated(Left(pk = "matching"), Right()) should be(true)
+    evaluated(Left(pk = "non-matching"), Right()) should be(false)
 
     evaluated.expr.expr.toString() should be("('LEFT.pk = matching)")
+  }
+
+  test("right T and left T can equal") {
+    val evaluated = evaluate match {
+      case (left, right) => right(_.pk) =:= left(_.pk)
+    }
+
+    evaluated(Left(pk = "matching"), Right(pk = "matching")) should be(true)
+    evaluated(Left(pk = "matching"), Right(pk = "non-matching")) should be(false)
+
+    evaluated.expr.expr.toString() should be("('RIGHT.pk = 'LEFT.pk)")
+  }
+
+  test("right T and left opt T can equal") {
+    val evaluated = evaluate match {
+      case (left, right) => right(_.pk) =:= left(_.opt)
+    }
+
+    evaluated(Left(opt = Some("matching")), Right(pk = "matching")) should be(true)
+    evaluated(Left(opt = Some("non-matching")), Right(pk = "matching")) should be(false)
+    evaluated(Left(opt = None), Right(pk = "matching")) should be(false)
+
+    evaluated.expr.expr.toString() should be("('RIGHT.pk = 'LEFT.opt)")
+  }
+
+  test("right T and right T can equal") {
+    val evaluated = evaluate match {
+      case (_, right) => right(_.pk).=:=[Left](right(_.pk))
+    }
+
+    evaluated(Left(), Right(pk = "matching")) should be(true)
+
+    evaluated.expr.expr.toString() should be("('RIGHT.pk = 'RIGHT.pk)")
+  }
+
+  test("right T and right opt T can equal") {
+    val evaluated = evaluate match {
+      case (_, right) => right(_.pk).=:=[Left](right(_.opt))
+    }
+
+    evaluated(Left(), Right(pk = "matching", opt = Some("matching"))) should be(true)
+    evaluated(Left(), Right(pk = "matching", opt = Some("non-matching"))) should be(false)
+    evaluated(Left(), Right(pk = "matching", opt = None)) should be(false)
+
+    evaluated.expr.expr.toString() should be("('RIGHT.pk = 'RIGHT.opt)")
+  }
+
+  test("right T and const T can equal") {
+    val evaluated = evaluate match {
+      case (_, right) => right(_.pk).=:=[Left]("matching")
+    }
+
+    evaluated(Left(), Right(pk = "matching")) should be(true)
+    evaluated(Left(), Right(pk = "non-matching")) should be(false)
+
+    evaluated.expr.expr.toString() should be("('RIGHT.pk = matching)")
   }
 
   test("left opt T and right T can equal") {
@@ -74,10 +130,10 @@ class EqualSyntaxTest extends AnyFunSuite with Matchers {
       case (left, right) => left(_.opt) =:= right(_.pk)
     }
 
-    evaluated(A(opt = Some("matching")), B(pk = "matching")) should be(true)
-    evaluated(A(opt = Some("matching")), B(pk = "non-matching")) should be(false)
-    evaluated(A(opt = Some("non-matching")), B(pk = "matching")) should be(false)
-    evaluated(A(opt = None), B(pk = "matching")) should be(false)
+    evaluated(Left(opt = Some("matching")), Right(pk = "matching")) should be(true)
+    evaluated(Left(opt = Some("matching")), Right(pk = "non-matching")) should be(false)
+    evaluated(Left(opt = Some("non-matching")), Right(pk = "matching")) should be(false)
+    evaluated(Left(opt = None), Right(pk = "matching")) should be(false)
 
     evaluated.expr.expr.toString() should be("('LEFT.opt = 'RIGHT.pk)")
   }
@@ -87,77 +143,110 @@ class EqualSyntaxTest extends AnyFunSuite with Matchers {
       case (left, right) => left(_.opt) =:= right(_.opt)
     }
 
-    evaluated(A(opt = Some("matching")), B(opt = Some("matching"))) should be(true)
-    evaluated(A(opt = Some("matching")), B(opt = Some("non-matching"))) should be(false)
-    evaluated(A(opt = Some("matching")), B(opt = None)) should be(false)
-    evaluated(A(opt = None), B(opt = None)) should be(false)
+    evaluated(Left(opt = Some("matching")), Right(opt = Some("matching"))) should be(true)
+    evaluated(Left(opt = Some("matching")), Right(opt = Some("non-matching"))) should be(false)
+    evaluated(Left(opt = Some("matching")), Right(opt = None)) should be(false)
+    evaluated(Left(opt = None), Right(opt = None)) should be(false)
 
     evaluated.expr.expr.toString() should be("('LEFT.opt = 'RIGHT.opt)")
   }
 
   test("left opt T and left T can equal") {
     val evaluated = evaluate match {
-      case (left, _) => left(_.opt).=:=[B](left(_.pk))
+      case (left, _) => left(_.opt).=:=[Right](left(_.pk))
     }
 
-    evaluated(A(opt = Some("matching"), pk = "matching"), B()) should be(true)
-    evaluated(A(opt = Some("matching"), pk = "non-matching"), B()) should be(false)
-    evaluated(A(opt = Some("non-matching"), pk = "matching"), B()) should be(false)
-    evaluated(A(opt = None, pk = "matching"), B()) should be(false)
+    evaluated(Left(opt = Some("matching"), pk = "matching"), Right()) should be(true)
+    evaluated(Left(opt = Some("matching"), pk = "non-matching"), Right()) should be(false)
+    evaluated(Left(opt = Some("non-matching"), pk = "matching"), Right()) should be(false)
+    evaluated(Left(opt = None, pk = "matching"), Right()) should be(false)
 
     evaluated.expr.expr.toString() should be("('LEFT.opt = 'LEFT.pk)")
   }
 
   test("left opt T and left opt T can equal") {
     val evaluated = evaluate match {
-      case (left, _) => left(_.opt).=:=[B](left(_.opt))
+      case (left, _) => left(_.opt).=:=[Right](left(_.opt))
     }
 
-    evaluated(A(opt = Some("matching")), B()) should be(true)
-    evaluated(A(opt = None), B()) should be(false)
+    evaluated(Left(opt = Some("matching")), Right()) should be(true)
+    evaluated(Left(opt = None), Right()) should be(false)
 
     evaluated.expr.expr.toString() should be("('LEFT.opt = 'LEFT.opt)")
   }
 
   test("left opt T and const T can equal") {
     val evaluated = evaluate match {
-      case (left, _) => left(_.opt).=:=[B]("matching")
+      case (left, _) => left(_.opt).=:=[Right]("matching")
     }
 
-    evaluated(A(opt = Some("matching")), B()) should be(true)
-    evaluated(A(opt = Some("non-matching")), B()) should be(false)
-    evaluated(A(opt = None), B()) should be(false)
+    evaluated(Left(opt = Some("matching")), Right()) should be(true)
+    evaluated(Left(opt = Some("non-matching")), Right()) should be(false)
+    evaluated(Left(opt = None), Right()) should be(false)
 
     evaluated.expr.expr.toString() should be("('LEFT.opt = matching)")
   }
 
-//
-//  evaluate match {
-//    case (left, _) => left(_.pk) =:= "1"
-//  }
-//
-//  evaluate match {
-//    case (left, _) => left(_.optional) =:= "1"
-//  }
-//
-//  evaluate match {
-//    case (left, right) => right(_.pk) =:= left(_.pk)
-//  }
-//
-//  evaluate match {
-//    case (left, right) => right(_.pk) =:= left(_.optional)
-//  }
-//
-//  evaluate match {
-//    case (left, right) => right(_.optional) =:= left(_.optional)
-//  }
-//
-//  evaluate match {
-//    case (_, right) => right(_.pk) =:= "1"
-//  }
-//
-//  evaluate match {
-//    case (_, right) => right(_.optional) =:= "1"
-//  }
+  test("right opt T and left T can equal") {
+    val evaluated = evaluate match {
+      case (left, right) => right(_.pk) =:= left(_.opt)
+    }
+
+    evaluated(Left(opt = Some("matching")), Right(pk = "matching")) should be(true)
+    evaluated(Left(opt = Some("matching")), Right(pk = "non-matching")) should be(false)
+    evaluated(Left(opt = Some("non-matching")), Right(pk = "matching")) should be(false)
+    evaluated(Left(opt = None), Right(pk = "matching")) should be(false)
+
+    evaluated.expr.expr.toString() should be("('RIGHT.pk = 'LEFT.opt)")
+  }
+
+  test("right opt T and left opt T can equal") {
+    val evaluated = evaluate match {
+      case (left, right) => right(_.opt) =:= left(_.opt)
+    }
+
+    evaluated(Left(opt = Some("matching")), Right(opt = Some("matching"))) should be(true)
+    evaluated(Left(opt = Some("matching")), Right(opt = Some("non-matching"))) should be(false)
+    evaluated(Left(opt = Some("matching")), Right(opt = None)) should be(false)
+    evaluated(Left(opt = None), Right(opt = None)) should be(false)
+
+    evaluated.expr.expr.toString() should be("('RIGHT.opt = 'LEFT.opt)")
+  }
+
+  test("right opt T and right T can equal") {
+    val evaluated = evaluate match {
+      case (_, right) => right(_.opt).=:=[Left](right(_.pk))
+    }
+
+    evaluated(Left(), Right(opt = Some("matching"), pk = "matching")) should be(true)
+    evaluated(Left(), Right(opt = Some("matching"), pk = "non-matching")) should be(false)
+    evaluated(Left(), Right(opt = Some("non-matching"), pk = "matching")) should be(false)
+    evaluated(Left(), Right(opt = None, pk = "matching")) should be(false)
+
+    evaluated.expr.expr.toString() should be("('RIGHT.opt = 'RIGHT.pk)")
+  }
+
+  test("right opt T and right opt T can equal") {
+    val evaluated = evaluate match {
+      case (_, right) => right(_.opt).=:=[Left](right(_.opt))
+    }
+
+    evaluated(Left(), Right(opt = Some("matching"))) should be(true)
+    evaluated(Left(), Right(opt = None)) should be(false)
+
+    evaluated.expr.expr.toString() should be("('RIGHT.opt = 'RIGHT.opt)")
+  }
+
+  test("right opt T and const T can equal") {
+    val evaluated = evaluate match {
+      case (_, right) => right(_.opt).=:=[Left]("matching")
+    }
+
+    evaluated(Left(), Right(opt = Some("matching"))) should be(true)
+    evaluated(Left(), Right(opt = Some("non-matching"))) should be(false)
+    evaluated(Left(), Right(opt = None)) should be(false)
+
+    evaluated.expr.expr.toString() should be("('RIGHT.opt = matching)")
+  }
 
 }
