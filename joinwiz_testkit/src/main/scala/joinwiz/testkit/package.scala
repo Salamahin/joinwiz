@@ -1,19 +1,19 @@
 package joinwiz
-import joinwiz.dataset.{Collect, Distinct, Filter, FlatMap, GroupByKey, Join, KeyValueGroupped, Map, UnionByName}
+import joinwiz.api.{Collect, Distinct, Filter, FlatMap, GroupByKey, Join, KeyValueGroupped, Map, UnionByName}
 import joinwiz.syntax.JOIN_CONDITION
 
 import scala.reflect.runtime.universe
 import scala.reflect.runtime.universe.TypeTag
 
 package object testkit {
-  implicit val fakeComputationEngine = new ComputationEngine[Seq] {
+  implicit val fakeComputationEngine: ComputationEngine[Seq] = new ComputationEngine[Seq] {
     override def join[T]: Join[Seq, T] = new Join[Seq, T] {
       override def inner[U](ft: Seq[T], fu: Seq[U])(expr: JOIN_CONDITION[T, U]): Seq[(T, U)] = {
-        new SeqJoinImpl[T, U](expr(ApplyLeft[T], ApplyRight[U]), ft, fu).innerJoin()
+        new SeqJoinImpl[T, U](expr(ApplyLTCol[T, U], ApplyRTCol[T, U]), ft, fu).innerJoin()
       }
 
       override def left[U](ft: Seq[T], fu: Seq[U])(expr: JOIN_CONDITION[T, U]): Seq[(T, U)] = {
-        new SeqJoinImpl[T, U](expr(ApplyLeft[T], ApplyRight[U]), ft, fu).leftJoin()
+        new SeqJoinImpl[T, U](expr(ApplyLTCol[T, U], ApplyRTCol[T, U]), ft, fu).leftJoin()
       }
     }
 

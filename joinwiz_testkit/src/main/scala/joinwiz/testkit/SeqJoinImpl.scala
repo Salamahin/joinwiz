@@ -1,22 +1,21 @@
 package joinwiz.testkit
 
-import joinwiz.Expression
+import joinwiz.Expr
 
-class SeqJoinImpl[T, U](op: Expression, left: Seq[T], right: Seq[U]) {
-  private val eval = new SeqExpressionEvaluator[T, U]
+class SeqJoinImpl[L, R](op: Expr[L, R], left: Seq[L], right: Seq[R]) {
 
-  def innerJoin(): Seq[(T, U)] =
+  def leftJoin(): Seq[(L, R)] = {
+    val joined          = innerJoin()
+    val (leftJoined, _) = joined.unzip
+    val notJoined       = left diff leftJoined
+
+    joined ++ notJoined.map((_, null.asInstanceOf[R]))
+  }
+
+  def innerJoin(): Seq[(L, R)] =
     for {
       a <- left
       b <- right
-      if eval(a, b).evaluate(op)
+      if op(a, b)
     } yield (a, b)
-
-  def leftJoin(): Seq[(T, U)] = {
-    val joined = innerJoin()
-    val (leftJoined, _) = joined.unzip
-    val notJoined = left diff leftJoined
-
-    joined ++ notJoined.map((_, null.asInstanceOf[U]))
-  }
 }

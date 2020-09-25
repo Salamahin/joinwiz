@@ -126,52 +126,6 @@ class SeqExpressionEvaluatorTest extends AnyFunSuite with Matchers {
     )
   }
 
-  test("can join on lifted to some value when equals") {
-    as.innerJoin(cs) {
-      case (a, c) => a(_.value).some =:= c(_.optValue)
-    } should contain only ((a1, c1))
-  }
-
-  test("can join on lifted to some value when greater or eq") {
-    as.innerJoin(cs) {
-      case (a, c) => a(_.value).some >= c(_.optValue)
-    } should contain only (
-      (a0, cminus1),
-      (a1, c1),
-      (a1, cminus1)
-    )
-  }
-
-  test("can join on lifted to some value when greater") {
-    as.innerJoin(cs) {
-      case (a, c) => a(_.value).some > c(_.optValue)
-    } should contain only (
-      (a0, cminus1),
-      (a1, cminus1)
-    )
-  }
-
-  test("can join on lifted to some value when less or eq") {
-    as.innerJoin(cs) {
-      case (a, c) => a(_.value).some <= c(_.optValue)
-    } should contain only (
-      (a0, c1),
-      (a0, c3),
-      (a1, c1),
-      (a1, c3)
-    )
-  }
-
-  test("can join on lifted to some value when less") {
-    as.innerJoin(cs) {
-      case (a, c) => a(_.value).some < c(_.optValue)
-    } should contain only (
-      (a0, c1),
-      (a0, c3),
-      (a1, c3)
-    )
-  }
-
   test("can join on const when eq") {
     as.innerJoin(bs) {
       case (a, _) => a(_.value) =:= 1
@@ -224,14 +178,13 @@ class SeqExpressionEvaluatorTest extends AnyFunSuite with Matchers {
   test("can join unapplying ApplyLeft `wiz`") {
     (as zip bs)
       .innerJoin(cs) {
-        case (a wiz _, c) => a(_.value).some =:= c(_.optValue)
+        case (a wiz _, c) => a(_.value) =:= c(_.optValue)
       } should contain only (((a1, b2), c1))
   }
 
   test("can join unapplying ApplyRight`wiz`") {
-    as
-      .innerJoin(bs zip cs) {
-        case (a, _ wiz c) => a(_.value).some =:= c(_.optValue)
-      } should contain only ((a1, (b1, c1)))
+    as.innerJoin(bs zip cs) {
+      case (a, _ wiz c) => a(_.value) =:= c(_.optValue)
+    } should contain only ((a1, (b1, c1)))
   }
 }

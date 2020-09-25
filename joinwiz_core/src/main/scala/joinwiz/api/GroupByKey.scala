@@ -1,4 +1,4 @@
-package joinwiz.dataset
+package joinwiz.api
 
 import scala.reflect.runtime.universe.TypeTag
 
