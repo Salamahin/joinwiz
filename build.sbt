@@ -9,7 +9,9 @@ lazy val commonSettings = Seq(
     "-Xfatal-warnings",
     "-deprecation",
     "-language:postfixOps",
-    "-language:higherKinds"
+    "-language:higherKinds",
+    "-language:implicitConversions",
+    "-feature"
   )
 )
 

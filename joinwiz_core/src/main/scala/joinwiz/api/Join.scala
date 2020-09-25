@@ -1,4 +1,4 @@
-package joinwiz.dataset
+package joinwiz.api
 
 import joinwiz.syntax.JOIN_CONDITION
 

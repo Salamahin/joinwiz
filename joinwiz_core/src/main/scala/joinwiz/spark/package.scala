@@ -1,6 +1,6 @@
 package joinwiz
 
-import joinwiz.dataset.{Collect, Distinct, Filter, FlatMap, GroupByKey, Join, KeyValueGroupped, Map, UnionByName}
+import joinwiz.api.{Collect, Distinct, Filter, FlatMap, GroupByKey, Join, KeyValueGroupped, Map, UnionByName}
 import joinwiz.syntax.JOIN_CONDITION
 import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder
@@ -9,7 +9,7 @@ import scala.reflect.runtime.universe.TypeTag
 
 package object spark {
 
-  implicit val sparkBasedEngine = new ComputationEngine[Dataset] {
+  implicit val sparkBasedEngine: ComputationEngine[Dataset] = new ComputationEngine[Dataset] {
     override def join[L]: Join[Dataset, L] = new Join[Dataset, L] {
 
       def joinWiz[R](fl: Dataset[L], fr: Dataset[R], joinType: String)(
@@ -18,7 +18,7 @@ package object spark {
         fl.as(joinwiz.Left.alias)
           .joinWith(
             fr.as(joinwiz.Right.alias),
-            SparkExpressionEvaluator.evaluate(joinBy(ApplyLeft[L], ApplyRight[R])),
+            joinBy(ApplyLTCol[L, R], ApplyRTCol[L, R])(),
             joinType
           )
       }

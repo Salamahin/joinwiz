@@ -1,23 +1,23 @@
 package joinwiz
 
 object wiz {
-  def unapply[F[_, _]: Tupled, O, A, B](tupled: F[O, (A, B)]): Option[(F[O, A], F[O, B])] = {
+  def unapply[F[_, _, _]: Tupled, L, R, A, B](tupled: F[L, R, (A, B)]): Option[(F[L, R, A], F[L, R, B])] = {
     val t = implicitly[Tupled[F]]
     Some(t.left(tupled), t.right(tupled))
   }
 
-  trait Tupled[F[_, _]] {
-    def left[O, A, B](t: F[O, (A, B)]): F[O, A]
-    def right[O, A, B](t: F[O, (A, B)]): F[O, B]
+  trait Tupled[F[_, _, _]] {
+    def left[L, R, A, B](t: F[L, R, (A, B)]): F[L, R, A]
+    def right[L, R, A, B](t: F[L, R, (A, B)]): F[L, R, B]
   }
 
-  implicit val applyToLeftTupled = new Tupled[ApplyLeft] {
-    override def left[O, A, B](t: ApplyLeft[O, (A, B)]): ApplyLeft[O, A]  = t.map("_1", _._1)
-    override def right[O, A, B](t: ApplyLeft[O, (A, B)]): ApplyLeft[O, B] = t.map("_2", _._2)
+  implicit val applyToLeftTupled: Tupled[ApplyLTCol] = new Tupled[ApplyLTCol] {
+    override def left[L, R, A, B](t: ApplyLTCol[L, R, (A, B)]): ApplyLTCol[L, R, A]  = t.map("_1", _._1)
+    override def right[L, R, A, B](t: ApplyLTCol[L, R, (A, B)]): ApplyLTCol[L, R, B] = t.map("_2", _._2)
   }
 
-  implicit val applyToRightTupled = new Tupled[ApplyRight] {
-    override def left[O, A, B](t: ApplyRight[O, (A, B)]): ApplyRight[O, A]  = t.map("_1", _._1)
-    override def right[O, A, B](t: ApplyRight[O, (A, B)]): ApplyRight[O, B] = t.map("_2", _._2)
+  implicit val applyToRightTupled: Tupled[ApplyRTCol] = new Tupled[ApplyRTCol] {
+    override def left[L, R, A, B](t: ApplyRTCol[L, R, (A, B)]): ApplyRTCol[L, R, A]  = t.map("_1", _._1)
+    override def right[L, R, A, B](t: ApplyRTCol[L, R, (A, B)]): ApplyRTCol[L, R, B] = t.map("_2", _._2)
   }
 }

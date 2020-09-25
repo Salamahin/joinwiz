@@ -1,6 +1,6 @@
 package joinwiz
 
-import joinwiz.dataset.{Collect, Distinct, Filter, FlatMap, GroupByKey, Join, Map, UnionByName}
+import joinwiz.api.{Collect, Distinct, Filter, FlatMap, GroupByKey, Join, Map, UnionByName}
 
 trait ComputationEngine[F[_]] {
 

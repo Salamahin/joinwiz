@@ -6,9 +6,8 @@ import org.scalatest.{BeforeAndAfterAll, Suite}
 trait SparkSuite extends BeforeAndAfterAll {
   this: Suite =>
 
+  lazy val ss: SparkSession                = _ss
   @transient private var _ss: SparkSession = _
-
-  lazy val ss: SparkSession = _ss
 
   override def beforeAll() {
     super.beforeAll()
