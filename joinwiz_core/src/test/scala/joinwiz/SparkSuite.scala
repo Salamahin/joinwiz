@@ -16,6 +16,7 @@ trait SparkSuite extends BeforeAndAfterAll {
       .builder()
       .master("local[*]")
       .config("spark.driver.host", "127.0.0.1")
+      .config("spark.sql.shuffle.partitions", 10)
       .getOrCreate()
   }
 }

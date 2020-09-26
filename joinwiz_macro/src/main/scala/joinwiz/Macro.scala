@@ -7,7 +7,7 @@ import scala.language.experimental.macros
 import scala.language.higherKinds
 import scala.reflect.macros.blackbox
 
-sealed trait Expr[L, R] {
+trait Expr[L, R] {
   def apply(): Column
   def apply(left: L, right: R): Boolean
 }
