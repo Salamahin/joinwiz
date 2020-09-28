@@ -1,12 +1,13 @@
 package joinwiz
 
 import joinwiz.api.KeyValueGroupped
-import joinwiz.expression.{CompareSyntax, EqualSyntax, ExpressionCombinatorsSyntax}
+import joinwiz.expression._
 
 import scala.reflect.ClassTag
 import scala.reflect.runtime.universe.TypeTag
 
-object syntax extends EqualSyntax with CompareSyntax with ExpressionCombinatorsSyntax {
+object syntax extends EqualSyntax with CompareSyntax with CombinatorsSyntax with MapSyntax with Wrappers {
+
   type JOIN_CONDITION[L, R] = (ApplyLTCol[L, R, L], ApplyRTCol[L, R, R]) => Expr[L, R]
 
   implicit class DatasetLikeSyntax[F[_]: ComputationEngine, T: ClassTag](ft: F[T]) {
