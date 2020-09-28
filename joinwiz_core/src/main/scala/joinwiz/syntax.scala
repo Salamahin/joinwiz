@@ -1,12 +1,12 @@
 package joinwiz
 
 import joinwiz.api.KeyValueGroupped
-import joinwiz.expression.{CompareSyntax, EqualSyntax, CombinatorsSyntax, MapSyntax}
+import joinwiz.expression._
 
 import scala.reflect.ClassTag
 import scala.reflect.runtime.universe.TypeTag
 
-object syntax extends EqualSyntax with CompareSyntax with CombinatorsSyntax with MapSyntax {
+object syntax extends EqualSyntax with CompareSyntax with CombinatorsSyntax with MapSyntax with Wrappers {
 
   type JOIN_CONDITION[L, R] = (ApplyLTCol[L, R, L], ApplyRTCol[L, R, R]) => Expr[L, R]
 
