@@ -11,7 +11,6 @@ class EqualSyntaxTest extends AnyFunSuite with Matchers {
   private val evaluate = (ApplyLTCol[Left, Right], ApplyRTCol[Left, Right])
 
   case class Left(pk: String = null, opt: Option[String] = None)
-
   case class Right(pk: String = null, opt: Option[String] = None)
 
   test("left T and right T can equal") {
