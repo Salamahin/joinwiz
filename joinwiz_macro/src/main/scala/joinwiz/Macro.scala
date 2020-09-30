@@ -13,7 +13,7 @@ trait Expr[L, R] {
 }
 
 object Expr {
-  def expr[L, R](c: Column)(f: (L, R) => Boolean): Expr[L, R] = new Expr[L, R] {
+  def expr[L, R](f: (L, R) => Boolean)(c: Column): Expr[L, R] = new Expr[L, R] {
     override def apply(): Column                   = c
     override def apply(left: L, right: R): Boolean = f(left, right)
   }
