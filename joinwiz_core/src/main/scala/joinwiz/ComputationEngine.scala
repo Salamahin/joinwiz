@@ -2,7 +2,7 @@ package joinwiz
 
 import joinwiz.api.{Collect, Distinct, Filter, FlatMap, GroupByKey, Join, Map, UnionByName}
 
-trait ComputationEngine[F[_]] {
+trait ComputationEngine[F[_]] extends Serializable {
 
   def join[T]: Join[F, T]
 
