@@ -6,6 +6,7 @@ import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
 
 import scala.language.higherKinds
+import scala.reflect.runtime.universe.TypeTag
 
 object ComputationEngineTest {
   case class Entity(uuid: Int, value: String)
@@ -14,7 +15,7 @@ object ComputationEngineTest {
 abstract class ComputationEngineTest[F[_]: ComputationEngine] extends AnyFunSuite with Matchers {
   import joinwiz.syntax._
 
-  def entities(a: Entity*): F[Entity]
+  def entities[T <: Product: TypeTag](a: T*): F[T]
 
   test("can inner join") {
     val l1 = Entity(1, "skipme-left")
@@ -46,22 +47,19 @@ abstract class ComputationEngineTest[F[_]: ComputationEngine] extends AnyFunSuit
       .collect() should contain only ((l1, None), (l2, Some(r1)))
   }
 
-  test("can left join 2") {
-    val l1 = Entity(1, "joinme-left-1")
-    val l2 = Entity(2, "joinme-left-2")
+  test("can extract members from option") {
+    val l1 = (Entity(1, "e1"), None: Option[Entity])
+    val l2 = (Entity(2, "e2"), Some(Entity(2, "e2")))
 
-    val r1 = Entity(2, "joinme-right")
-    val r2 = Entity(3, "skipme-right")
+    val r1 = Entity(2, "e3")
+    val r2 = Entity(3, "e4")
 
     val left  = entities(l1, l2)
     val right = entities(r1, r2)
 
     left
-      .leftJoin(right)((l, r) => l(_.uuid) =:= r(_.uuid))
       .leftJoin(right) {
-        case (left wiz r1, r2) =>
-          left(_.uuid) =:= r1 ? (_.uuid)
-          ???
+        case (_ wiz maybeLeft, right) => maybeLeft(_.uuid) =:= right(_.uuid)
       }
       .collect() should contain only ((l1, None), (l2, Some(r1)))
   }
@@ -187,5 +185,5 @@ import joinwiz.spark._
 class SparkComputationEngineTest extends ComputationEngineTest[Dataset] with Matchers with SparkSuite {
   import ss.implicits._
 
-  override def entities(a: Entity*): Dataset[Entity] = a.toDS
+  override def entities[T <: Product: TypeTag](a: T*): Dataset[T] = a.toDS
 }

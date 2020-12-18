@@ -6,7 +6,7 @@ import joinwiz.expression._
 import scala.reflect.ClassTag
 import scala.reflect.runtime.universe.TypeTag
 
-object syntax extends EqualSyntax with CompareSyntax with CombinatorsSyntax with MapSyntax with IsEmptySyntax with Wrappers with ExtraApplyTColSyntax with UnapplySyntax {
+object syntax extends EqualSyntax with CompareSyntax with CombinatorsSyntax with MapSyntax with IsEmptySyntax with Wrappers with UnapplySyntax with ExtractTColSyntax {
 
   type JOIN_CONDITION[L, R] = (ApplyLTCol[L, R, L], ApplyRTCol[L, R, R]) => Expr[L, R]
 
