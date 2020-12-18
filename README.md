@@ -3,18 +3,11 @@
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.github.salamahin/joinwiz_2.11/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.github.salamahin/joinwiz_2.11) [![Build Status](https://travis-ci.com/Salamahin/joinwiz.svg?branch=master)](https://travis-ci.com/Salamahin/joinwiz)
 
 Spark API enhancements for Dataset's joins.
+ * Typesafe - checks the type of the joining expression in compile time
+ * Run (some) unit tests without SparkSession
+ * No reflection
 
 **Note the API is evolving and thus may be unstable**
-
-
-## Motivation
-* Prevent from joining by conflicting types like string-decimal
-* Specify join condition with lambdas instead of strings
-* Opportunity for joining expression analysis for skewed data fixes, statistics collection etc
-* Write Dataset transformations and test them in pure-unit style without running spark (testkit)
-
-
-
 
 ## Try it
 ```scala
@@ -23,78 +16,72 @@ libraryDependencies += "io.github.salamahin" %% "joinwiz_testkit" % joinwiz_vers
 ```
 
 
-## Usage
-
+## Primitive join
 ```scala
-object Runner extends App {
-  val ss = SparkSession.builder()
-    .master("local[*]")
-    .getOrCreate()
-    
-  import ss.implicits._
-    
-  case class A(a: String)
-  case class B(b: String)
-  case class C(c: String)
-    
-  val aDs: Dataset[A] = ???
-  val bDs: Dataset[B] = ???
-  val cDs: Dataset[C] = ???
-    
-  import joinwiz.spark.implicits._
+def doJoin[F[_]: ComputationEngine](as: F[A], bs: F[B]): F[(A, Option[B])] = {
   import joinwiz.syntax._
-   
-  aDs
-    .innerJoin(bDs)((l, r) => l(_.a) =:= r(_.b)) //specify joining columns by types
-    .innerJoin(cDs) {
-      case (_ wiz b, c) => b(_.b) =:= c(_.c)  //or unapply previously joined tuple
-    }
-    .show()
+  as.leftJoin(bs) {
+    case (left, right) => left(_.field) =:= right(_.field)
+  }
 }
 ```
 
-
-## Testkit
-
-Running spark tests takes ages. Sometimes it worthful to test something relatively simple like set of joins and maps
-without actually running spark.
-With testkit you can write something like:
+Injecting an `ComputationEngine` allows to make an abstraction over exact kind, which means it's possible to run
+the code in 2 modes: with and without spark
 ```scala
-val as = Seq(a1, a2, a3)
-val bs = Seq(b1, b2)
-val aDs = as.toDS()
-val bDs = bs.toDS()
+import jointwiz.spark._
+val as: Dataset[A] = ???
+val bs: Dataset[B] = ???
+doJoin(as, bs) //will run using SparkSession and result is a Dataset
+```
 
-private def testMe[F[_] : ComputationEngine](fa: F[A], fb: F[B]) = {
+On the other hand for test purposes you can do the following
+```scala
+import jointwiz.testkit._
+val as: Seq[A] = ???
+val bs: Seq[B] = ???
+doJoin(as, bs) //will run without SparkSession and result is a Seq
+```
+
+Clearly testing without spark makes your unit-test run much faster 
+
+## Chained joins
+In case when several joins are made one-by-one it might be tricky to check which exactly col in which table is used.
+You can easily workaround with unapplication
+```scala
+def doSequentialJoin[F[_]: ComputationEngine](as: F[A], bs: F[B], cs: F[C]) = {
   import joinwiz.syntax._
-    
-  fa
-    .innerJoin(fb)(
-      (l, r) => l(_.pk) =:= r(_.fk) && l(_.value) =:= "val1" && r(_.value) =:= Some(BigDecimal(0L))
-    )
-    .map {
-      case (a, b) => (b, a)
+  as
+    .leftJoin(bs) {
+      case (left, right) => left(_.field) =:= right(_.field)
     }
-}
-
-//takes millis to run
-test("with sparkless API") { 
-  import joinwiz.testkit._
-  testMe(as, bs) should contain only ((b1, a1))
-}
-
-//takes seconds to run + some spark initialization overhead
-test("with spark API") {
-  import joinwiz.spark._
-  testMe(aDs, bDs).collect() should contain only ((b1, a1))
+    .leftJoin(cs) {
+      case (_ wiz b, c) => b(_.field) =:= c(_.field)
+    }
 }
 ```
 
-Supported dataset API
- * inner/left outer joins
- * map
- * flatMap
- * distinct
- * groupByKey + mapGroups, reduceGroups, count, cogroup
- * filter
- * collect
+Unapply can be used to extract a members from a product type even if the type of option kind
+
+## UDFs
+Mapping of the joining expression is supported. To make the changes usable in testkit, one must specify transformation
+implementation on both `Column` and type
+```scala
+def joinWithMap[F[_]: ComputationEngine](as: F[A], bs: F[B]) = {
+  import joinwiz.syntax._
+  as
+    .leftJoin(bs) {
+      case (left, right) => left(_.field).map(column => column.cast(StringType), value => value.toString) =:= right(_.field)
+    }
+}
+```
+
+## Behind joins
+`ComputationEngine` provides syntax for generic operations like:
+  * inner/left outer joins
+  * map
+  * flatMap
+  * distinct
+  * groupByKey + mapGroups, reduceGroups, count, cogroup
+  * filter
+  * collect
