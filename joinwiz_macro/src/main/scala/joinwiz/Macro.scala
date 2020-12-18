@@ -26,14 +26,14 @@ sealed trait TCol[O, +T] {
 trait LTCol[LO, RO, +T] extends TCol[LO, T]
 trait RTCol[LO, RO, +T] extends TCol[RO, T]
 
-sealed class ApplyLTCol[LO, RO, E](val names: Seq[String], val orig: LO => E) extends Serializable {
+final class ApplyLTCol[LO, RO, E](val names: Seq[String], val orig: LO => E) extends Serializable {
   private[joinwiz] def map[E1](name: String, newOrig: E => E1) =
     new ApplyLTCol[LO, RO, E1](names :+ name, newOrig compose orig)
 
   def apply[T](expr: E => T): LTCol[LO, RO, T] = macro ApplyCol.leftColumn[LO, RO, E, T]
 }
 
-sealed class ApplyRTCol[LO, RO, E](val names: Seq[String], val orig: RO => E) extends Serializable {
+final class ApplyRTCol[LO, RO, E](val names: Seq[String], val orig: RO => E) extends Serializable {
   private[joinwiz] def map[E1](name: String, newOrig: E => E1) =
     new ApplyRTCol[LO, RO, E1](names :+ name, newOrig compose orig)
 

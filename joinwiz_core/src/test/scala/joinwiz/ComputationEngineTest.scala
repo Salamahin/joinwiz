@@ -59,8 +59,9 @@ abstract class ComputationEngineTest[F[_]: ComputationEngine] extends AnyFunSuit
     left
       .leftJoin(right)((l, r) => l(_.uuid) =:= r(_.uuid))
       .leftJoin(right) {
-        case (left UnapplySyntax r1, r2) => r1.?
-        ???
+        case (left wiz r1, r2) =>
+          left(_.uuid) =:= r1 ? (_.uuid)
+          ???
       }
       .collect() should contain only ((l1, None), (l2, Some(r1)))
   }
