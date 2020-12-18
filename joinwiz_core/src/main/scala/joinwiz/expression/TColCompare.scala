@@ -1,6 +1,8 @@
 package joinwiz.expression
 
-trait TColOps[F[_]] {
+import joinwiz.Id
+
+trait TColCompare[F[_]] {
   def pure[T](t: T): F[T]
   def map[T, U](ft: F[T])(f: T => U): F[U]
 
@@ -11,9 +13,7 @@ trait TColOps[F[_]] {
   def compare[T: Ordering](thisFt: F[T], thatT: Option[T])(expected: Int*): Boolean
 }
 
-object TColOps {
-  type Id[T] = T
-
+object TColCompare {
   private def compareEither[T](x: T, y: T)(expected: Int*)(implicit o: Ordering[T]) = {
     val compared = o.compare(x, y)
 
@@ -41,7 +41,7 @@ object TColOps {
     }
   }
 
-  implicit val optionPure: TColOps[Option] = new TColOps[Option] {
+  implicit val compareOfOptionTCol: TColCompare[Option] = new TColCompare[Option] {
     override def pure[T](t: T): Option[T]                       = Option(t)
     override def map[T, U](ft: Option[T])(f: T => U): Option[U] = ft map f
 
@@ -52,7 +52,7 @@ object TColOps {
     override def compare[T: Ordering](thisFt: Option[T], thatT: Option[T])(expected: Int*): Boolean = compareEither(thisFt, thatT)(expected: _*)
   }
 
-  implicit val idPure: TColOps[Id] = new TColOps[Id] {
+  implicit val compareOfIdTCol: TColCompare[Id] = new TColCompare[Id] {
     override def pure[T](t: T): Id[T]                   = t
     override def map[T, U](ft: Id[T])(f: T => U): Id[U] = f(ft)
 

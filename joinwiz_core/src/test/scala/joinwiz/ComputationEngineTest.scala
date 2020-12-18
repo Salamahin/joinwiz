@@ -43,7 +43,26 @@ abstract class ComputationEngineTest[F[_]: ComputationEngine] extends AnyFunSuit
 
     left
       .leftJoin(right)((l, r) => l(_.uuid) =:= r(_.uuid))
-      .collect() should contain only ((l1, null), (l2, r1))
+      .collect() should contain only ((l1, None), (l2, Some(r1)))
+  }
+
+  test("can left join 2") {
+    val l1 = Entity(1, "joinme-left-1")
+    val l2 = Entity(2, "joinme-left-2")
+
+    val r1 = Entity(2, "joinme-right")
+    val r2 = Entity(3, "skipme-right")
+
+    val left  = entities(l1, l2)
+    val right = entities(r1, r2)
+
+    left
+      .leftJoin(right)((l, r) => l(_.uuid) =:= r(_.uuid))
+      .leftJoin(right) {
+        case (left UnapplySyntax r1, r2) => r1.?
+        ???
+      }
+      .collect() should contain only ((l1, None), (l2, Some(r1)))
   }
 
   test("can map") {

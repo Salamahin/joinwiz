@@ -1,10 +1,8 @@
 package joinwiz.expression
 
 import java.sql.{Date, Timestamp}
-
 import joinwiz.Expr.expr
-import joinwiz.expression.TColOps.Id
-import joinwiz.{Expr, LTCol, RTCol}
+import joinwiz.{Expr, Id, LTCol, RTCol}
 
 trait LowLevelCompareSyntax {
   import org.apache.spark.sql.functions.lit
@@ -21,7 +19,7 @@ trait LowLevelCompareSyntax {
     def containsEither(expected: Int, orExpected: Int): Boolean = compResult.contains(expected) || compResult.contains(orExpected)
   }
 
-  abstract class BasicLTColCompareSyntax[F[_], L, R, T: Ordering](thisCol: LTCol[L, R, F[T]])(implicit op: TColOps[F]) {
+  abstract class BasicLTColCompareSyntax[F[_], L, R, T: Ordering](thisCol: LTCol[L, R, F[T]])(implicit op: TColCompare[F]) {
     def <(thatCol: LTColW[L, R, T]): Expr[L, R]    = expr[L, R]((l, _) => op.compare(thisCol(l), thatCol.wrapped(l))(-1))(thisCol.column < thatCol.wrapped.column)
     def <(thatCol: RTColW[L, R, T]): Expr[L, R]    = expr[L, R]((l, r) => op.compare(thisCol(l), thatCol.wrapped(r))(-1))(thisCol.column < thatCol.wrapped.column)
     def <(thatCol: LTColOptW[L, R, T]): Expr[L, R] = expr[L, R]((l, _) => op.compare(thisCol(l), thatCol.wrapped(l))(-1))(thisCol.column < thatCol.wrapped.column)
@@ -47,7 +45,7 @@ trait LowLevelCompareSyntax {
     def >=(const: T): Expr[L, R]                    = expr[L, R]((l, _) => op.compare(thisCol(l), const)(1, 0))(thisCol.column >= lit(const))
   }
 
-  abstract class BasicRTColCompareSyntax[F[_], L, R, T: Ordering](thisCol: RTCol[L, R, F[T]])(implicit op: TColOps[F]) {
+  abstract class BasicRTColCompareSyntax[F[_], L, R, T: Ordering](thisCol: RTCol[L, R, F[T]])(implicit op: TColCompare[F]) {
     def <(thatCol: LTColW[L, R, T]): Expr[L, R]    = expr[L, R]((l, r) => op.compare(thisCol(r), thatCol.wrapped(l))(-1))(thisCol.column < thatCol.wrapped.column)
     def <(thatCol: RTColW[L, R, T]): Expr[L, R]    = expr[L, R]((_, r) => op.compare(thisCol(r), thatCol.wrapped(r))(-1))(thisCol.column < thatCol.wrapped.column)
     def <(thatCol: LTColOptW[L, R, T]): Expr[L, R] = expr[L, R]((l, r) => op.compare(thisCol(r), thatCol.wrapped(l))(-1))(thisCol.column < thatCol.wrapped.column)

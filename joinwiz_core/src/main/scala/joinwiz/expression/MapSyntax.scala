@@ -1,19 +1,18 @@
 package joinwiz.expression
 
-import joinwiz.expression.TColOps.Id
-import joinwiz.{Expr, LTCol, RTCol}
+import joinwiz.{Expr, Id, LTCol, RTCol}
 import org.apache.spark.sql.Column
 
 trait LowLevelMapSyntax {
-  abstract class BasicLTColMapSyntax[F[_], L, R, T](thisCol: LTCol[L, R, F[T]])(implicit f: TColOps[F]) {
-    def map[U](forTestKit: T => U)(forSpark: Column => Column): LTCol[L, R, F[U]] = new LTCol[L, R, F[U]] {
+  abstract class BasicLTColMapSyntax[F[_], L, R, T](thisCol: LTCol[L, R, F[T]])(implicit f: TColCompare[F]) {
+    def map[U](forSpark: Column => Column, forTestKit: T => U): LTCol[L, R, F[U]] = new LTCol[L, R, F[U]] {
       override def column: Column        = forSpark(thisCol.column)
       override def apply(value: L): F[U] = f.map(thisCol(value))(forTestKit)
     }
   }
 
-  abstract class BasicRTColMapSyntax[F[_], L, R, T](thisCol: RTCol[L, R, F[T]])(implicit f: TColOps[F]) {
-    def map[U](forTestKit: T => U)(forSpark: Column => Column): RTCol[L, R, F[U]] = new RTCol[L, R, F[U]] {
+  abstract class BasicRTColMapSyntax[F[_], L, R, T](thisCol: RTCol[L, R, F[T]])(implicit f: TColCompare[F]) {
+    def map[U](forSpark: Column => Column, forTestKit: T => U): RTCol[L, R, F[U]] = new RTCol[L, R, F[U]] {
       override def column: Column        = forSpark(thisCol.column)
       override def apply(value: R): F[U] = f.map(thisCol(value))(forTestKit)
     }

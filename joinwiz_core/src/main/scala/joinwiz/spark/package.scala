@@ -2,8 +2,8 @@ package joinwiz
 
 import joinwiz.api.{Collect, Distinct, Filter, FlatMap, GroupByKey, Join, KeyValueGroupped, Map, UnionByName}
 import joinwiz.syntax.JOIN_CONDITION
-import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder
+import org.apache.spark.sql.{Dataset, Encoder}
 
 import scala.reflect.runtime.universe.TypeTag
 
@@ -27,8 +27,13 @@ package object spark {
         joinWiz(fl, fr, "inner")(expr)
       }
 
-      override def left[R](fl: Dataset[L], fr: Dataset[R])(expr: JOIN_CONDITION[L, R]): Dataset[(L, R)] = {
+      override def left[R](fl: Dataset[L], fr: Dataset[R])(expr: JOIN_CONDITION[L, R])(implicit tt: TypeTag[(L, Option[R])]): Dataset[(L, Option[R])] = {
+        implicit val enc: Encoder[(L, Option[R])] = ExpressionEncoder[(L, Option[R])]()
+
         joinWiz(fl, fr, "left_outer")(expr)
+          .map {
+            case (x, y) => (x, Option(y))
+          }
       }
     }
 
