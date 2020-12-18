@@ -14,7 +14,7 @@ class MapSyntaxTest extends AnyFunSuite with Matchers {
 
   test("can map a left T") {
     val evaluated = evaluate match {
-      case (left, right) => left(_.pk).map(_ + 1)(_ + 1) =:= right(_.pk)
+      case (left, right) => left(_.pk).map(_ + 1, _ + 1) =:= right(_.pk)
     }
 
     evaluated(Left(pk = 1), Right(pk = 2)) should be(true)
@@ -25,7 +25,7 @@ class MapSyntaxTest extends AnyFunSuite with Matchers {
 
   test("can map a right T") {
     val evaluated = evaluate match {
-      case (left, right) => left(_.pk) =:= right(_.pk).map(_ + 1)(_ + 1)
+      case (left, right) => left(_.pk) =:= right(_.pk).map(_ + 1, _ + 1)
     }
 
     evaluated(Left(pk = 2), Right(pk = 1)) should be(true)
@@ -36,7 +36,7 @@ class MapSyntaxTest extends AnyFunSuite with Matchers {
 
   test("can map a left opt T") {
     val evaluated = evaluate match {
-      case (left, right) => left(_.opt).map(_ + 1)(_ + 1) =:= right(_.pk)
+      case (left, right) => left(_.opt).map(_ + 1, _ + 1) =:= right(_.pk)
     }
 
     evaluated(Left(opt = Some(1)), Right(pk = 2)) should be(true)
@@ -47,7 +47,7 @@ class MapSyntaxTest extends AnyFunSuite with Matchers {
 
   test("can map a right opt T") {
     val evaluated = evaluate match {
-      case (left, right) => left(_.pk) =:= right(_.opt).map(_ + 1)(_ + 1)
+      case (left, right) => left(_.pk) =:= right(_.opt).map(_ + 1, _ + 1)
     }
 
     evaluated(Left(pk = 2), Right(opt = Some(1))) should be(true)

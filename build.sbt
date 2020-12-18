@@ -39,8 +39,7 @@ lazy val joinwiz_testkit = project
     libraryDependencies ++= Seq(
       dependencies.sparkCore,
       dependencies.sparkSql,
-      dependencies.scalatest,
-      dependencies.shapeless
+      dependencies.scalatest
     )
   )
 
@@ -49,7 +48,6 @@ lazy val dependencies = new {
 
   val sparkCore = "org.apache.spark" %% "spark-core" % sparkV
   val sparkSql  = "org.apache.spark" %% "spark-sql"  % sparkV
-  val shapeless = "com.chuusai"      %% "shapeless"  % "2.3.2"
   val scalatest = "org.scalatest"    %% "scalatest"  % "3.1.0" % Test
 }
 
@@ -89,3 +87,5 @@ releaseProcess := Seq[ReleaseStep](
   commitNextVersion,
   pushChanges
 )
+
+addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.11.2" cross CrossVersion.full)
