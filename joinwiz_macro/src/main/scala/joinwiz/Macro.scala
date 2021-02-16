@@ -1,6 +1,7 @@
 package joinwiz
 
 import org.apache.spark.sql.Column
+import org.apache.spark.sql.expressions.{Window, WindowSpec}
 
 import scala.annotation.tailrec
 import scala.language.experimental.macros
@@ -28,19 +29,19 @@ trait RTCol[LO, RO, +T] extends TCol[RO, T]
 
 trait ExtractTColSyntax {
   implicit class BasicLTColExtract[LO, RO, E](val applyLTCol: ApplyLTCol[LO, RO, E]) {
-    def apply[T](expr: E => T): LTCol[LO, RO, T] = macro ApplyCol.leftColumn[LO, RO, E, T]
+    def apply[T](expr: E => T): LTCol[LO, RO, T] = macro MacroImpl.leftColumn[LO, RO, E, T]
   }
 
   implicit class BasicRTColExtract[LO, RO, E](val applyRTCol: ApplyRTCol[LO, RO, E]) {
-    def apply[T](expr: E => T): RTCol[LO, RO, T] = macro ApplyCol.rightColumn[LO, RO, E, T]
+    def apply[T](expr: E => T): RTCol[LO, RO, T] = macro MacroImpl.rightColumn[LO, RO, E, T]
   }
 
   implicit class OptionLTColExtract[LO, RO, E](val applyLTCol: ApplyLTCol[LO, RO, Option[E]]) {
-    def apply[T](expr: E => T): LTCol[LO, RO, Option[T]] = macro ApplyCol.leftOptColumn[LO, RO, E, T]
+    def apply[T](expr: E => T): LTCol[LO, RO, Option[T]] = macro MacroImpl.leftOptColumn[LO, RO, E, T]
   }
 
   implicit class OptionRTColExtract[LO, RO, E](val applyRTCol: ApplyRTCol[LO, RO, Option[E]]) {
-    def apply[T](expr: E => T): RTCol[LO, RO, Option[T]] = macro ApplyCol.rightOptColumn[LO, RO, E, T]
+    def apply[T](expr: E => T): RTCol[LO, RO, Option[T]] = macro MacroImpl.rightOptColumn[LO, RO, E, T]
   }
 }
 
@@ -67,7 +68,58 @@ private[joinwiz] object Right {
   val alias = "RIGHT"
 }
 
-private object ApplyCol {
+trait TWindow[O] extends Serializable {
+  type E
+
+  def partitionByCols: List[Column] = Nil
+  def orderCols: List[Column]       = Nil
+
+  final def apply(): WindowSpec = Window.partitionBy(partitionByCols: _*).orderBy(orderCols: _*)
+
+  def apply(o: O): E
+  def ordering: Ordering[O]
+
+  def partitionBy[S](expr: O => S): TWindow.Aux[O, S] = ???
+  def orderByAsc[S](expr: O => S): TWindow[O]         = ???
+  def orderByDesc[S](expr: O => S): TWindow[O]        = ???
+}
+
+sealed class NextTWindow[O](prev: TWindow[O]) extends TWindow[O] {
+
+
+}
+
+object TWindow {
+  type Aux[O, E1] = TWindow[O] { type E = E1 }
+}
+
+private object MacroImpl {
+
+  def partitionWindowBy[O: c.WeakTypeTag, E1: c.WeakTypeTag, S: c.WeakTypeTag](c: blackbox.Context)(expr: c.Expr[O => S]): c.Expr[TWindow.Aux[O, E1]] = {
+    import c.universe._
+
+    val origType       = c.weakTypeOf[O]
+    val extractionType = c.weakTypeOf[E1]
+    val fieldType      = c.weakTypeOf[S]
+    val fieldName      = extractArgName[O, S](c)(expr)
+
+    Window.partitionBy().partitionBy()
+
+    c.Expr(
+      q"""
+         new joinwiz.TWindow[$origType] {
+            type E = $extractionType
+            
+            override def partitionByCols() = org.apache.spark.sql.functions.col($fieldName) :: Nil
+            override def apply(o: $origType) = $expr(o)
+            override def ordering = Ordering.by[$origType, $fieldType]($expr)
+            
+            def partitionBy[S](expr: O => S): TWindow.Aux[O, S] = ???
+         }
+       """
+    )
+
+  }
 
   def leftColumn[LO: c.WeakTypeTag, RO: c.WeakTypeTag, E: c.WeakTypeTag, T: c.WeakTypeTag](c: blackbox.Context)(expr: c.Expr[E => T]): c.Expr[LTCol[LO, RO, T]] = {
     import c.universe._
