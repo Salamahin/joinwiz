@@ -79,10 +79,10 @@ def joinWithMap[F[_]: ComputationEngine](as: F[A], bs: F[B]) = {
 ## Window functions
 To add a new window function one has to inherit `joinwiz.window.WindowFunction`. After this can be used like following:
 ```scala
-def addRowNumber[F[_]: ComputationEngine](as: F[A]) = {
+def addRowNumber[F[_]: ComputationEngine](as: F[A]): F[(A, Int)] = {
   import joinwiz.syntax._
   as.withWindow { window =>
-    row_number[A] over window
+    row_number over window
       .partitionBy(_.field1)
       .partitionBy(_.field2)
       .orderByAsc(_.field3)
