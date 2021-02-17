@@ -82,10 +82,11 @@ To add a new window function one has to inherit `joinwiz.window.WindowFunction`.
 def addRowNumber[F[_]: ComputationEngine](as: F[A]): F[(A, Int)] = {
   import joinwiz.syntax._
   as.withWindow { window =>
-    row_number over window
+    window
       .partitionBy(_.field1)
       .partitionBy(_.field2)
       .orderByAsc(_.field3)
+      .call(row_number)
   }
 }
 ```
