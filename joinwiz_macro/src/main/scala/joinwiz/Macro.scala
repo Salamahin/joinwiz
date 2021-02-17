@@ -150,16 +150,18 @@ private object MacroImpl {
     val fieldType      = c.weakTypeOf[S]
     val fieldName      = extractArgName[O, S](c)(expr)
 
-    c.Expr(
-      q"""
-         new joinwiz.TWindow[$origType, $extractionType](${c.prefix}.partitionByCols, ${c.prefix}.orderByCols :+ org.apache.spark.sql.functions.col($fieldName)) {
-            override def apply(o: $origType) = ${c.prefix}.apply(o)
-            override def ordering = {
-              joinwiz.TWindow.composeOrdering(${c.prefix}.ordering, Ordering.by[$origType, $fieldType]($expr))
-            }
-         }
-       """
-    )
+//    c.Expr(
+//      q"""
+//         new joinwiz.TWindow[$origType, $extractionType](${c.prefix}.partitionByCols, ${c.prefix}.orderByCols :+ org.apache.spark.sql.functions.col($fieldName)) {
+//            override def apply(o: $origType) = ${c.prefix}.apply(o)
+//            override def ordering = {
+//              joinwiz.TWindow.composeOrdering(${c.prefix}.ordering, Ordering.by[$origType, $fieldType]($expr))
+//            }
+//         }
+//       """
+//    )
+
+    ???
   }
 
   def orderWindowByDesc[O: c.WeakTypeTag, E: c.WeakTypeTag, S](c: blackbox.Context)(expr: c.Expr[O => S]): c.Expr[TWindow[O, E]] = {
@@ -181,7 +183,13 @@ private object MacroImpl {
     val tType     = c.weakTypeOf[T]
     val name      = extractArgName[E, T](c)(expr)
 
-    ???
+    c.Expr(
+      q"""new joinwiz.LTCol[$leftType, $rightType, $tType] {
+            import org.apache.spark.sql.functions.col
+            override def apply(value: $leftType): $tType = ($expr compose ${c.prefix}.applyLTCol.orig)(value)
+            override def column = col((${c.prefix}.applyLTCol.names :+ $name).mkString("."))
+          }"""
+    )
   }
 
   def leftOptColumn[LO: c.WeakTypeTag, RO: c.WeakTypeTag, E: c.WeakTypeTag, T: c.WeakTypeTag](c: blackbox.Context)(expr: c.Expr[E => T]): c.Expr[LTCol[LO, RO, Option[T]]] = {
