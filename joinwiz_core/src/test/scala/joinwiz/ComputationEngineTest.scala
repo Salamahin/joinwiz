@@ -188,7 +188,11 @@ abstract class ComputationEngineTest[F[_]: ComputationEngine] extends AnyFunSuit
     val e5 = Entity(2, "a")
 
     entities(e1, e2, e3, e4, e5)
-      .withWindow(w => row_number[Entity] over w.partitionBy(_.uuid).orderByAsc(_.value))
+      .withWindow { window =>
+        row_number[Entity] over window
+          .partitionBy(_.uuid)
+          .orderByAsc(_.value)
+      }
       .collect() should contain only (
       (e1, 2),
       (e2, 1),
