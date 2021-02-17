@@ -5,22 +5,22 @@ import org.apache.spark.sql.Column
 import org.apache.spark.sql.expressions.WindowSpec
 import org.apache.spark.sql.functions.{row_number => spark_row_number}
 
-case class TWindowSpec[O, T](func: WindowFunction[T], window: TWindow[O, _])
+case class TWindowSpec[O, T](func: WindowFunction[O, T], window: TWindow[O, _])
 
-trait WindowFunction[T] {
+trait WindowFunction[O, T] {
   def apply(window: WindowSpec): Column
-  def apply[O](rows: Seq[O]): Seq[T]
+  def apply(rows: Seq[O]): Seq[T]
 }
 
 trait WindowExpressionSyntax {
-  implicit class FunctionOverWindowSyntax[O, T](wf: WindowFunction[T]) {
-    def over[E](tw: TWindow[O, E]): TWindowSpec[O, T] = TWindowSpec[O, T](wf, tw)
+  implicit class FunctionOverWindowSyntax[O](window: TWindow[O, _]) {
+    def call[T](func: WindowFunction[O, T]): TWindowSpec[O, T] = TWindowSpec[O, T](func, window)
   }
 }
 
 trait CommonWindowFunctions {
-  def row_number: WindowFunction[Int] = new WindowFunction[Int] {
+  def row_number[O]: WindowFunction[O, Int] = new WindowFunction[O, Int] {
     override def apply(window: WindowSpec): Column = spark_row_number() over window
-    override def apply[O](rows: Seq[O]): Seq[Int]  = rows.indices.map(_ + 1)
+    override def apply(rows: Seq[O]): Seq[Int]     = rows.indices.map(_ + 1)
   }
 }
