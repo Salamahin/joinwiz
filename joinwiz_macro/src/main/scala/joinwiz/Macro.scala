@@ -1,6 +1,7 @@
 package joinwiz
 
 import org.apache.spark.sql.Column
+import org.apache.spark.sql.expressions.{Window, WindowSpec}
 
 import scala.annotation.tailrec
 import scala.language.experimental.macros
@@ -28,19 +29,19 @@ trait RTCol[LO, RO, +T] extends TCol[RO, T]
 
 trait ExtractTColSyntax {
   implicit class BasicLTColExtract[LO, RO, E](val applyLTCol: ApplyLTCol[LO, RO, E]) {
-    def apply[T](expr: E => T): LTCol[LO, RO, T] = macro ApplyCol.leftColumn[LO, RO, E, T]
+    def apply[T](expr: E => T): LTCol[LO, RO, T] = macro MacroImpl.leftColumn[LO, RO, E, T]
   }
 
   implicit class BasicRTColExtract[LO, RO, E](val applyRTCol: ApplyRTCol[LO, RO, E]) {
-    def apply[T](expr: E => T): RTCol[LO, RO, T] = macro ApplyCol.rightColumn[LO, RO, E, T]
+    def apply[T](expr: E => T): RTCol[LO, RO, T] = macro MacroImpl.rightColumn[LO, RO, E, T]
   }
 
   implicit class OptionLTColExtract[LO, RO, E](val applyLTCol: ApplyLTCol[LO, RO, Option[E]]) {
-    def apply[T](expr: E => T): LTCol[LO, RO, Option[T]] = macro ApplyCol.leftOptColumn[LO, RO, E, T]
+    def apply[T](expr: E => T): LTCol[LO, RO, Option[T]] = macro MacroImpl.leftOptColumn[LO, RO, E, T]
   }
 
   implicit class OptionRTColExtract[LO, RO, E](val applyRTCol: ApplyRTCol[LO, RO, Option[E]]) {
-    def apply[T](expr: E => T): RTCol[LO, RO, Option[T]] = macro ApplyCol.rightOptColumn[LO, RO, E, T]
+    def apply[T](expr: E => T): RTCol[LO, RO, Option[T]] = macro MacroImpl.rightOptColumn[LO, RO, E, T]
   }
 }
 
@@ -67,7 +68,128 @@ private[joinwiz] object Right {
   val alias = "RIGHT"
 }
 
-private object ApplyCol {
+trait TWindow[O, E] {
+  def partitionByCols: List[Column]
+  def orderByCols: List[Column]
+  def ordering: Option[Ordering[O]]
+
+  def apply(): WindowSpec = Window.partitionBy(partitionByCols: _*).orderBy(orderByCols: _*)
+  def apply(o: O): E
+
+  def partitionBy[S](expr: O => S): TWindow[O, (E, S)] = macro MacroImpl.partitionWindowBy[O, E, S]
+  def orderByAsc[S](expr: O => S): TWindow[O, E] = macro MacroImpl.orderWindowByAsc[O, E, S]
+  def orderByDesc[S](expr: O => S): TWindow[O, E] = macro MacroImpl.orderWindowByDesc[O, E, S]
+}
+
+class ApplyTWindow[O] extends Serializable {
+  def partitionBy[S](expr: O => S): TWindow[O, S] = macro MacroImpl.basicTWindow[O, S]
+}
+
+object TWindow {
+  def composeOrdering[T](first: Ordering[T], second: Ordering[T]) = new Ordering[T] {
+    override def compare(x: T, y: T): Int = {
+      val compared = first.compare(x, y)
+      if (compared == 0) second.compare(x, y)
+      else compared
+    }
+  }
+
+  def composeOrdering[T](maybePrevOrdering: Option[Ordering[T]], nextOrdering: Ordering[T]): Option[Ordering[T]] = maybePrevOrdering match {
+    case None       => Some(nextOrdering)
+    case Some(prev) => Some(composeOrdering(prev, nextOrdering))
+  }
+}
+
+private object MacroImpl {
+
+  def basicTWindow[O: c.WeakTypeTag, S: c.WeakTypeTag](c: blackbox.Context)(expr: c.Expr[O => S]): c.Expr[TWindow[O, S]] = {
+    import c.universe._
+
+    val origType  = c.weakTypeOf[O]
+    val fieldType = c.weakTypeOf[S]
+    val fieldName = extractArgName[O, S](c)(expr)
+
+    c.Expr(
+      q"""
+         new joinwiz.TWindow[$origType, $fieldType] {
+            import org.apache.spark.sql.functions.col
+            override def partitionByCols = col($fieldName) :: Nil
+            override def ordering = None
+            override def orderByCols = Nil
+            override def apply(o: $origType) = $expr(o)
+         }
+       """
+    )
+  }
+
+  def partitionWindowBy[O: c.WeakTypeTag, E: c.WeakTypeTag, S: c.WeakTypeTag](c: blackbox.Context)(expr: c.Expr[O => S]): c.Expr[TWindow[O, (E, S)]] = {
+    import c.universe._
+
+    val origType  = c.weakTypeOf[O]
+    val prevType  = c.weakTypeOf[E]
+    val fieldType = c.weakTypeOf[S]
+    val fieldName = extractArgName[O, S](c)(expr)
+
+    c.Expr(
+      q"""
+         new joinwiz.TWindow[$origType, ($prevType, $fieldType)] {
+            private val prev = ${c.prefix}
+
+            import org.apache.spark.sql.functions.col
+            override def partitionByCols = prev.partitionByCols :+ col($fieldName)
+            override def ordering = prev.ordering
+            override def orderByCols = prev.orderByCols
+            override def apply(o: $origType) = (prev(o), $expr(o))
+         }
+       """
+    )
+  }
+
+  def orderWindowByAsc[O: c.WeakTypeTag, E: c.WeakTypeTag, S: c.WeakTypeTag](c: blackbox.Context)(expr: c.Expr[O => S]): c.Expr[TWindow[O, E]] = {
+    import c.universe._
+
+    val origType  = c.weakTypeOf[O]
+    val prevType  = c.weakTypeOf[E]
+    val fieldType = c.weakTypeOf[S]
+    val fieldName = extractArgName[O, S](c)(expr)
+
+    c.Expr(
+      q"""
+         new joinwiz.TWindow[$origType, $prevType] {
+            private val prev = ${c.prefix}
+
+            import org.apache.spark.sql.functions.col
+            override def partitionByCols = prev.partitionByCols
+            override def ordering = joinwiz.TWindow.composeOrdering(prev.ordering, Ordering.by[$origType, $fieldType]($expr))
+            override def orderByCols = prev.orderByCols :+ col($fieldName)
+            override def apply(o: $origType) = prev(o)
+         }
+       """
+    )
+  }
+
+  def orderWindowByDesc[O: c.WeakTypeTag, E: c.WeakTypeTag, S: c.WeakTypeTag](c: blackbox.Context)(expr: c.Expr[O => S]): c.Expr[TWindow[O, E]] = {
+    import c.universe._
+
+    val origType  = c.weakTypeOf[O]
+    val prevType  = c.weakTypeOf[E]
+    val fieldType = c.weakTypeOf[S]
+    val fieldName = extractArgName[O, S](c)(expr)
+
+    c.Expr(
+      q"""
+         new joinwiz.TWindow[$origType, $prevType] {
+            private val prev = ${c.prefix}
+
+            import org.apache.spark.sql.functions.col
+            override def partitionByCols = prev.partitionByCols
+            override def ordering = joinwiz.TWindow.composeOrdering(prev.ordering, Ordering.by[$origType, $fieldType]($expr).reverse)
+            override def orderByCols = prev.orderByCols :+ col($fieldName).desc
+            override def apply(o: $origType) = prev(o)
+         }
+       """
+    )
+  }
 
   def leftColumn[LO: c.WeakTypeTag, RO: c.WeakTypeTag, E: c.WeakTypeTag, T: c.WeakTypeTag](c: blackbox.Context)(expr: c.Expr[E => T]): c.Expr[LTCol[LO, RO, T]] = {
     import c.universe._

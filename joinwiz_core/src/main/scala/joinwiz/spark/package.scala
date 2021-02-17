@@ -1,9 +1,11 @@
 package joinwiz
 
-import joinwiz.api.{Collect, Distinct, Filter, FlatMap, GroupByKey, Join, KeyValueGroupped, Map, UnionByName}
-import joinwiz.syntax.JOIN_CONDITION
+import joinwiz.api.{Collect, Distinct, Filter, FlatMap, GroupByKey, Join, KeyValueGroupped, Map, UnionByName, WithWindow}
+import joinwiz.syntax.{JOIN_CONDITION, WINDOW_EXPRESSION}
+import joinwiz.window.TWindowSpec
 import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder
-import org.apache.spark.sql.{Dataset, Encoder}
+import org.apache.spark.sql.functions.{col, struct}
+import org.apache.spark.sql.{Dataset, Encoder, Encoders}
 
 import scala.reflect.runtime.universe.TypeTag
 
@@ -89,6 +91,19 @@ package object spark {
 
     override def collect[T]: Collect[Dataset, T] = new Collect[Dataset, T] {
       override def apply(ft: Dataset[T]): Seq[T] = ft.collect()
+    }
+
+    override def withWindow[T]: WithWindow[Dataset, T] = new WithWindow[Dataset, T] {
+      override def apply[S](fo: Dataset[T])(withWindow: WINDOW_EXPRESSION[T, S])(implicit tt: TypeTag[(T, S)]): Dataset[(T, S)] = {
+        val TWindowSpec(func, window) = withWindow(new ApplyTWindow[T])
+
+        fo.withColumn("joinwiz_window", func(window()))
+          .select(
+            struct(fo.columns.map(col): _*),
+            col("joinwiz_window")
+          )
+          .as[(T, S)](ExpressionEncoder())
+      }
     }
   }
 }
