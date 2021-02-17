@@ -6,7 +6,7 @@ import org.scalatest.matchers.should.Matchers
 
 case class Testee(a: String, b: Int, c: Boolean, d: Double)
 
-class TWindowTest extends AnyFunSuite with TWindowSyntax with Matchers {
+class TWindowTest extends AnyFunSuite with Matchers {
 
   test("can chain partition by in the window") {
     val window = new ApplyTWindow[Testee]
@@ -18,11 +18,12 @@ class TWindowTest extends AnyFunSuite with TWindowSyntax with Matchers {
     val testee = Testee("string", -1, true, Math.PI)
 
     window(testee) should be(((("string", -1), true), Math.PI))
-//    window.partitionByCols should contain inOrderOnly (
-//      col("a"),
-//      col("b"),
-//      col("c"),
-//      col("d")
-//    )
+    window.partitionByCols
+    window.partitionByCols should contain inOrderOnly (
+      col("a"),
+      col("b"),
+      col("c"),
+      col("d")
+    )
   }
 }

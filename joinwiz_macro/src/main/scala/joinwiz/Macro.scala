@@ -69,16 +69,11 @@ private[joinwiz] object Right {
 }
 
 trait TWindow[O, E] {
+  def partitionByCols: List[Column]
   def apply(): WindowSpec = /*Window.partitionBy(partitionByCols: _*)*/ ???
 
-//  def partitionByCols: List[Column]
+  def partitionBy[S](expr: O => S): TWindow[O, (E, S)] = macro MacroImpl.partitionWindowBy[O, E, S]
   def apply(o: O): E
-}
-
-trait TWindowSyntax {
-  implicit class TWindowPartitionBy[O, E](val window: TWindow[O, E]) {
-    def partitionBy[S](expr: O => S): TWindow[O, (E, S)] = macro MacroImpl.partitionWindowBy[O, E, S]
-  }
 }
 
 class ApplyTWindow[O] extends Serializable {
@@ -111,6 +106,8 @@ private object MacroImpl {
     c.Expr(
       q"""
          new joinwiz.TWindow[$origType, $fieldType] {
+            import org.apache.spark.sql.functions.col
+            override def partitionByCols = col($fieldName) :: Nil
             override def apply(o: $origType) = $expr(o)
          }
        """
@@ -120,23 +117,19 @@ private object MacroImpl {
   def partitionWindowBy[O: c.WeakTypeTag, E: c.WeakTypeTag, S: c.WeakTypeTag](c: blackbox.Context)(expr: c.Expr[O => S]): c.Expr[TWindow[O, (E, S)]] = {
     import c.universe._
 
-    val origType       = c.weakTypeOf[O]
-    val extractionType = c.weakTypeOf[E]
-    val fieldType      = c.weakTypeOf[S]
-    val fieldName      = extractArgName[O, S](c)(expr)
-
-    println(c.prefix)
+    val origType  = c.weakTypeOf[O]
+    val prevType  = c.weakTypeOf[E]
+    val fieldType = c.weakTypeOf[S]
+    val fieldName = extractArgName[O, S](c)(expr)
 
     c.Expr(
       q"""
-         new joinwiz.TWindow[$origType, ($extractionType, $fieldType)] {
-            import org.apache.spark.sql.functions.col
+         new joinwiz.TWindow[$origType, ($prevType, $fieldType)] {
+            private val prev = ${c.prefix}
 
-            override def apply(o: $origType) = {
-              val prev = ${c.prefix}.window(o)
-              val next = $expr(o)
-              (prev, next)
-            }
+            import org.apache.spark.sql.functions.col
+            override def partitionByCols = prev.partitionByCols :+ col($fieldName)
+            override def apply(o: $origType) = (prev(o), $expr(o))
          }
        """
     )
