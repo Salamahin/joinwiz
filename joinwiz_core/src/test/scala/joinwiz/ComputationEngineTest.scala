@@ -189,7 +189,7 @@ abstract class ComputationEngineTest[F[_]: ComputationEngine] extends AnyFunSuit
 
     entities(e1, e2, e3, e4, e5)
       .withWindow { window =>
-        row_number[Entity] over window
+        row_number over window
           .partitionBy(_.uuid)
           .orderByAsc(_.value)
       }
