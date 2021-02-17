@@ -1,6 +1,7 @@
 package joinwiz
-import joinwiz.api.{Collect, Distinct, Filter, FlatMap, GroupByKey, Join, KeyValueGroupped, Map, UnionByName}
-import joinwiz.syntax.JOIN_CONDITION
+import joinwiz.api.{Collect, Distinct, Filter, FlatMap, GroupByKey, Join, KeyValueGroupped, Map, UnionByName, WithWindow}
+import joinwiz.syntax.{JOIN_CONDITION, WINDOW_EXPRESSION}
+import joinwiz.window.TWindowSpec
 
 import scala.reflect.runtime.universe
 import scala.reflect.runtime.universe.TypeTag
@@ -80,6 +81,19 @@ package object testkit {
 
     override def collect[T]: Collect[Seq, T] = new Collect[Seq, T] {
       override def apply(ft: Seq[T]): Seq[T] = ft
+    }
+
+    override def withWindow[T]: WithWindow[Seq, T] = new WithWindow[Seq, T] {
+      override def apply[S](fo: Seq[T])(withWindow: WINDOW_EXPRESSION[T, S])(implicit tt: TypeTag[(T, S)]): Seq[(T, S)] = {
+        val TWindowSpec(func, window) = withWindow(new ApplyTWindow[T])
+
+        fo
+          .groupBy(window.apply)
+          .values
+          .map(vals => window.ordering.map(implicit ord => vals.sorted).getOrElse(vals))
+          .flatMap(vals => vals zip func(vals))
+          .toSeq
+      }
     }
   }
 }

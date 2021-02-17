@@ -180,6 +180,24 @@ abstract class ComputationEngineTest[F[_]: ComputationEngine] extends AnyFunSuit
     (entities(e1, e2) unionByName entities(e3, e4, e5)).collect() should contain only (e1, e2, e3, e4, e5)
   }
 
+  test("can build row_number") {
+    val e1 = Entity(1, "b")
+    val e2 = Entity(1, "a")
+    val e3 = Entity(2, "c")
+    val e4 = Entity(2, "b")
+    val e5 = Entity(2, "a")
+
+    entities(e1, e2, e3, e4, e5)
+      .withWindow(w => row_number[Entity] over w.partitionBy(_.uuid).orderByAsc(_.value))
+      .collect() should contain only (
+      (e1, 2),
+      (e2, 1),
+      (e3, 3),
+      (e4, 2),
+      (e5, 1)
+    )
+  }
+
 }
 import joinwiz.spark._
 class SparkComputationEngineTest extends ComputationEngineTest[Dataset] with Matchers with SparkSuite {
