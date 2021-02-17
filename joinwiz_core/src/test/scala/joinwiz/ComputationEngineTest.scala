@@ -189,9 +189,10 @@ abstract class ComputationEngineTest[F[_]: ComputationEngine] extends AnyFunSuit
 
     entities(e1, e2, e3, e4, e5)
       .withWindow { window =>
-        row_number over window
+        window
           .partitionBy(_.uuid)
           .orderByAsc(_.value)
+          .call(row_number)
       }
       .collect() should contain only (
       (e1, 2),
