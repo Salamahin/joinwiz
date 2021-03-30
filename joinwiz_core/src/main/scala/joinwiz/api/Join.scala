@@ -1,11 +1,10 @@
 package joinwiz.api
 
 import joinwiz.syntax.JOIN_CONDITION
-
 import scala.reflect.runtime.universe.TypeTag
 
-trait Join[F[_], T] {
-  def inner[U](ft: F[T], fu: F[U])(expr: JOIN_CONDITION[T, U]): F[(T, U)]
+trait Join[F[_]] {
+  def inner[LEFT, RIGHT](ft: F[LEFT], fu: F[RIGHT])(expr: JOIN_CONDITION[LEFT, RIGHT]): F[(LEFT, RIGHT)]
 
-  def left[U](ft: F[T], fu: F[U])(expr: JOIN_CONDITION[T, U])(implicit tt: TypeTag[(T, Option[U])]): F[(T, Option[U])]
+  def left[LEFT: TypeTag, RIGHT: TypeTag](ft: F[LEFT], fu: F[RIGHT])(expr: JOIN_CONDITION[LEFT, RIGHT]): F[(LEFT, Option[RIGHT])]
 }

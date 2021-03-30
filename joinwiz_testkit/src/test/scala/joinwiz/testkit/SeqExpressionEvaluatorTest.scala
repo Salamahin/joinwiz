@@ -1,6 +1,5 @@
 package joinwiz.testkit
 
-import joinwiz.expression.UnapplySyntax
 import joinwiz.testkit.SeqExpressionEvaluatorTest._
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers

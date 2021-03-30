@@ -22,12 +22,12 @@ object syntax
   type JOIN_CONDITION[L, R]    = (ApplyLTCol[L, R, L], ApplyRTCol[L, R, R]) => Expr[L, R]
   type WINDOW_EXPRESSION[T, S] = ApplyTWindow[T] => TWindowSpec[T, S]
 
-  implicit class DatasetLikeSyntax[F[_], T: ClassTag](ft: F[T])(implicit ce: ComputationEngine[F]) {
+  implicit class DatasetLikeSyntax[F[_], T: TypeTag](ft: F[T])(implicit ce: ComputationEngine[F]) {
     def innerJoin[U](fu: F[U])(expr: JOIN_CONDITION[T, U]): F[(T, U)] =
       ce.join.inner(ft, fu)(expr)
 
-    def leftJoin[U](fu: F[U])(expr: JOIN_CONDITION[T, U])(implicit tt: TypeTag[(T, Option[U])]): F[(T, Option[U])] =
-      ce.join.left(ft, fu)(expr)
+    def leftJoin[U: TypeTag](fu: F[U])(expr: JOIN_CONDITION[T, U]): F[(T, Option[U])] =
+      ce.join.left[T, U](ft, fu)(expr)
 
     def map[U: TypeTag](func: T => U): F[U] =
       ce.map(ft)(func)
@@ -48,7 +48,7 @@ object syntax
 
     def collect(): Seq[T] = ce.collect(ft)
 
-    def withWindow[S](expr: WINDOW_EXPRESSION[T, S])(implicit tt: TypeTag[(T, S)]) =
+    def withWindow[S: TypeTag](expr: WINDOW_EXPRESSION[T, S]): F[(T, S)] =
       ce.withWindow(ft)(expr)
   }
 }

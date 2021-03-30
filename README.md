@@ -2,12 +2,21 @@
 
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.github.salamahin/joinwiz_2.11/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.github.salamahin/joinwiz_2.11) [![Build Status](https://travis-ci.com/Salamahin/joinwiz.svg?branch=master)](https://travis-ci.com/Salamahin/joinwiz)
 
-Spark API enhancements for Dataset's joins.
- * Typesafe - checks the type of the joining expression in compile time
- * Run (some) unit tests without SparkSession
- * No reflection
+Tiny library improves Spark's dataset join API and improves unit-testing experience of (some) Spark transformations
 
-**Note the API is evolving and thus may be unstable**
+## Why
+There are 2 main reasons - using typesafe Dataset API one still need to specify the joining condition with strings or
+expressions which is not convenient and possible can be reason of a silly mistake. On the other hand with the power of
+macroses one can extract fields are used in the expression in the same manner as it is implemented in various lens libs.
+That will let your IDE to help you build an expression and will prevent from comparing incompatible types (like string-
+decimal join when spark casts both left and right values to double)
+
+The second reason is that unit testing with Spark is a nightmare. It takes seconds for local session to start which 
+means you will be running your single suite for a minute or two. On the other hand Scala has an abstraction over type - 
+higher kinds. Most popular spark transformations can be expressed on top of Datasets and any Seq, and `joinwiz-testkit` 
+allows you to do so **without even creating a Spark context**, and that will your tests super fast. Of course not every 
+transformation has an analogue in Seq's terms (like `repartition` makes sence only for distributed collections) but
+such specific behaviour still can be isolated easily.
 
 ## Try it
 ```scala
@@ -17,6 +26,7 @@ libraryDependencies += "io.github.salamahin" %% "joinwiz_testkit" % joinwiz_vers
 
 
 ## Primitive join
+Note that result has type of `(A, Option[B])` - no more NPE's when mapping!
 ```scala
 def doJoin[F[_]: ComputationEngine](as: F[A], bs: F[B]): F[(A, Option[B])] = {
   import joinwiz.syntax._
@@ -47,7 +57,7 @@ Clearly testing without spark makes your unit-test run much faster
 
 ## Chained joins
 In case when several joins are made one-by-one it might be tricky to check which exactly col in which table is used.
-You can easily workaround with unapplication
+You can easily workaround this with `wiz` unapplication
 ```scala
 def doSequentialJoin[F[_]: ComputationEngine](as: F[A], bs: F[B], cs: F[C]) = {
   import joinwiz.syntax._
@@ -100,3 +110,5 @@ def addRowNumber[F[_]: ComputationEngine](as: F[A]): F[(A, Int)] = {
   * groupByKey + mapGroups, reduceGroups, count, cogroup
   * filter
   * collect
+
+You can find more examples of usage in appropriate [test](joinwiz_core/src/test/scala/joinwiz/ComputationEngineTest.scala)

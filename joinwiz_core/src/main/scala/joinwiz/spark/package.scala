@@ -5,18 +5,16 @@ import joinwiz.syntax.{JOIN_CONDITION, WINDOW_EXPRESSION}
 import joinwiz.window.TWindowSpec
 import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder
 import org.apache.spark.sql.functions.{col, struct}
-import org.apache.spark.sql.{Dataset, Encoder, Encoders}
+import org.apache.spark.sql.{Dataset, Encoder}
 
 import scala.reflect.runtime.universe.TypeTag
 
 package object spark {
 
   implicit val sparkBasedEngine: ComputationEngine[Dataset] = new ComputationEngine[Dataset] {
-    override def join[L]: Join[Dataset, L] = new Join[Dataset, L] {
+    override def join: Join[Dataset] = new Join[Dataset] {
 
-      def joinWiz[R](fl: Dataset[L], fr: Dataset[R], joinType: String)(
-        joinBy: JOIN_CONDITION[L, R]
-      ): Dataset[(L, R)] = {
+      def joinWiz[L, R](fl: Dataset[L], fr: Dataset[R], joinType: String)(joinBy: JOIN_CONDITION[L, R]): Dataset[(L, R)] = {
         fl.as(joinwiz.Left.alias)
           .joinWith(
             fr.as(joinwiz.Right.alias),
@@ -25,11 +23,11 @@ package object spark {
           )
       }
 
-      override def inner[R](fl: Dataset[L], fr: Dataset[R])(expr: JOIN_CONDITION[L, R]): Dataset[(L, R)] = {
+      override def inner[L, R](fl: Dataset[L], fr: Dataset[R])(expr: JOIN_CONDITION[L, R]): Dataset[(L, R)] = {
         joinWiz(fl, fr, "inner")(expr)
       }
 
-      override def left[R](fl: Dataset[L], fr: Dataset[R])(expr: JOIN_CONDITION[L, R])(implicit tt: TypeTag[(L, Option[R])]): Dataset[(L, Option[R])] = {
+      override def left[L: TypeTag, R: TypeTag](fl: Dataset[L], fr: Dataset[R])(expr: JOIN_CONDITION[L, R]): Dataset[(L, Option[R])] = {
         implicit val enc: Encoder[(L, Option[R])] = ExpressionEncoder[(L, Option[R])]()
 
         joinWiz(fl, fr, "left_outer")(expr)
@@ -39,27 +37,27 @@ package object spark {
       }
     }
 
-    override def map[T]: Map[Dataset, T] = new Map[Dataset, T] {
-      override def apply[U: TypeTag](ft: Dataset[T])(func: T => U): Dataset[U] =
+    override def map: Map[Dataset] = new Map[Dataset] {
+      override def apply[T, U: TypeTag](ft: Dataset[T])(func: T => U): Dataset[U] =
         ft.map(func)(ExpressionEncoder())
     }
 
-    override def flatMap[L]: FlatMap[Dataset, L] = new FlatMap[Dataset, L] {
-      override def apply[R: TypeTag](ft: Dataset[L])(func: L => TraversableOnce[R]): Dataset[R] =
+    override def flatMap: FlatMap[Dataset] = new FlatMap[Dataset] {
+      override def apply[L, R: TypeTag](ft: Dataset[L])(func: L => TraversableOnce[R]): Dataset[R] =
         ft.flatMap(func)(ExpressionEncoder())
     }
 
-    override def filter[L]: Filter[Dataset, L] = new Filter[Dataset, L] {
-      override def apply(ft: Dataset[L])(predicate: L => Boolean): Dataset[L] =
+    override def filter: Filter[Dataset] = new Filter[Dataset] {
+      override def apply[L](ft: Dataset[L])(predicate: L => Boolean): Dataset[L] =
         ft.filter(predicate)
     }
 
-    override def distinct[T]: Distinct[Dataset, T] = new Distinct[Dataset, T] {
-      override def apply(ft: Dataset[T]): Dataset[T] = ft.distinct()
+    override def distinct: Distinct[Dataset] = new Distinct[Dataset] {
+      override def apply[T](ft: Dataset[T]): Dataset[T] = ft.distinct()
     }
 
-    override def groupByKey[T]: GroupByKey[Dataset, T] = new GroupByKey[Dataset, T] {
-      override def apply[K: TypeTag](ft: Dataset[T])(func: T => K): KeyValueGroupped[Dataset, T, K] =
+    override def groupByKey: GroupByKey[Dataset] = new GroupByKey[Dataset] {
+      override def apply[T, K: TypeTag](ft: Dataset[T])(func: T => K): KeyValueGroupped[Dataset, T, K] =
         new KeyValueGroupped[Dataset, T, K] {
           override def mapGroups[U: TypeTag](f: (K, Iterator[T]) => U): Dataset[U] =
             ft.groupByKey(func)(ExpressionEncoder()).mapGroups(f)(ExpressionEncoder())
@@ -84,17 +82,17 @@ package object spark {
         }
     }
 
-    override def unionByName[T]: UnionByName[Dataset, T] =
-      new UnionByName[Dataset, T] {
-        override def apply(ft1: Dataset[T])(ft2: Dataset[T]): Dataset[T] = ft1 unionByName ft2
+    override def unionByName: UnionByName[Dataset] =
+      new UnionByName[Dataset] {
+        override def apply[T](ft1: Dataset[T])(ft2: Dataset[T]): Dataset[T] = ft1 unionByName ft2
       }
 
-    override def collect[T]: Collect[Dataset, T] = new Collect[Dataset, T] {
-      override def apply(ft: Dataset[T]): Seq[T] = ft.collect()
+    override def collect: Collect[Dataset] = new Collect[Dataset] {
+      override def apply[T](ft: Dataset[T]): Seq[T] = ft.collect()
     }
 
-    override def withWindow[T]: WithWindow[Dataset, T] = new WithWindow[Dataset, T] {
-      override def apply[S](fo: Dataset[T])(withWindow: WINDOW_EXPRESSION[T, S])(implicit tt: TypeTag[(T, S)]): Dataset[(T, S)] = {
+    override def withWindow: WithWindow[Dataset] = new WithWindow[Dataset] {
+      override def apply[T: TypeTag, S: TypeTag](fo: Dataset[T])(withWindow: WINDOW_EXPRESSION[T, S]): Dataset[(T, S)] = {
         val TWindowSpec(func, window) = withWindow(new ApplyTWindow[T])
 
         fo.withColumn("joinwiz_window", func(window()))
@@ -102,7 +100,7 @@ package object spark {
             struct(fo.columns.map(col): _*),
             col("joinwiz_window")
           )
-          .as[(T, S)](ExpressionEncoder())
+          .as[(T, S)](ExpressionEncoder[(T, S)]())
       }
     }
   }

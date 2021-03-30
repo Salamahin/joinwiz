@@ -8,36 +8,36 @@ import scala.reflect.runtime.universe.TypeTag
 
 package object testkit {
   implicit val fakeComputationEngine: ComputationEngine[Seq] = new ComputationEngine[Seq] {
-    override def join[T]: Join[Seq, T] = new Join[Seq, T] {
-      override def inner[U](ft: Seq[T], fu: Seq[U])(expr: JOIN_CONDITION[T, U]): Seq[(T, U)] = {
+    override def join: Join[Seq] = new Join[Seq] {
+      override def inner[T, U](ft: Seq[T], fu: Seq[U])(expr: JOIN_CONDITION[T, U]): Seq[(T, U)] = {
         new SeqJoinImpl[T, U](expr(ApplyLTCol[T, U], ApplyRTCol[T, U]), ft, fu).innerJoin()
       }
 
-      override def left[U](ft: Seq[T], fu: Seq[U])(expr: JOIN_CONDITION[T, U])(implicit tt: TypeTag[(T, Option[U])]): Seq[(T, Option[U])] = {
+      override def left[T: TypeTag, U: TypeTag](ft: Seq[T], fu: Seq[U])(expr: JOIN_CONDITION[T, U]): Seq[(T, Option[U])] = {
         new SeqJoinImpl[T, U](expr(ApplyLTCol[T, U], ApplyRTCol[T, U]), ft, fu).leftJoin()
       }
     }
 
-    override def map[T]: Map[Seq, T] = new Map[Seq, T] {
-      override def apply[U: TypeTag](ft: Seq[T])(func: T => U): Seq[U] = ft.map(func)
+    override def map: Map[Seq] = new Map[Seq] {
+      override def apply[T, U: TypeTag](ft: Seq[T])(func: T => U): Seq[U] = ft.map(func)
     }
 
-    override def flatMap[T]: FlatMap[Seq, T] = new FlatMap[Seq, T] {
-      override def apply[U: TypeTag](ft: Seq[T])(func: T => TraversableOnce[U]): Seq[U] =
+    override def flatMap: FlatMap[Seq] = new FlatMap[Seq] {
+      override def apply[T, U: TypeTag](ft: Seq[T])(func: T => TraversableOnce[U]): Seq[U] =
         ft.flatMap(func)
     }
 
-    override def filter[T]: Filter[Seq, T] = new Filter[Seq, T] {
-      override def apply(ft: Seq[T])(predicate: T => Boolean): Seq[T] =
+    override def filter: Filter[Seq] = new Filter[Seq] {
+      override def apply[T](ft: Seq[T])(predicate: T => Boolean): Seq[T] =
         ft.filter(predicate)
     }
 
-    override def distinct[T]: Distinct[Seq, T] = new Distinct[Seq, T] {
-      override def apply(ft: Seq[T]): Seq[T] = ft.distinct
+    override def distinct: Distinct[Seq] = new Distinct[Seq] {
+      override def apply[T](ft: Seq[T]): Seq[T] = ft.distinct
     }
 
-    override def groupByKey[T]: GroupByKey[Seq, T] = new GroupByKey[Seq, T] {
-      override def apply[K: TypeTag](ft: Seq[T])(func: T => K): KeyValueGroupped[Seq, T, K] =
+    override def groupByKey: GroupByKey[Seq] = new GroupByKey[Seq] {
+      override def apply[T, K: TypeTag](ft: Seq[T])(func: T => K): KeyValueGroupped[Seq, T, K] =
         new KeyValueGroupped[Seq, T, K] {
           override def mapGroups[U: TypeTag](f: (K, Iterator[T]) => U): Seq[U] =
             ft.groupBy(func)
@@ -75,20 +75,19 @@ package object testkit {
         }
     }
 
-    override def unionByName[T]: UnionByName[Seq, T] = new UnionByName[Seq, T] {
-      override def apply(ft1: Seq[T])(ft2: Seq[T]): Seq[T] = ft1 ++ ft2
+    override def unionByName: UnionByName[Seq] = new UnionByName[Seq] {
+      override def apply[T](ft1: Seq[T])(ft2: Seq[T]): Seq[T] = ft1 ++ ft2
     }
 
-    override def collect[T]: Collect[Seq, T] = new Collect[Seq, T] {
-      override def apply(ft: Seq[T]): Seq[T] = ft
+    override def collect: Collect[Seq] = new Collect[Seq] {
+      override def apply[T](ft: Seq[T]): Seq[T] = ft
     }
 
-    override def withWindow[T]: WithWindow[Seq, T] = new WithWindow[Seq, T] {
-      override def apply[S](fo: Seq[T])(withWindow: WINDOW_EXPRESSION[T, S])(implicit tt: TypeTag[(T, S)]): Seq[(T, S)] = {
+    override def withWindow: WithWindow[Seq] = new WithWindow[Seq] {
+      override def apply[T: TypeTag, S: TypeTag](fo: Seq[T])(withWindow: WINDOW_EXPRESSION[T, S]): Seq[(T, S)] = {
         val TWindowSpec(func, window) = withWindow(new ApplyTWindow[T])
 
-        fo
-          .groupBy(window.apply)
+        fo.groupBy(window.apply)
           .values
           .map(vals => window.ordering.map(implicit ord => vals.sorted).getOrElse(vals))
           .flatMap(vals => vals zip func(vals))
