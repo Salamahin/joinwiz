@@ -70,9 +70,9 @@ package object spark {
           override def cogroup[U, R: TypeTag](
             other: KeyValueGroupped[Dataset, U, K]
           )(f: (K, Iterator[T], Iterator[U]) => TraversableOnce[R]): Dataset[R] = {
-            val otherDs = other.underlying.groupByKey(other.keyFunc)(ExpressionEncoder())
+            val otherDs = other.underlying.groupByKey(other.keyFunc)(ExpressionEncoder[K]())
 
-            ft.groupByKey(func)(ExpressionEncoder())
+            ft.groupByKey(func)(ExpressionEncoder[K]())
               .cogroup(otherDs)(f)(ExpressionEncoder[R]())
           }
 

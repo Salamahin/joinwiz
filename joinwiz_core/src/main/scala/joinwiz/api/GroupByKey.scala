@@ -7,8 +7,8 @@ trait GroupByKey[F[_]] {
 }
 
 trait KeyValueGroupped[F[_], T, K] {
-  protected def underlying: F[T]
-  protected def keyFunc: T => K
+  private[joinwiz] def underlying: F[T]
+  private[joinwiz] def keyFunc: T => K
 
   def mapGroups[U: TypeTag](f: (K, Iterator[T]) => U): F[U]
   def reduceGroups(f: (T, T) => T): F[(K, T)]
