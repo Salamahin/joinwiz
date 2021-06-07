@@ -65,23 +65,25 @@ abstract class ComputationEngineTest[F[_]: ComputationEngine] extends AnyFunSuit
       .collect() should contain only ((l1, None), (l2, Some(r1)))
   }
 
-//  test("extracts option value from option column") {
-//    val l1 = (Entity(1, "e1"), None: Option[EntityWithOpt])
-//    val l2 = (Entity(2, "e2"), Some(EntityWithOpt(Some(2))))
-//
-//    val r1 = Entity(2, "2")
-//    val r2 = Entity(23, "23")
-//
-//    val left = entities(l1, l2)
-//    val right  = entities(r1, r2)
-//
-//    left
-//      .leftJoin(right) {
-//        case (_ wiz b, c) =>
-//          b(_.optUuid) =:= c(_.uuid)
-//      }
-//      .collect() should contain only (???)
-//  }
+  test("extracts option value from option column") {
+    val l1 = (Entity(1, "e1"), None: Option[EntityWithOpt])
+    val l2 = (Entity(2, "e2"), Some(EntityWithOpt(Some(2))))
+
+    val r1 = Entity(2, "2")
+    val r2 = Entity(23, "23")
+
+    val left  = entities(l1, l2)
+    val right = entities(r1, r2)
+
+    left
+      .leftJoin(right) {
+        case (_ wiz optB, c) => optB(_.optUuid).flatten =:= c(_.uuid)
+      }
+      .collect() should contain only (
+      (l1, None),
+      (l2, Some(r1))
+    )
+  }
 
   test("can map") {
     entities(Entity(1, "* -1"), Entity(2, "* -1"))

@@ -6,7 +6,7 @@ import org.apache.spark.sql.expressions.{Window, WindowSpec}
 import scala.annotation.tailrec
 import scala.language.experimental.macros
 import scala.language.higherKinds
-import scala.reflect.macros.whitebox
+import scala.reflect.macros.blackbox
 
 trait Expr[L, R] {
   def apply(): Column
@@ -20,39 +20,28 @@ object Expr {
   }
 }
 
-sealed trait TCol[O] {
-  type T
-
+sealed trait TCol[O, +T] {
   def column: Column
   def apply(value: O): T
 }
-
-trait LTCol[LO, RO] extends TCol[LO]
-trait RTCol[LO, RO] extends TCol[RO]
-
-object LTCol {
-  type Aux[LO, RO, TT] = LTCol[LO, RO] { type T = TT }
-}
-
-object RTCol {
-  type Aux[LO, RO, TT] = RTCol[LO, RO] { type T = TT }
-}
+trait LTCol[LO, RO, +T] extends TCol[LO, T]
+trait RTCol[LO, RO, +T] extends TCol[RO, T]
 
 trait ExtractTColSyntax {
   implicit class BasicLTColExtract[LO, RO, E](val applyLTCol: ApplyLTCol[LO, RO, E]) {
-    def apply[T](expr: E => T): LTCol[LO, RO] = macro MacroImpl.leftColumn[LO, RO, E, T]
+    def apply[T](expr: E => T): LTCol[LO, RO, T] = macro MacroImpl.leftColumn[LO, RO, E, T]
   }
 
   implicit class BasicRTColExtract[LO, RO, E](val applyRTCol: ApplyRTCol[LO, RO, E]) {
-    def apply[T](expr: E => T): RTCol[LO, RO] = macro MacroImpl.rightColumn[LO, RO, E, T]
+    def apply[T](expr: E => T): RTCol[LO, RO, T] = macro MacroImpl.rightColumn[LO, RO, E, T]
   }
 
   implicit class OptionLTColExtract[LO, RO, E](val applyLTCol: ApplyLTCol[LO, RO, Option[E]]) {
-    def apply[T](expr: E => T) : LTCol[LO, RO] = macro MacroImpl.leftOptColumn[LO, RO, E, T]
+    def apply[T](expr: E => T): LTCol[LO, RO, Option[T]] = macro MacroImpl.leftOptColumn[LO, RO, E, T]
   }
 
   implicit class OptionRTColExtract[LO, RO, E](val applyRTCol: ApplyRTCol[LO, RO, Option[E]]) {
-    def apply[T](expr: E => T): RTCol[LO, RO] = macro MacroImpl.rightOptColumn[LO, RO, E, T]
+    def apply[T](expr: E => T): RTCol[LO, RO, Option[T]] = macro MacroImpl.rightOptColumn[LO, RO, E, T]
   }
 }
 
@@ -113,7 +102,7 @@ object TWindow {
 
 private object MacroImpl {
 
-  def basicTWindow[O: c.WeakTypeTag, S: c.WeakTypeTag](c: whitebox.Context)(expr: c.Expr[O => S]): c.Expr[TWindow[O, S]] = {
+  def basicTWindow[O: c.WeakTypeTag, S: c.WeakTypeTag](c: blackbox.Context)(expr: c.Expr[O => S]): c.Expr[TWindow[O, S]] = {
     import c.universe._
 
     val origType  = c.weakTypeOf[O]
@@ -133,7 +122,7 @@ private object MacroImpl {
     )
   }
 
-  def partitionWindowBy[O: c.WeakTypeTag, E: c.WeakTypeTag, S: c.WeakTypeTag](c: whitebox.Context)(expr: c.Expr[O => S]): c.Expr[TWindow[O, (E, S)]] = {
+  def partitionWindowBy[O: c.WeakTypeTag, E: c.WeakTypeTag, S: c.WeakTypeTag](c: blackbox.Context)(expr: c.Expr[O => S]): c.Expr[TWindow[O, (E, S)]] = {
     import c.universe._
 
     val origType  = c.weakTypeOf[O]
@@ -156,7 +145,7 @@ private object MacroImpl {
     )
   }
 
-  def orderWindowByAsc[O: c.WeakTypeTag, E: c.WeakTypeTag, S: c.WeakTypeTag](c: whitebox.Context)(expr: c.Expr[O => S]): c.Expr[TWindow[O, E]] = {
+  def orderWindowByAsc[O: c.WeakTypeTag, E: c.WeakTypeTag, S: c.WeakTypeTag](c: blackbox.Context)(expr: c.Expr[O => S]): c.Expr[TWindow[O, E]] = {
     import c.universe._
 
     val origType  = c.weakTypeOf[O]
@@ -179,7 +168,7 @@ private object MacroImpl {
     )
   }
 
-  def orderWindowByDesc[O: c.WeakTypeTag, E: c.WeakTypeTag, S: c.WeakTypeTag](c: whitebox.Context)(expr: c.Expr[O => S]): c.Expr[TWindow[O, E]] = {
+  def orderWindowByDesc[O: c.WeakTypeTag, E: c.WeakTypeTag, S: c.WeakTypeTag](c: blackbox.Context)(expr: c.Expr[O => S]): c.Expr[TWindow[O, E]] = {
     import c.universe._
 
     val origType  = c.weakTypeOf[O]
@@ -202,7 +191,7 @@ private object MacroImpl {
     )
   }
 
-  def leftColumn[LO: c.WeakTypeTag, RO: c.WeakTypeTag, E: c.WeakTypeTag, T: c.WeakTypeTag](c: whitebox.Context)(expr: c.Expr[E => T]): c.universe.Tree = {
+  def leftColumn[LO: c.WeakTypeTag, RO: c.WeakTypeTag, E: c.WeakTypeTag, T: c.WeakTypeTag](c: blackbox.Context)(expr: c.Expr[E => T]): c.Expr[LTCol[LO, RO, T]] = {
     import c.universe._
 
     val leftType  = c.weakTypeOf[LO]
@@ -210,32 +199,33 @@ private object MacroImpl {
     val tType     = c.weakTypeOf[T]
     val name      = extractArgName[E, T](c)(expr)
 
-      q"""new joinwiz.LTCol[$leftType, $rightType] {
+    c.Expr(
+      q"""new joinwiz.LTCol[$leftType, $rightType, $tType] {
             import org.apache.spark.sql.functions.col
-            override type T = $tType
             override def apply(value: $leftType): $tType = ($expr compose ${c.prefix}.applyLTCol.orig)(value)
             override def column = col((${c.prefix}.applyLTCol.names :+ $name).mkString("."))
           }"""
+    )
   }
 
-  def leftOptColumn[LO: c.WeakTypeTag, RO: c.WeakTypeTag, E: c.WeakTypeTag, T: c.WeakTypeTag](c: whitebox.Context)(expr: c.Expr[E => T]): c.universe.Tree = {
+  def leftOptColumn[LO: c.WeakTypeTag, RO: c.WeakTypeTag, E: c.WeakTypeTag, T: c.WeakTypeTag](c: blackbox.Context)(expr: c.Expr[E => T]): c.Expr[LTCol[LO, RO, Option[T]]] = {
     import c.universe._
 
     val leftType  = c.weakTypeOf[LO]
     val rightType = c.weakTypeOf[RO]
-    val tType = c.weakTypeOf[T]
+    val tType     = c.weakTypeOf[T]
+    val name      = extractArgName[E, T](c)(expr)
 
-    val name = extractArgName[E, T](c)(expr)
-
-      q"""new joinwiz.LTCol[$leftType, $rightType] {
+    c.Expr(
+      q"""new joinwiz.LTCol[$leftType, $rightType, Option[$tType]] {
             import org.apache.spark.sql.functions.col
-            override type T = Option[$tType]
             override def apply(value: $leftType): Option[$tType] = ${c.prefix}.applyLTCol.orig(value).map($expr)
             override def column = col((${c.prefix}.applyLTCol.names :+ $name).mkString("."))
           }"""
+    )
   }
 
-  def rightColumn[LO: c.WeakTypeTag, RO: c.WeakTypeTag, E: c.WeakTypeTag, T: c.WeakTypeTag](c: whitebox.Context)(expr: c.Expr[E => T]): c.universe.Tree = {
+  def rightColumn[LO: c.WeakTypeTag, RO: c.WeakTypeTag, E: c.WeakTypeTag, T: c.WeakTypeTag](c: blackbox.Context)(expr: c.Expr[E => T]): c.Expr[RTCol[LO, RO, T]] = {
     import c.universe._
 
     val leftType  = c.weakTypeOf[LO]
@@ -243,15 +233,16 @@ private object MacroImpl {
     val tType     = c.weakTypeOf[T]
     val name      = extractArgName[E, T](c)(expr)
 
-      q"""new joinwiz.RTCol[$leftType, $rightType] {
+    c.Expr(
+      q"""new joinwiz.RTCol[$leftType, $rightType, $tType] {
             import org.apache.spark.sql.functions.col
-            override type T = $tType
             override def apply(value: $rightType): $tType = ($expr compose ${c.prefix}.applyRTCol.orig)(value)
             override def column = col((${c.prefix}.applyRTCol.names :+ $name).mkString("."))
           }"""
+    )
   }
 
-  def rightOptColumn[LO: c.WeakTypeTag, RO: c.WeakTypeTag, E: c.WeakTypeTag, T: c.WeakTypeTag](c: whitebox.Context)(expr: c.Expr[E => T]): c.universe.Tree = {
+  def rightOptColumn[LO: c.WeakTypeTag, RO: c.WeakTypeTag, E: c.WeakTypeTag, T: c.WeakTypeTag](c: blackbox.Context)(expr: c.Expr[E => T]): c.Expr[RTCol[LO, RO, Option[T]]] = {
     import c.universe._
 
     val leftType  = c.weakTypeOf[LO]
@@ -259,15 +250,16 @@ private object MacroImpl {
     val tType     = c.weakTypeOf[T]
     val name      = extractArgName[E, T](c)(expr)
 
+    c.Expr(
       q"""new joinwiz.RTCol[$leftType, $rightType,  Option[$tType]] {
             import org.apache.spark.sql.functions.col
-            override type T = Option[$tType]
             override def apply(value: $leftType): Option[$tType] = ${c.prefix}.applyRTCol.orig(value).map($expr)
             override def column = col((${c.prefix}.applyRTCol.names :+ $name).mkString("."))
           }"""
+    )
   }
 
-  private def extractArgName[E: c.WeakTypeTag, T: c.WeakTypeTag](c: whitebox.Context)(func: c.Expr[E => T]): String = {
+  private def extractArgName[E: c.WeakTypeTag, T: c.WeakTypeTag](c: blackbox.Context)(func: c.Expr[E => T]): String = {
     import c.universe._
 
     @tailrec

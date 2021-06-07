@@ -17,7 +17,8 @@ object syntax
     with UnapplySyntax
     with ExtractTColSyntax
     with CommonWindowFunctions
-    with WindowExpressionSyntax {
+    with WindowExpressionSyntax
+    with OptColFlattenSyntax {
 
   type JOIN_CONDITION[L, R]    = (ApplyLTCol[L, R, L], ApplyRTCol[L, R, R]) => Expr[L, R]
   type WINDOW_EXPRESSION[T, S] = ApplyTWindow[T] => TWindowSpec[T, S]
