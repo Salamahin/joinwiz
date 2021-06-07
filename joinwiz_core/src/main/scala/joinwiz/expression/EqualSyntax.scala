@@ -15,8 +15,8 @@ trait LowLevelEqualSyntax {
   }
 
   abstract class BasicRTColEqualSyntax[F[_], L, R, T](thisCol: RTCol[L, R, F[T]])(implicit op: TColCompare[F]) {
-    def =:=(thatCol: LTColW[L, R, T]): Expr[L, R]    = expr[L, R]((l, r) => op.equals(thisCol(r), thatCol.wrapped(l)))(thisCol.column === thatCol.wrapped.column)
-    def =:=(thatCol: RTColW[L, R, T]): Expr[L, R]    = expr[L, R]((_, r) => op.equals(thisCol(r), thatCol.wrapped(r)))(thisCol.column === thatCol.wrapped.column)
+    def =:=(thatCol: LTCol[L, R, T]): Expr[L, R]    = expr[L, R]((l, r) => op.equals(thisCol(r), thatCol(l)))(thisCol.column === thatCol.column)
+    def =:=(thatCol: RTCol[L, R, T]): Expr[L, R]    = expr[L, R]((_, r) => op.equals(thisCol(r), thatCol(r)))(thisCol.column === thatCol.column)
     def =:=(thatCol: LTColOptW[L, R, T]): Expr[L, R] = expr[L, R]((l, r) => op.equals(thisCol(r), thatCol.wrapped(l)))(thisCol.column === thatCol.wrapped.column)
     def =:=(thatCol: RTColOptW[L, R, T]): Expr[L, R] = expr[L, R]((_, r) => op.equals(thisCol(r), thatCol.wrapped(r)))(thisCol.column === thatCol.wrapped.column)
     def =:=(const: T): Expr[L, R]                    = expr[L, R]((_, r) => op.equals(thisCol(r), const))(thisCol.column === lit(const))

@@ -10,6 +10,7 @@ import scala.reflect.runtime.universe.TypeTag
 
 object ComputationEngineTest {
   case class Entity(uuid: Int, value: String)
+  case class EntityWithOpt(optUuid: Option[Int])
 }
 
 abstract class ComputationEngineTest[F[_]: ComputationEngine] extends AnyFunSuite with Matchers {
@@ -62,6 +63,26 @@ abstract class ComputationEngineTest[F[_]: ComputationEngine] extends AnyFunSuit
         case (_ wiz maybeLeft, right) => maybeLeft(_.uuid) =:= right(_.uuid)
       }
       .collect() should contain only ((l1, None), (l2, Some(r1)))
+  }
+
+  test("extracts option value from option column") {
+    val l1 = (Entity(1, "e1"), None: Option[EntityWithOpt])
+    val l2 = (Entity(2, "e2"), Some(EntityWithOpt(Some(2))))
+
+    val r1 = Entity(2, "2")
+    val r2 = Entity(23, "23")
+
+    val left  = entities(l1, l2)
+    val right = entities(r1, r2)
+
+    left
+      .leftJoin(right) {
+        case (_ wiz optB, c) => optB(_.optUuid).flatten =:= c(_.uuid)
+      }
+      .collect() should contain only (
+      (l1, None),
+      (l2, Some(r1))
+    )
   }
 
   test("can map") {
