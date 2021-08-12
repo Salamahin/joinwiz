@@ -1,8 +1,6 @@
 name := "joinwiz"
-
-lazy val scala212 = "2.12.14"
-lazy val scala211 = "2.11.12"
-lazy val supportedScalaVersions = List(scala212, scala211)
+organization in ThisBuild := "io.github.salamahin"
+scalaVersion in ThisBuild := "2.11.12"
 
 lazy val commonSettings = Seq(
   scalacOptions ++= Seq(
@@ -18,38 +16,44 @@ lazy val commonSettings = Seq(
   )
 )
 
-val sparkBinaries = Def.setting {
-  val sparkV = Map(
-    "2.11" -> "2.3.1",
-    "2.12" -> "2.4.8"
-  )
-
-  "org.apache.spark"   %% "spark-core" % sparkV(scalaBinaryVersion.value) ::
-    "org.apache.spark" %% "spark-sql"  % sparkV(scalaBinaryVersion.value) ::
-    Nil
-}
-
-val scalaTest = Def.setting { "org.scalatest" %% "scalatest" % "3.1.0" % Test }
-
 lazy val joinwiz_macro = project
-  .settings(crossScalaVersions := supportedScalaVersions)
   .settings(commonSettings: _*)
-  .settings(libraryDependencies ++= "org.scala-lang" % "scala-reflect" % scalaVersion.value :: sparkBinaries.value)
+  .settings(
+    libraryDependencies ++= Seq(
+      "org.scala-lang" % "scala-reflect" % scalaVersion.value,
+      dependencies.sparkCore,
+      dependencies.sparkSql
+    )
+  )
 
 lazy val joinwiz_core = project
   .dependsOn(joinwiz_macro)
-  .settings(crossScalaVersions := supportedScalaVersions)
   .settings(commonSettings: _*)
-  .settings(libraryDependencies ++= scalaTest.value :: sparkBinaries.value)
+  .settings(
+    libraryDependencies ++= Seq(dependencies.sparkCore, dependencies.sparkSql, dependencies.scalatest)
+  )
 
 lazy val joinwiz_testkit = project
   .dependsOn(joinwiz_core % "compile->compile;test->test")
-  .settings(crossScalaVersions := supportedScalaVersions)
   .settings(commonSettings: _*)
-  .settings(libraryDependencies ++= scalaTest.value :: sparkBinaries.value)
+  .settings(
+    libraryDependencies ++= Seq(
+      dependencies.sparkCore,
+      dependencies.sparkSql,
+      dependencies.scalatest
+    )
+  )
+
+lazy val dependencies = new {
+  val sparkV = "2.3.0"
+
+  val sparkCore = "org.apache.spark" %% "spark-core" % sparkV
+  val sparkSql  = "org.apache.spark" %% "spark-sql"  % sparkV
+  val scalatest = "org.scalatest"    %% "scalatest"  % "3.1.0" % Test
+}
 
 import sbtrelease.ReleasePlugin.autoImport.ReleaseTransformations._
-ThisBuild / organization := "io.github.salamahin"
+
 ThisBuild / publishMavenStyle := true
 ThisBuild / publishTo := sonatypePublishToBundle.value
 ThisBuild / licenses := Seq("Apache 2" -> new URL("http://www.apache.org/licenses/LICENSE-2.0.txt"))
@@ -84,3 +88,5 @@ releaseProcess := Seq[ReleaseStep](
   commitNextVersion,
   pushChanges
 )
+
+addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.11.2" cross CrossVersion.full)
