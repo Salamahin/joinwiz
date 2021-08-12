@@ -1,6 +1,6 @@
 # joinwiz
 
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.github.salamahin/joinwiz_2.11/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.github.salamahin/joinwiz_2.11) [![Build Status](https://travis-ci.com/Salamahin/joinwiz.svg?branch=master)](https://travis-ci.com/Salamahin/joinwiz)
+[![Build Status](https://travis-ci.com/Salamahin/joinwiz.svg?branch=master)](https://travis-ci.com/Salamahin/joinwiz)
 
 Tiny library improves Spark's dataset join API and improves unit-testing experience of (some) Spark transformations
 
@@ -21,7 +21,6 @@ such specific behaviour still can be isolated easily.
 ## Try it
 ```scala
 libraryDependencies += "io.github.salamahin" %% "joinwiz_core" % joinwiz_version
-libraryDependencies += "io.github.salamahin" %% "joinwiz_testkit" % joinwiz_version //for testkit
 ```
 
 
