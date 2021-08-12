@@ -6,7 +6,7 @@ import org.apache.spark.sql.expressions.{Window, WindowSpec}
 import scala.annotation.tailrec
 import scala.language.experimental.macros
 import scala.language.higherKinds
-import scala.reflect.macros.blackbox
+import scala.reflect.macros.whitebox
 
 trait Expr[L, R] {
   def apply(): Column
@@ -102,7 +102,7 @@ object TWindow {
 
 private object MacroImpl {
 
-  def basicTWindow[O: c.WeakTypeTag, S: c.WeakTypeTag](c: blackbox.Context)(expr: c.Expr[O => S]): c.Expr[TWindow[O, S]] = {
+  def basicTWindow[O: c.WeakTypeTag, S: c.WeakTypeTag](c: whitebox.Context)(expr: c.Expr[O => S]): c.Expr[TWindow[O, S]] = {
     import c.universe._
 
     val origType  = c.weakTypeOf[O]
@@ -122,7 +122,7 @@ private object MacroImpl {
     )
   }
 
-  def partitionWindowBy[O: c.WeakTypeTag, E: c.WeakTypeTag, S: c.WeakTypeTag](c: blackbox.Context)(expr: c.Expr[O => S]): c.Expr[TWindow[O, (E, S)]] = {
+  def partitionWindowBy[O: c.WeakTypeTag, E: c.WeakTypeTag, S: c.WeakTypeTag](c: whitebox.Context)(expr: c.Expr[O => S]): c.Expr[TWindow[O, (E, S)]] = {
     import c.universe._
 
     val origType  = c.weakTypeOf[O]
@@ -145,7 +145,7 @@ private object MacroImpl {
     )
   }
 
-  def orderWindowByAsc[O: c.WeakTypeTag, E: c.WeakTypeTag, S: c.WeakTypeTag](c: blackbox.Context)(expr: c.Expr[O => S]): c.Expr[TWindow[O, E]] = {
+  def orderWindowByAsc[O: c.WeakTypeTag, E: c.WeakTypeTag, S: c.WeakTypeTag](c: whitebox.Context)(expr: c.Expr[O => S]): c.Expr[TWindow[O, E]] = {
     import c.universe._
 
     val origType  = c.weakTypeOf[O]
@@ -168,7 +168,7 @@ private object MacroImpl {
     )
   }
 
-  def orderWindowByDesc[O: c.WeakTypeTag, E: c.WeakTypeTag, S: c.WeakTypeTag](c: blackbox.Context)(expr: c.Expr[O => S]): c.Expr[TWindow[O, E]] = {
+  def orderWindowByDesc[O: c.WeakTypeTag, E: c.WeakTypeTag, S: c.WeakTypeTag](c: whitebox.Context)(expr: c.Expr[O => S]): c.Expr[TWindow[O, E]] = {
     import c.universe._
 
     val origType  = c.weakTypeOf[O]
@@ -191,7 +191,7 @@ private object MacroImpl {
     )
   }
 
-  def leftColumn[LO: c.WeakTypeTag, RO: c.WeakTypeTag, E: c.WeakTypeTag, T: c.WeakTypeTag](c: blackbox.Context)(expr: c.Expr[E => T]): c.Expr[LTCol[LO, RO, T]] = {
+  def leftColumn[LO: c.WeakTypeTag, RO: c.WeakTypeTag, E: c.WeakTypeTag, T: c.WeakTypeTag](c: whitebox.Context)(expr: c.Expr[E => T]): c.Expr[LTCol[LO, RO, T]] = {
     import c.universe._
 
     val leftType  = c.weakTypeOf[LO]
@@ -208,7 +208,7 @@ private object MacroImpl {
     )
   }
 
-  def leftOptColumn[LO: c.WeakTypeTag, RO: c.WeakTypeTag, E: c.WeakTypeTag, T: c.WeakTypeTag](c: blackbox.Context)(expr: c.Expr[E => T]): c.Expr[LTCol[LO, RO, Option[T]]] = {
+  def leftOptColumn[LO: c.WeakTypeTag, RO: c.WeakTypeTag, E: c.WeakTypeTag, T: c.WeakTypeTag](c: whitebox.Context)(expr: c.Expr[E => T]): c.Expr[LTCol[LO, RO, Option[T]]] = {
     import c.universe._
 
     val leftType  = c.weakTypeOf[LO]
@@ -225,7 +225,7 @@ private object MacroImpl {
     )
   }
 
-  def rightColumn[LO: c.WeakTypeTag, RO: c.WeakTypeTag, E: c.WeakTypeTag, T: c.WeakTypeTag](c: blackbox.Context)(expr: c.Expr[E => T]): c.Expr[RTCol[LO, RO, T]] = {
+  def rightColumn[LO: c.WeakTypeTag, RO: c.WeakTypeTag, E: c.WeakTypeTag, T: c.WeakTypeTag](c: whitebox.Context)(expr: c.Expr[E => T]): c.Expr[RTCol[LO, RO, T]] = {
     import c.universe._
 
     val leftType  = c.weakTypeOf[LO]
@@ -242,7 +242,7 @@ private object MacroImpl {
     )
   }
 
-  def rightOptColumn[LO: c.WeakTypeTag, RO: c.WeakTypeTag, E: c.WeakTypeTag, T: c.WeakTypeTag](c: blackbox.Context)(expr: c.Expr[E => T]): c.Expr[RTCol[LO, RO, Option[T]]] = {
+  def rightOptColumn[LO: c.WeakTypeTag, RO: c.WeakTypeTag, E: c.WeakTypeTag, T: c.WeakTypeTag](c: whitebox.Context)(expr: c.Expr[E => T]): c.Expr[RTCol[LO, RO, Option[T]]] = {
     import c.universe._
 
     val leftType  = c.weakTypeOf[LO]
@@ -259,7 +259,7 @@ private object MacroImpl {
     )
   }
 
-  private def extractArgName[E: c.WeakTypeTag, T: c.WeakTypeTag](c: blackbox.Context)(func: c.Expr[E => T]): String = {
+  private def extractArgName[E: c.WeakTypeTag, T: c.WeakTypeTag](c: whitebox.Context)(func: c.Expr[E => T]): String = {
     import c.universe._
 
     @tailrec

@@ -1,12 +1,14 @@
 package joinwiz
+
 import joinwiz.api.{Collect, Distinct, Filter, FlatMap, GroupByKey, Join, KeyValueGroupped, Map, UnionByName, WithWindow}
 import joinwiz.syntax.{JOIN_CONDITION, WINDOW_EXPRESSION}
 import joinwiz.window.TWindowSpec
 
-import scala.reflect.runtime.universe
 import scala.reflect.runtime.universe.TypeTag
+import scala.reflect.runtime.universe
 
 package object testkit {
+
   implicit val fakeComputationEngine: ComputationEngine[Seq] = new ComputationEngine[Seq] {
     override def join: Join[Seq] = new Join[Seq] {
       override def inner[T, U](ft: Seq[T], fu: Seq[U])(expr: JOIN_CONDITION[T, U]): Seq[(T, U)] = {
