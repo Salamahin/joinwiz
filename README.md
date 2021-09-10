@@ -103,7 +103,7 @@ def addRowNumber[F[_]: ComputationEngine](as: F[A]): F[(A, Int)] = {
 
 ## Behind joins
 `ComputationEngine` provides syntax for generic operations like:
-  * inner/left outer joins
+  * inner/left outer/left anti joins
   * map
   * flatMap
   * distinct

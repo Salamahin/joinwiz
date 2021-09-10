@@ -35,6 +35,18 @@ package object spark {
             case (x, y) => (x, Option(y))
           }
       }
+
+      override def left_anti[L: TypeTag, R](fl: Dataset[L], fr: Dataset[R])(expr: JOIN_CONDITION[L, R]): Dataset[L] = {
+        implicit val enc: Encoder[L] = ExpressionEncoder[L]()
+
+        fl.as(joinwiz.Left.alias)
+          .join(
+            fr.as(joinwiz.Right.alias),
+            expr(ApplyLTCol[L, R], ApplyRTCol[L, R])(),
+            "left_anti"
+          )
+          .as[L]
+      }
     }
 
     override def map: Map[Dataset] = new Map[Dataset] {

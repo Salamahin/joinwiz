@@ -18,6 +18,10 @@ package object testkit {
       override def left[T: TypeTag, U: TypeTag](ft: Seq[T], fu: Seq[U])(expr: JOIN_CONDITION[T, U]): Seq[(T, Option[U])] = {
         new SeqJoinImpl[T, U](expr(ApplyLTCol[T, U], ApplyRTCol[T, U]), ft, fu).leftJoin()
       }
+
+      override def left_anti[T: TypeTag, U](ft: Seq[T], fu: Seq[U])(expr: JOIN_CONDITION[T, U]): Seq[T] = {
+        new SeqJoinImpl[T, U](expr(ApplyLTCol[T, U], ApplyRTCol[T, U]), ft, fu).leftAntiJoin()
+      }
     }
 
     override def map: Map[Seq] = new Map[Seq] {
