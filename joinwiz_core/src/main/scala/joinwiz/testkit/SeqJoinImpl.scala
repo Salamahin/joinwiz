@@ -23,7 +23,7 @@ class SeqJoinImpl[L, R](op: Expr[L, R], left: Seq[L], right: Seq[R]) {
     } yield (a, b)
 
   def leftAntiJoin(): Seq[L] = {
-    leftJoin().collect { case e if e._2.isEmpty => e._1 }
+    leftJoin().collect { case (left, None) => left }
   }
 
 }
