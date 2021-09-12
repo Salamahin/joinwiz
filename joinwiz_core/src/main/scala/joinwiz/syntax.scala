@@ -30,6 +30,9 @@ object syntax
     def leftJoin[U: TypeTag](fu: F[U])(expr: JOIN_CONDITION[T, U]): F[(T, Option[U])] =
       ce.join.left[T, U](ft, fu)(expr)
 
+    def leftAntiJoin[U: TypeTag](fu: F[U])(expr: JOIN_CONDITION[T, U]): F[T] =
+      ce.join.left_anti[T, U](ft, fu)(expr)
+
     def map[U: TypeTag](func: T => U): F[U] =
       ce.map(ft)(func)
 

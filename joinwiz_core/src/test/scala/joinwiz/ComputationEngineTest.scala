@@ -10,6 +10,7 @@ import scala.reflect.runtime.universe.TypeTag
 
 object ComputationEngineTest {
   case class Entity(uuid: Int, value: String)
+  case class OtherEntity(uuid: Int, value: String)
   case class EntityWithOpt(optUuid: Option[Int])
 }
 
@@ -83,6 +84,22 @@ abstract class ComputationEngineTest[F[_]: ComputationEngine] extends AnyFunSuit
       (l1, None),
       (l2, Some(r1))
     )
+  }
+
+  test("can left anti join") {
+    val l1 = Entity(1, "only-in-left")
+    val l2 = Entity(2, "only-in-left")
+    val l3 = Entity(3, "in-left-and-in-right")
+
+    val r1 = OtherEntity(3, "in-left-and-in-right")
+    val r2 = OtherEntity(4, "only-in-right")
+
+    val left  = entities(l1, l2, l3)
+    val right = entities(r1, r2)
+
+    left
+      .leftAntiJoin(right)((l, r) => l(_.uuid) =:= r(_.uuid))
+      .collect() should contain only (l1, l2)
   }
 
   test("can map") {

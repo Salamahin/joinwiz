@@ -21,4 +21,9 @@ class SeqJoinImpl[L, R](op: Expr[L, R], left: Seq[L], right: Seq[R]) {
       b <- right
       if op(a, b)
     } yield (a, b)
+
+  def leftAntiJoin(): Seq[L] = {
+    leftJoin().collect { case (left, None) => left }
+  }
+
 }
