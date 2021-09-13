@@ -3,20 +3,24 @@ name: Scala CI
 on:
   push:
     branches: [ master, feature/github_action ]
-  pull_request:
-    branches: [ master, feature/github_action ]
+# temporary disable
+#  pull_request:
+#    branches: [ master, feature/github_action ]
+#    paths: ['src/**', 'test/**']
+  release:
+    types: [published, created, edited]
 
 jobs:
-  build:
-
-    runs-on: ubuntu-latest
-
+  tests:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ ubuntu-latest, windows-latest ]
     steps:
     - uses: actions/checkout@v2
-    - name: Set up JDK 11
+    - name: Set Java
       uses: actions/setup-java@v2
       with:
-        java-version: '11'
-        distribution: 'adopt'
+        java-version: '8'
     - name: Run tests
       run: sbt test
