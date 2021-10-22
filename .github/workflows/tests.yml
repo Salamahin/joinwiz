@@ -2,7 +2,7 @@ name: Scala tests
 
 on:
   push:
-    branches: [ master, main ]
+    branches: [ master, main, feature/github_action ]
   pull_request:
     branches: [ master, main ]
     paths: ['src/**', 'test/**']
