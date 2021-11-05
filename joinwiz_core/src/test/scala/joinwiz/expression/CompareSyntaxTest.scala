@@ -52,8 +52,8 @@ class CompareSyntaxTest extends AnyFunSuite with Matchers {
       case (left, right) => left(_.pk) >= right(_.pk)
     }
 
-    evaluated(Left(pk = 1), Right(pk = 1)) should be(true)
-    evaluated(Left(pk = 1), Right(pk = 0)) should be(true)
+    evaluated(Left(pk = 1), Right(pk  = 1)) should be(true)
+    evaluated(Left(pk = 1), Right(pk  = 0)) should be(true)
     evaluated(Left(pk = -1), Right(pk = 0)) should be(false)
 
     evaluated().expr.toString() should be("('LEFT.pk >= 'RIGHT.pk)")
@@ -101,8 +101,8 @@ class CompareSyntaxTest extends AnyFunSuite with Matchers {
       case (left, right) => left(_.pk) >= right(_.opt)
     }
 
-    evaluated(Left(pk = 1), Right(opt = Some(1))) should be(true)
-    evaluated(Left(pk = 1), Right(opt = Some(0))) should be(true)
+    evaluated(Left(pk = 1), Right(opt  = Some(1))) should be(true)
+    evaluated(Left(pk = 1), Right(opt  = Some(0))) should be(true)
     evaluated(Left(pk = -1), Right(opt = Some(0))) should be(false)
     evaluated(Left(pk = -1), Right(opt = None)) should be(false)
 
@@ -162,7 +162,7 @@ class CompareSyntaxTest extends AnyFunSuite with Matchers {
 
     evaluated(Left(opt = Some(1)), Right(pk = 1)) should be(false)
     evaluated(Left(opt = Some(0)), Right(pk = 1)) should be(true)
-    evaluated(Left(opt = None), Right(pk = 1)) should be(false)
+    evaluated(Left(opt = None), Right(pk    = 1)) should be(false)
 
     evaluated().expr.toString() should be("('LEFT.opt < 'RIGHT.pk)")
   }
@@ -175,7 +175,7 @@ class CompareSyntaxTest extends AnyFunSuite with Matchers {
     evaluated(Left(opt = Some(1)), Right(pk = 1)) should be(true)
     evaluated(Left(opt = Some(0)), Right(pk = 1)) should be(true)
     evaluated(Left(opt = Some(0)), Right(pk = -1)) should be(false)
-    evaluated(Left(opt = None), Right(pk = -1)) should be(false)
+    evaluated(Left(opt = None), Right(pk    = -1)) should be(false)
 
     evaluated().expr.toString() should be("('LEFT.opt <= 'RIGHT.pk)")
   }
@@ -187,7 +187,7 @@ class CompareSyntaxTest extends AnyFunSuite with Matchers {
 
     evaluated(Left(opt = Some(1)), Right(pk = 1)) should be(false)
     evaluated(Left(opt = Some(1)), Right(pk = 0)) should be(true)
-    evaluated(Left(opt = None), Right(pk = 0)) should be(false)
+    evaluated(Left(opt = None), Right(pk    = 0)) should be(false)
 
     evaluated().expr.toString() should be("('LEFT.opt > 'RIGHT.pk)")
   }
@@ -197,10 +197,10 @@ class CompareSyntaxTest extends AnyFunSuite with Matchers {
       case (left, right) => left(_.opt) >= right(_.pk)
     }
 
-    evaluated(Left(opt = Some(1)), Right(pk = 1)) should be(true)
-    evaluated(Left(opt = Some(1)), Right(pk = 0)) should be(true)
+    evaluated(Left(opt = Some(1)), Right(pk  = 1)) should be(true)
+    evaluated(Left(opt = Some(1)), Right(pk  = 0)) should be(true)
     evaluated(Left(opt = Some(-1)), Right(pk = 0)) should be(false)
-    evaluated(Left(opt = None), Right(pk = 0)) should be(false)
+    evaluated(Left(opt = None), Right(pk     = 0)) should be(false)
 
     evaluated().expr.toString() should be("('LEFT.opt >= 'RIGHT.pk)")
   }
@@ -213,7 +213,7 @@ class CompareSyntaxTest extends AnyFunSuite with Matchers {
     evaluated(Left(opt = Some(1)), Right(opt = Some(1))) should be(false)
     evaluated(Left(opt = Some(0)), Right(opt = Some(1))) should be(true)
     evaluated(Left(opt = Some(0)), Right(opt = None)) should be(false)
-    evaluated(Left(opt = None), Right(opt = None)) should be(false)
+    evaluated(Left(opt = None), Right(opt    = None)) should be(false)
 
     evaluated().expr.toString() should be("('LEFT.opt < 'RIGHT.opt)")
   }
@@ -227,7 +227,7 @@ class CompareSyntaxTest extends AnyFunSuite with Matchers {
     evaluated(Left(opt = Some(0)), Right(opt = Some(1))) should be(true)
     evaluated(Left(opt = Some(0)), Right(opt = Some(-1))) should be(false)
     evaluated(Left(opt = Some(0)), Right(opt = None)) should be(false)
-    evaluated(Left(opt = None), Right(opt = None)) should be(false)
+    evaluated(Left(opt = None), Right(opt    = None)) should be(false)
 
     evaluated().expr.toString() should be("('LEFT.opt <= 'RIGHT.opt)")
   }
@@ -240,7 +240,7 @@ class CompareSyntaxTest extends AnyFunSuite with Matchers {
     evaluated(Left(opt = Some(1)), Right(opt = Some(1))) should be(false)
     evaluated(Left(opt = Some(1)), Right(opt = Some(0))) should be(true)
     evaluated(Left(opt = Some(1)), Right(opt = None)) should be(false)
-    evaluated(Left(opt = None), Right(opt = None)) should be(false)
+    evaluated(Left(opt = None), Right(opt    = None)) should be(false)
 
     evaluated().expr.toString() should be("('LEFT.opt > 'RIGHT.opt)")
   }
@@ -250,11 +250,11 @@ class CompareSyntaxTest extends AnyFunSuite with Matchers {
       case (left, right) => left(_.opt) >= right(_.opt)
     }
 
-    evaluated(Left(opt = Some(1)), Right(opt = Some(1))) should be(true)
-    evaluated(Left(opt = Some(1)), Right(opt = Some(0))) should be(true)
+    evaluated(Left(opt = Some(1)), Right(opt  = Some(1))) should be(true)
+    evaluated(Left(opt = Some(1)), Right(opt  = Some(0))) should be(true)
     evaluated(Left(opt = Some(-1)), Right(opt = Some(0))) should be(false)
     evaluated(Left(opt = Some(-1)), Right(opt = None)) should be(false)
-    evaluated(Left(opt = None), Right(opt = None)) should be(false)
+    evaluated(Left(opt = None), Right(opt     = None)) should be(false)
 
     evaluated().expr.toString() should be("('LEFT.opt >= 'RIGHT.opt)")
   }
@@ -363,7 +363,7 @@ class CompareSyntaxTest extends AnyFunSuite with Matchers {
 
     evaluated(Left(opt = Some(1)), Right(pk = 1)) should be(false)
     evaluated(Left(opt = Some(1)), Right(pk = 0)) should be(true)
-    evaluated(Left(opt = None), Right(pk = 1)) should be(false)
+    evaluated(Left(opt = None), Right(pk    = 1)) should be(false)
 
     evaluated().expr.toString() should be("('RIGHT.pk < 'LEFT.opt)")
   }
@@ -373,10 +373,10 @@ class CompareSyntaxTest extends AnyFunSuite with Matchers {
       case (left, right) => right(_.pk) <= left(_.opt)
     }
 
-    evaluated(Left(opt = Some(1)), Right(pk = 1)) should be(true)
-    evaluated(Left(opt = Some(1)), Right(pk = 0)) should be(true)
+    evaluated(Left(opt = Some(1)), Right(pk  = 1)) should be(true)
+    evaluated(Left(opt = Some(1)), Right(pk  = 0)) should be(true)
     evaluated(Left(opt = Some(-1)), Right(pk = 0)) should be(false)
-    evaluated(Left(opt = None), Right(pk = 0)) should be(false)
+    evaluated(Left(opt = None), Right(pk     = 0)) should be(false)
 
     evaluated().expr.toString() should be("('RIGHT.pk <= 'LEFT.opt)")
   }
@@ -388,7 +388,7 @@ class CompareSyntaxTest extends AnyFunSuite with Matchers {
 
     evaluated(Left(opt = Some(1)), Right(pk = 1)) should be(false)
     evaluated(Left(opt = Some(0)), Right(pk = 1)) should be(true)
-    evaluated(Left(opt = None), Right(pk = 1)) should be(false)
+    evaluated(Left(opt = None), Right(pk    = 1)) should be(false)
 
     evaluated().expr.toString() should be("('RIGHT.pk > 'LEFT.opt)")
   }
@@ -401,7 +401,7 @@ class CompareSyntaxTest extends AnyFunSuite with Matchers {
     evaluated(Left(opt = Some(1)), Right(pk = 1)) should be(true)
     evaluated(Left(opt = Some(0)), Right(pk = 1)) should be(true)
     evaluated(Left(opt = Some(0)), Right(pk = -1)) should be(false)
-    evaluated(Left(opt = None), Right(pk = -1)) should be(false)
+    evaluated(Left(opt = None), Right(pk    = -1)) should be(false)
 
     evaluated().expr.toString() should be("('RIGHT.pk >= 'LEFT.opt)")
   }
@@ -469,8 +469,8 @@ class CompareSyntaxTest extends AnyFunSuite with Matchers {
       case (left, right) => right(_.opt) <= left(_.pk)
     }
 
-    evaluated(Left(pk = 1), Right(opt = Some(1))) should be(true)
-    evaluated(Left(pk = 1), Right(opt = Some(0))) should be(true)
+    evaluated(Left(pk = 1), Right(opt  = Some(1))) should be(true)
+    evaluated(Left(pk = 1), Right(opt  = Some(0))) should be(true)
     evaluated(Left(pk = -1), Right(opt = Some(0))) should be(false)
     evaluated(Left(pk = -1), Right(opt = None)) should be(false)
 
@@ -509,8 +509,8 @@ class CompareSyntaxTest extends AnyFunSuite with Matchers {
 
     evaluated(Left(opt = Some(1)), Right(opt = Some(1))) should be(false)
     evaluated(Left(opt = Some(1)), Right(opt = Some(0))) should be(true)
-    evaluated(Left(opt = None), Right(opt = Some(0))) should be(false)
-    evaluated(Left(opt = None), Right(opt = None)) should be(false)
+    evaluated(Left(opt = None), Right(opt    = Some(0))) should be(false)
+    evaluated(Left(opt = None), Right(opt    = None)) should be(false)
 
     evaluated().expr.toString() should be("('RIGHT.opt < 'LEFT.opt)")
   }
@@ -520,11 +520,11 @@ class CompareSyntaxTest extends AnyFunSuite with Matchers {
       case (left, right) => right(_.opt) <= left(_.opt)
     }
 
-    evaluated(Left(opt = Some(1)), Right(opt = Some(1))) should be(true)
-    evaluated(Left(opt = Some(1)), Right(opt = Some(0))) should be(true)
+    evaluated(Left(opt = Some(1)), Right(opt  = Some(1))) should be(true)
+    evaluated(Left(opt = Some(1)), Right(opt  = Some(0))) should be(true)
     evaluated(Left(opt = Some(-1)), Right(opt = Some(0))) should be(false)
-    evaluated(Left(opt = None), Right(opt = Some(0))) should be(false)
-    evaluated(Left(opt = None), Right(opt = None)) should be(false)
+    evaluated(Left(opt = None), Right(opt     = Some(0))) should be(false)
+    evaluated(Left(opt = None), Right(opt     = None)) should be(false)
 
     evaluated().expr.toString() should be("('RIGHT.opt <= 'LEFT.opt)")
   }
@@ -536,8 +536,8 @@ class CompareSyntaxTest extends AnyFunSuite with Matchers {
 
     evaluated(Left(opt = Some(1)), Right(opt = Some(1))) should be(false)
     evaluated(Left(opt = Some(0)), Right(opt = Some(1))) should be(true)
-    evaluated(Left(opt = None), Right(opt = Some(1))) should be(false)
-    evaluated(Left(opt = None), Right(opt = None)) should be(false)
+    evaluated(Left(opt = None), Right(opt    = Some(1))) should be(false)
+    evaluated(Left(opt = None), Right(opt    = None)) should be(false)
 
     evaluated().expr.toString() should be("('RIGHT.opt > 'LEFT.opt)")
   }
@@ -550,8 +550,8 @@ class CompareSyntaxTest extends AnyFunSuite with Matchers {
     evaluated(Left(opt = Some(1)), Right(opt = Some(1))) should be(true)
     evaluated(Left(opt = Some(0)), Right(opt = Some(1))) should be(true)
     evaluated(Left(opt = Some(0)), Right(opt = Some(-1))) should be(false)
-    evaluated(Left(opt = None), Right(opt = Some(-1))) should be(false)
-    evaluated(Left(opt = None), Right(opt = None)) should be(false)
+    evaluated(Left(opt = None), Right(opt    = Some(-1))) should be(false)
+    evaluated(Left(opt = None), Right(opt    = None)) should be(false)
 
     evaluated().expr.toString() should be("('RIGHT.opt >= 'LEFT.opt)")
   }

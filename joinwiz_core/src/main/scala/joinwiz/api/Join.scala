@@ -1,6 +1,7 @@
 package joinwiz.api
 
 import joinwiz.syntax.JOIN_CONDITION
+
 import scala.reflect.runtime.universe.TypeTag
 
 trait Join[F[_]] {

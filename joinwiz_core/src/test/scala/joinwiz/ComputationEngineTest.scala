@@ -15,6 +15,7 @@ object ComputationEngineTest {
 }
 
 abstract class ComputationEngineTest[F[_]: ComputationEngine] extends AnyFunSuite with Matchers {
+
   import joinwiz.syntax._
 
   def entities[T <: Product: TypeTag](a: T*): F[T]
@@ -66,7 +67,7 @@ abstract class ComputationEngineTest[F[_]: ComputationEngine] extends AnyFunSuit
       .collect() should contain only ((l1, None), (l2, Some(r1)))
   }
 
-  test("extracts option value from option column") {
+  test("extracts option value from left option column") {
     val l1 = (Entity(1, "e1"), None: Option[EntityWithOpt])
     val l2 = (Entity(2, "e2"), Some(EntityWithOpt(Some(2))))
 
@@ -78,12 +79,31 @@ abstract class ComputationEngineTest[F[_]: ComputationEngine] extends AnyFunSuit
 
     left
       .leftJoin(right) {
-        case (_ wiz optB, c) => optB(_.optUuid).flatten =:= c(_.uuid)
+        case (_ wiz optB, c) => optB(_.optUuid) =:= c(_.uuid)
       }
       .collect() should contain only (
       (l1, None),
       (l2, Some(r1))
     )
+  }
+
+  test("extracts option value from right option column") {
+    val l1 = (Entity(1, "e1"), None: Option[EntityWithOpt])
+    val l2 = (Entity(2, "e2"), Some(EntityWithOpt(Some(2))))
+
+    val r1 = Entity(2, "2")
+    val r2 = Entity(23, "23")
+
+    val left  = entities(l1, l2)
+    val right = entities(r1, r2)
+
+    val ab = left.leftJoin(right) {
+      case (_ wiz optB, c) => optB(_.optUuid) =:= c(_.uuid)
+    }
+
+    left.leftJoin(ab) {
+      case (a wiz optB, optC wiz optD) => optB(_.optUuid) =:= optAB(_.)
+    }
   }
 
   test("can left anti join") {
@@ -242,8 +262,11 @@ abstract class ComputationEngineTest[F[_]: ComputationEngine] extends AnyFunSuit
   }
 
 }
+
 import joinwiz.spark._
+
 class SparkComputationEngineTest extends ComputationEngineTest[Dataset] with Matchers with SparkSuite {
+
   import ss.implicits._
 
   override def entities[T <: Product: TypeTag](a: T*): Dataset[T] = a.toDS

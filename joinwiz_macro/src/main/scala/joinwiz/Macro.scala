@@ -38,10 +38,12 @@ trait ExtractTColSyntax {
 
   implicit class OptionLTColExtract[LO, RO, E](val applyLTCol: ApplyLTCol[LO, RO, Option[E]]) {
     def apply[T](expr: E => T): LTCol[LO, RO, Option[T]] = macro MacroImpl.leftOptColumn[LO, RO, E, T]
+    def apply[T](expr: E => Option[T]): LTCol[LO, RO, Option[T]] = macro MacroImpl.leftOptFlattenColumn[LO, RO, E, T]
   }
 
   implicit class OptionRTColExtract[LO, RO, E](val applyRTCol: ApplyRTCol[LO, RO, Option[E]]) {
     def apply[T](expr: E => T): RTCol[LO, RO, Option[T]] = macro MacroImpl.rightOptColumn[LO, RO, E, T]
+    def apply[T](expr: E => Option[T]): LTCol[LO, RO, Option[T]] = macro MacroImpl.rightOptFlattenColumn[LO, RO, E, T]
   }
 }
 
@@ -225,6 +227,23 @@ private object MacroImpl {
     )
   }
 
+  def leftOptFlattenColumn[LO: c.WeakTypeTag, RO: c.WeakTypeTag, E: c.WeakTypeTag, T: c.WeakTypeTag](c: whitebox.Context)(expr: c.Expr[E => Option[T]]): c.Expr[LTCol[LO, RO, Option[T]]] = {
+    import c.universe._
+
+    val leftType  = c.weakTypeOf[LO]
+    val rightType = c.weakTypeOf[RO]
+    val tType     = c.weakTypeOf[T]
+    val name      = extractArgName[E, Option[T]](c)(expr)
+
+    c.Expr(
+      q"""new joinwiz.LTCol[$leftType, $rightType, Option[$tType]] {
+            import org.apache.spark.sql.functions.col
+            override def apply(value: $leftType): Option[$tType] = ${c.prefix}.applyLTCol.orig(value).flatMap($expr)
+            override def column = col((${c.prefix}.applyLTCol.names :+ $name).mkString("."))
+          }"""
+    )
+  }
+
   def rightColumn[LO: c.WeakTypeTag, RO: c.WeakTypeTag, E: c.WeakTypeTag, T: c.WeakTypeTag](c: whitebox.Context)(expr: c.Expr[E => T]): c.Expr[RTCol[LO, RO, T]] = {
     import c.universe._
 
@@ -254,6 +273,23 @@ private object MacroImpl {
       q"""new joinwiz.RTCol[$leftType, $rightType,  Option[$tType]] {
             import org.apache.spark.sql.functions.col
             override def apply(value: $leftType): Option[$tType] = ${c.prefix}.applyRTCol.orig(value).map($expr)
+            override def column = col((${c.prefix}.applyRTCol.names :+ $name).mkString("."))
+          }"""
+    )
+  }
+
+  def rightOptFlattenColumn[LO: c.WeakTypeTag, RO: c.WeakTypeTag, E: c.WeakTypeTag, T: c.WeakTypeTag](c: whitebox.Context)(expr: c.Expr[E => Option[T]]): c.Expr[RTCol[LO, RO, Option[T]]] = {
+    import c.universe._
+
+    val leftType  = c.weakTypeOf[LO]
+    val rightType = c.weakTypeOf[RO]
+    val tType     = c.weakTypeOf[T]
+    val name      = extractArgName[E, Option[T]](c)(expr)
+
+    c.Expr(
+      q"""new joinwiz.RTCol[$leftType, $rightType,  Option[$tType]] {
+            import org.apache.spark.sql.functions.col
+            override def apply(value: $leftType): Option[$tType] = ${c.prefix}.applyRTCol.orig(value).flatMap($expr)
             override def column = col((${c.prefix}.applyRTCol.names :+ $name).mkString("."))
           }"""
     )
