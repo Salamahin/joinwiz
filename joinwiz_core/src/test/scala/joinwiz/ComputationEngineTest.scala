@@ -67,43 +67,28 @@ abstract class ComputationEngineTest[F[_]: ComputationEngine] extends AnyFunSuit
       .collect() should contain only ((l1, None), (l2, Some(r1)))
   }
 
-  test("extracts option value from left option column") {
-    val l1 = (Entity(1, "e1"), None: Option[EntityWithOpt])
-    val l2 = (Entity(2, "e2"), Some(EntityWithOpt(Some(2))))
+  test("flattens optional value extracted from optional entity") {
+    val entity       = EntityWithOpt(Some(1))
+    val bothPresent  = (Some(entity), Some(entity))
+    val leftPresent  = (Some(entity), None)
+    val rightPresent = (None, Some(entity))
 
-    val r1 = Entity(2, "2")
-    val r2 = Entity(23, "23")
+    val ds = entities(
+      bothPresent,
+      leftPresent,
+      rightPresent
+    )
 
-    val left  = entities(l1, l2)
-    val right = entities(r1, r2)
-
-    left
-      .leftJoin(right) {
-        case (_ wiz optB, c) => optB(_.optUuid) =:= c(_.uuid)
+    ds
+      .innerJoin(ds) {
+        case (_ wiz l2, _ wiz r2) => l2(_.optUuid) =:= r2(_.optUuid)
       }
       .collect() should contain only (
-      (l1, None),
-      (l2, Some(r1))
+      (bothPresent, bothPresent),
+      (bothPresent, rightPresent),
+      (rightPresent, bothPresent),
+      (rightPresent, rightPresent)
     )
-  }
-
-  test("extracts option value from right option column") {
-    val l1 = (Entity(1, "e1"), None: Option[EntityWithOpt])
-    val l2 = (Entity(2, "e2"), Some(EntityWithOpt(Some(2))))
-
-    val r1 = Entity(2, "2")
-    val r2 = Entity(23, "23")
-
-    val left  = entities(l1, l2)
-    val right = entities(r1, r2)
-
-    val ab = left.leftJoin(right) {
-      case (_ wiz optB, c) => optB(_.optUuid) =:= c(_.uuid)
-    }
-
-    left.leftJoin(ab) {
-      case (a wiz optB, optC wiz optD) => optB(_.optUuid) =:= optAB(_.)
-    }
   }
 
   test("can left anti join") {

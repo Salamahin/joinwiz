@@ -43,7 +43,7 @@ trait ExtractTColSyntax {
 
   implicit class OptionRTColExtract[LO, RO, E](val applyRTCol: ApplyRTCol[LO, RO, Option[E]]) {
     def apply[T](expr: E => T): RTCol[LO, RO, Option[T]] = macro MacroImpl.rightOptColumn[LO, RO, E, T]
-    def apply[T](expr: E => Option[T]): LTCol[LO, RO, Option[T]] = macro MacroImpl.rightOptFlattenColumn[LO, RO, E, T]
+    def apply[T](expr: E => Option[T]): RTCol[LO, RO, Option[T]] = macro MacroImpl.rightOptFlattenColumn[LO, RO, E, T]
   }
 }
 
