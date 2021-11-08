@@ -2,9 +2,8 @@ package joinwiz
 
 import joinwiz.api.KeyValueGroupped
 import joinwiz.expression._
-import joinwiz.window.{CommonWindowFunctions, TWindowSpec, WindowExpressionSyntax, WindowFunction}
+import joinwiz.window.{CommonWindowFunctions, TWindowSpec, WindowExpressionSyntax}
 
-import scala.reflect.ClassTag
 import scala.reflect.runtime.universe.TypeTag
 
 object syntax
@@ -17,8 +16,7 @@ object syntax
     with UnapplySyntax
     with ExtractTColSyntax
     with CommonWindowFunctions
-    with WindowExpressionSyntax
-    with OptColFlattenSyntax {
+    with WindowExpressionSyntax {
 
   type JOIN_CONDITION[L, R]    = (ApplyLTCol[L, R, L], ApplyRTCol[L, R, R]) => Expr[L, R]
   type WINDOW_EXPRESSION[T, S] = ApplyTWindow[T] => TWindowSpec[T, S]

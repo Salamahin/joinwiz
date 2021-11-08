@@ -85,9 +85,9 @@ class EqualSyntaxTest extends AnyFunSuite with Matchers {
       case (left, right) => right(_.pk) =:= left(_.opt)
     }
 
-    evaluated(Left(opt = Some("matching")), Right(pk = "matching")) should be(true)
+    evaluated(Left(opt = Some("matching")), Right(pk     = "matching")) should be(true)
     evaluated(Left(opt = Some("non-matching")), Right(pk = "matching")) should be(false)
-    evaluated(Left(opt = None), Right(pk = "matching")) should be(false)
+    evaluated(Left(opt = None), Right(pk                 = "matching")) should be(false)
 
     evaluated().expr.toString() should be("('RIGHT.pk = 'LEFT.opt)")
   }
@@ -130,10 +130,10 @@ class EqualSyntaxTest extends AnyFunSuite with Matchers {
       case (left, right) => left(_.opt) =:= right(_.pk)
     }
 
-    evaluated(Left(opt = Some("matching")), Right(pk = "matching")) should be(true)
-    evaluated(Left(opt = Some("matching")), Right(pk = "non-matching")) should be(false)
+    evaluated(Left(opt = Some("matching")), Right(pk     = "matching")) should be(true)
+    evaluated(Left(opt = Some("matching")), Right(pk     = "non-matching")) should be(false)
     evaluated(Left(opt = Some("non-matching")), Right(pk = "matching")) should be(false)
-    evaluated(Left(opt = None), Right(pk = "matching")) should be(false)
+    evaluated(Left(opt = None), Right(pk                 = "matching")) should be(false)
 
     evaluated().expr.toString() should be("('LEFT.opt = 'RIGHT.pk)")
   }
@@ -146,7 +146,7 @@ class EqualSyntaxTest extends AnyFunSuite with Matchers {
     evaluated(Left(opt = Some("matching")), Right(opt = Some("matching"))) should be(true)
     evaluated(Left(opt = Some("matching")), Right(opt = Some("non-matching"))) should be(false)
     evaluated(Left(opt = Some("matching")), Right(opt = None)) should be(false)
-    evaluated(Left(opt = None), Right(opt = None)) should be(false)
+    evaluated(Left(opt = None), Right(opt             = None)) should be(false)
 
     evaluated().expr.toString() should be("('LEFT.opt = 'RIGHT.opt)")
   }
@@ -156,10 +156,10 @@ class EqualSyntaxTest extends AnyFunSuite with Matchers {
       case (left, _) => left(_.opt) =:= left(_.pk)
     }
 
-    evaluated(Left(opt = Some("matching"), pk = "matching"), Right()) should be(true)
-    evaluated(Left(opt = Some("matching"), pk = "non-matching"), Right()) should be(false)
+    evaluated(Left(opt = Some("matching"), pk     = "matching"), Right()) should be(true)
+    evaluated(Left(opt = Some("matching"), pk     = "non-matching"), Right()) should be(false)
     evaluated(Left(opt = Some("non-matching"), pk = "matching"), Right()) should be(false)
-    evaluated(Left(opt = None, pk = "matching"), Right()) should be(false)
+    evaluated(Left(opt = None, pk                 = "matching"), Right()) should be(false)
 
     evaluated().expr.toString() should be("('LEFT.opt = 'LEFT.pk)")
   }
@@ -192,10 +192,10 @@ class EqualSyntaxTest extends AnyFunSuite with Matchers {
       case (left, right) => right(_.pk) =:= left(_.opt)
     }
 
-    evaluated(Left(opt = Some("matching")), Right(pk = "matching")) should be(true)
-    evaluated(Left(opt = Some("matching")), Right(pk = "non-matching")) should be(false)
+    evaluated(Left(opt = Some("matching")), Right(pk     = "matching")) should be(true)
+    evaluated(Left(opt = Some("matching")), Right(pk     = "non-matching")) should be(false)
     evaluated(Left(opt = Some("non-matching")), Right(pk = "matching")) should be(false)
-    evaluated(Left(opt = None), Right(pk = "matching")) should be(false)
+    evaluated(Left(opt = None), Right(pk                 = "matching")) should be(false)
 
     evaluated().expr.toString() should be("('RIGHT.pk = 'LEFT.opt)")
   }
@@ -208,7 +208,7 @@ class EqualSyntaxTest extends AnyFunSuite with Matchers {
     evaluated(Left(opt = Some("matching")), Right(opt = Some("matching"))) should be(true)
     evaluated(Left(opt = Some("matching")), Right(opt = Some("non-matching"))) should be(false)
     evaluated(Left(opt = Some("matching")), Right(opt = None)) should be(false)
-    evaluated(Left(opt = None), Right(opt = None)) should be(false)
+    evaluated(Left(opt = None), Right(opt             = None)) should be(false)
 
     evaluated().expr.toString() should be("('RIGHT.opt = 'LEFT.opt)")
   }
@@ -218,10 +218,10 @@ class EqualSyntaxTest extends AnyFunSuite with Matchers {
       case (_, right) => right(_.opt) =:= right(_.pk)
     }
 
-    evaluated(Left(), Right(opt = Some("matching"), pk = "matching")) should be(true)
-    evaluated(Left(), Right(opt = Some("matching"), pk = "non-matching")) should be(false)
+    evaluated(Left(), Right(opt = Some("matching"), pk     = "matching")) should be(true)
+    evaluated(Left(), Right(opt = Some("matching"), pk     = "non-matching")) should be(false)
     evaluated(Left(), Right(opt = Some("non-matching"), pk = "matching")) should be(false)
-    evaluated(Left(), Right(opt = None, pk = "matching")) should be(false)
+    evaluated(Left(), Right(opt = None, pk                 = "matching")) should be(false)
 
     evaluated().expr.toString() should be("('RIGHT.opt = 'RIGHT.pk)")
   }
