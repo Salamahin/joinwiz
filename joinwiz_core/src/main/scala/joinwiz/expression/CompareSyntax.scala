@@ -1,71 +1,63 @@
 package joinwiz.expression
 
-import java.sql.{Date, Timestamp}
 import joinwiz.Expr.expr
 import joinwiz.{Expr, Id, LTCol, RTCol}
+
+import java.sql.{Date, Timestamp}
 
 trait LowLevelCompareSyntax {
   import org.apache.spark.sql.functions.lit
 
-  implicit val dateOrdering: Ordering[Date] = new Ordering[Date] {
-    override def compare(x: Date, y: Date): Int = implicitly[Ordering[Long]].compare(x.getTime, y.getTime)
-  }
-
-  implicit val timestampOrdering: Ordering[Timestamp] = new Ordering[Timestamp] {
-    override def compare(x: Timestamp, y: Timestamp): Int = implicitly[Ordering[Long]].compare(x.getTime, y.getTime)
-  }
-
-  implicit class ComparisonResultSyntax(compResult: Option[Int]) {
-    def containsEither(expected: Int, orExpected: Int): Boolean = compResult.contains(expected) || compResult.contains(orExpected)
-  }
+  implicit val dateOrdering: Ordering[Date]           = (x: Date, y: Date) => implicitly[Ordering[Long]].compare(x.getTime, y.getTime)
+  implicit val timestampOrdering: Ordering[Timestamp] = (x: Timestamp, y: Timestamp) => implicitly[Ordering[Long]].compare(x.getTime, y.getTime)
 
   abstract class BasicLTColCompareSyntax[F[_], L, R, T: Ordering](thisCol: LTCol[L, R, F[T]])(implicit op: TColCompare[F]) {
-    def <(thatCol: LTCol[L, R, T]): Expr[L, R]    = expr[L, R]((l, _) => op.compare(thisCol(l), thatCol(l))(-1))(thisCol.column < thatCol.column)
-    def <(thatCol: RTCol[L, R, T]): Expr[L, R]    = expr[L, R]((l, r) => op.compare(thisCol(l), thatCol(r))(-1))(thisCol.column < thatCol.column)
+    def <(thatCol: LTCol[L, R, T]): Expr[L, R]     = expr[L, R]((l, _) => op.compare(thisCol(l), thatCol(l))(-1))(thisCol.column < thatCol.column)
+    def <(thatCol: RTCol[L, R, T]): Expr[L, R]     = expr[L, R]((l, r) => op.compare(thisCol(l), thatCol(r))(-1))(thisCol.column < thatCol.column)
     def <(thatCol: LTColOptW[L, R, T]): Expr[L, R] = expr[L, R]((l, _) => op.compare(thisCol(l), thatCol.wrapped(l))(-1))(thisCol.column < thatCol.wrapped.column)
     def <(thatCol: RTColOptW[L, R, T]): Expr[L, R] = expr[L, R]((l, r) => op.compare(thisCol(l), thatCol.wrapped(r))(-1))(thisCol.column < thatCol.wrapped.column)
     def <(const: T): Expr[L, R]                    = expr[L, R]((l, _) => op.compare(thisCol(l), const)(-1))(thisCol.column < lit(const))
 
-    def <=(thatCol: LTCol[L, R, T]): Expr[L, R]    = expr[L, R]((l, _) => op.compare(thisCol(l), thatCol(l))(-1, 0))(thisCol.column <= thatCol.column)
-    def <=(thatCol: RTCol[L, R, T]): Expr[L, R]    = expr[L, R]((l, r) => op.compare(thisCol(l), thatCol(r))(-1, 0))(thisCol.column <= thatCol.column)
+    def <=(thatCol: LTCol[L, R, T]): Expr[L, R]     = expr[L, R]((l, _) => op.compare(thisCol(l), thatCol(l))(-1, 0))(thisCol.column <= thatCol.column)
+    def <=(thatCol: RTCol[L, R, T]): Expr[L, R]     = expr[L, R]((l, r) => op.compare(thisCol(l), thatCol(r))(-1, 0))(thisCol.column <= thatCol.column)
     def <=(thatCol: LTColOptW[L, R, T]): Expr[L, R] = expr[L, R]((l, _) => op.compare(thisCol(l), thatCol.wrapped(l))(-1, 0))(thisCol.column <= thatCol.wrapped.column)
     def <=(thatCol: RTColOptW[L, R, T]): Expr[L, R] = expr[L, R]((l, r) => op.compare(thisCol(l), thatCol.wrapped(r))(-1, 0))(thisCol.column <= thatCol.wrapped.column)
     def <=(const: T): Expr[L, R]                    = expr[L, R]((l, _) => op.compare(thisCol(l), const)(-1, 0))(thisCol.column <= lit(const))
 
-    def >(thatCol: LTCol[L, R, T]): Expr[L, R]    = expr[L, R]((l, _) => op.compare(thisCol(l), thatCol(l))(1))(thisCol.column > thatCol.column)
-    def >(thatCol: RTCol[L, R, T]): Expr[L, R]    = expr[L, R]((l, r) => op.compare(thisCol(l), thatCol(r))(1))(thisCol.column > thatCol.column)
+    def >(thatCol: LTCol[L, R, T]): Expr[L, R]     = expr[L, R]((l, _) => op.compare(thisCol(l), thatCol(l))(1))(thisCol.column > thatCol.column)
+    def >(thatCol: RTCol[L, R, T]): Expr[L, R]     = expr[L, R]((l, r) => op.compare(thisCol(l), thatCol(r))(1))(thisCol.column > thatCol.column)
     def >(thatCol: LTColOptW[L, R, T]): Expr[L, R] = expr[L, R]((l, _) => op.compare(thisCol(l), thatCol.wrapped(l))(1))(thisCol.column > thatCol.wrapped.column)
     def >(thatCol: RTColOptW[L, R, T]): Expr[L, R] = expr[L, R]((l, r) => op.compare(thisCol(l), thatCol.wrapped(r))(1))(thisCol.column > thatCol.wrapped.column)
     def >(const: T): Expr[L, R]                    = expr[L, R]((l, _) => op.compare(thisCol(l), const)(1))(thisCol.column > lit(const))
 
-    def >=(thatCol: LTCol[L, R, T]): Expr[L, R]    = expr[L, R]((l, _) => op.compare(thisCol(l), thatCol(l))(1, 0))(thisCol.column >= thatCol.column)
-    def >=(thatCol: RTCol[L, R, T]): Expr[L, R]    = expr[L, R]((l, r) => op.compare(thisCol(l), thatCol(r))(1, 0))(thisCol.column >= thatCol.column)
+    def >=(thatCol: LTCol[L, R, T]): Expr[L, R]     = expr[L, R]((l, _) => op.compare(thisCol(l), thatCol(l))(1, 0))(thisCol.column >= thatCol.column)
+    def >=(thatCol: RTCol[L, R, T]): Expr[L, R]     = expr[L, R]((l, r) => op.compare(thisCol(l), thatCol(r))(1, 0))(thisCol.column >= thatCol.column)
     def >=(thatCol: LTColOptW[L, R, T]): Expr[L, R] = expr[L, R]((l, _) => op.compare(thisCol(l), thatCol.wrapped(l))(1, 0))(thisCol.column >= thatCol.wrapped.column)
     def >=(thatCol: RTColOptW[L, R, T]): Expr[L, R] = expr[L, R]((l, r) => op.compare(thisCol(l), thatCol.wrapped(r))(1, 0))(thisCol.column >= thatCol.wrapped.column)
     def >=(const: T): Expr[L, R]                    = expr[L, R]((l, _) => op.compare(thisCol(l), const)(1, 0))(thisCol.column >= lit(const))
   }
 
   abstract class BasicRTColCompareSyntax[F[_], L, R, T: Ordering](thisCol: RTCol[L, R, F[T]])(implicit op: TColCompare[F]) {
-    def <(thatCol: LTCol[L, R, T]): Expr[L, R]    = expr[L, R]((l, r) => op.compare(thisCol(r), thatCol(l))(-1))(thisCol.column < thatCol.column)
-    def <(thatCol: RTCol[L, R, T]): Expr[L, R]    = expr[L, R]((_, r) => op.compare(thisCol(r), thatCol(r))(-1))(thisCol.column < thatCol.column)
+    def <(thatCol: LTCol[L, R, T]): Expr[L, R]     = expr[L, R]((l, r) => op.compare(thisCol(r), thatCol(l))(-1))(thisCol.column < thatCol.column)
+    def <(thatCol: RTCol[L, R, T]): Expr[L, R]     = expr[L, R]((_, r) => op.compare(thisCol(r), thatCol(r))(-1))(thisCol.column < thatCol.column)
     def <(thatCol: LTColOptW[L, R, T]): Expr[L, R] = expr[L, R]((l, r) => op.compare(thisCol(r), thatCol.wrapped(l))(-1))(thisCol.column < thatCol.wrapped.column)
     def <(thatCol: RTColOptW[L, R, T]): Expr[L, R] = expr[L, R]((_, r) => op.compare(thisCol(r), thatCol.wrapped(r))(-1))(thisCol.column < thatCol.wrapped.column)
     def <(const: T): Expr[L, R]                    = expr[L, R]((_, r) => op.compare(thisCol(r), const)(-1))(thisCol.column < lit(const))
 
-    def <=(thatCol: LTCol[L, R, T]): Expr[L, R]    = expr[L, R]((l, r) => op.compare(thisCol(r), thatCol(l))(-1, 0))(thisCol.column <= thatCol.column)
-    def <=(thatCol: RTCol[L, R, T]): Expr[L, R]    = expr[L, R]((_, r) => op.compare(thisCol(r), thatCol(r))(-1, 0))(thisCol.column <= thatCol.column)
+    def <=(thatCol: LTCol[L, R, T]): Expr[L, R]     = expr[L, R]((l, r) => op.compare(thisCol(r), thatCol(l))(-1, 0))(thisCol.column <= thatCol.column)
+    def <=(thatCol: RTCol[L, R, T]): Expr[L, R]     = expr[L, R]((_, r) => op.compare(thisCol(r), thatCol(r))(-1, 0))(thisCol.column <= thatCol.column)
     def <=(thatCol: LTColOptW[L, R, T]): Expr[L, R] = expr[L, R]((l, r) => op.compare(thisCol(r), thatCol.wrapped(l))(-1, 0))(thisCol.column <= thatCol.wrapped.column)
     def <=(thatCol: RTColOptW[L, R, T]): Expr[L, R] = expr[L, R]((_, r) => op.compare(thisCol(r), thatCol.wrapped(r))(-1, 0))(thisCol.column <= thatCol.wrapped.column)
     def <=(const: T): Expr[L, R]                    = expr[L, R]((_, r) => op.compare(thisCol(r), const)(-1, 0))(thisCol.column <= lit(const))
 
-    def >(thatCol: LTCol[L, R, T]): Expr[L, R]    = expr[L, R]((l, r) => op.compare(thisCol(r), thatCol(l))(1))(thisCol.column > thatCol.column)
-    def >(thatCol: RTCol[L, R, T]): Expr[L, R]    = expr[L, R]((_, r) => op.compare(thisCol(r), thatCol(r))(1))(thisCol.column > thatCol.column)
+    def >(thatCol: LTCol[L, R, T]): Expr[L, R]     = expr[L, R]((l, r) => op.compare(thisCol(r), thatCol(l))(1))(thisCol.column > thatCol.column)
+    def >(thatCol: RTCol[L, R, T]): Expr[L, R]     = expr[L, R]((_, r) => op.compare(thisCol(r), thatCol(r))(1))(thisCol.column > thatCol.column)
     def >(thatCol: LTColOptW[L, R, T]): Expr[L, R] = expr[L, R]((l, r) => op.compare(thisCol(r), thatCol.wrapped(l))(1))(thisCol.column > thatCol.wrapped.column)
     def >(thatCol: RTColOptW[L, R, T]): Expr[L, R] = expr[L, R]((_, r) => op.compare(thisCol(r), thatCol.wrapped(r))(1))(thisCol.column > thatCol.wrapped.column)
     def >(const: T): Expr[L, R]                    = expr[L, R]((_, r) => op.compare(thisCol(r), const)(1))(thisCol.column > lit(const))
 
-    def >=(thatCol: LTCol[L, R, T]): Expr[L, R]    = expr[L, R]((l, r) => op.compare(thisCol(r), thatCol(l))(1, 0))(thisCol.column >= thatCol.column)
-    def >=(thatCol: RTCol[L, R, T]): Expr[L, R]    = expr[L, R]((_, r) => op.compare(thisCol(r), thatCol(r))(1, 0))(thisCol.column >= thatCol.column)
+    def >=(thatCol: LTCol[L, R, T]): Expr[L, R]     = expr[L, R]((l, r) => op.compare(thisCol(r), thatCol(l))(1, 0))(thisCol.column >= thatCol.column)
+    def >=(thatCol: RTCol[L, R, T]): Expr[L, R]     = expr[L, R]((_, r) => op.compare(thisCol(r), thatCol(r))(1, 0))(thisCol.column >= thatCol.column)
     def >=(thatCol: LTColOptW[L, R, T]): Expr[L, R] = expr[L, R]((l, r) => op.compare(thisCol(r), thatCol.wrapped(l))(1, 0))(thisCol.column >= thatCol.wrapped.column)
     def >=(thatCol: RTColOptW[L, R, T]): Expr[L, R] = expr[L, R]((_, r) => op.compare(thisCol(r), thatCol.wrapped(r))(1, 0))(thisCol.column >= thatCol.wrapped.column)
     def >=(const: T): Expr[L, R]                    = expr[L, R]((_, r) => op.compare(thisCol(r), const)(1, 0))(thisCol.column >= lit(const))
