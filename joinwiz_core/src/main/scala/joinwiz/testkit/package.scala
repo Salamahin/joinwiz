@@ -4,8 +4,8 @@ import joinwiz.api.{Collect, Distinct, Filter, FlatMap, GroupByKey, Join, KeyVal
 import joinwiz.syntax.{JOIN_CONDITION, WINDOW_EXPRESSION}
 import joinwiz.window.TWindowSpec
 
-import scala.reflect.runtime.universe.TypeTag
 import scala.reflect.runtime.universe
+import scala.reflect.runtime.universe.TypeTag
 
 package object testkit {
 
@@ -72,9 +72,9 @@ package object testkit {
             val keys = ftGroupped.keySet ++ otherGroupped.keySet
 
             for {
-              key    <- keys.toList
-              left   = ftGroupped.getOrElse(key, Nil)
-              right  = otherGroupped.getOrElse(key, Nil)
+              key <- keys.toList
+              left  = ftGroupped.getOrElse(key, Nil)
+              right = otherGroupped.getOrElse(key, Nil)
               mapped <- f(key, left.iterator, right.iterator)
             } yield mapped
           }

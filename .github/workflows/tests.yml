@@ -2,12 +2,12 @@ name: Scala tests
 
 on:
   push:
-    branches: [ master, main]
+    branches: [ master, main ]
   pull_request:
     branches: [ master, main ]
-    paths: ['src/**', 'test/**']
+    paths: [ 'src/**', 'test/**' ]
   release:
-    types: [published, created, edited]
+    types: [ published, created, edited ]
 
 jobs:
   tests:
@@ -15,14 +15,14 @@ jobs:
     strategy:
       matrix:
         os:
-        - ubuntu-20.04
+          - ubuntu-20.04
         java:
-        - adopt@1.8
+          - adopt@1.8
     steps:
-    - uses: actions/checkout@v2
-    - name: Set Scala
-      uses: olafurpg/setup-scala@v13
-      with:
-        java-version: ${{ matrix.java }}
-    - name: Run tests
-      run: sbt test
+      - uses: actions/checkout@v2
+      - name: Set Scala
+        uses: olafurpg/setup-scala@v13
+        with:
+          java-version: ${{ matrix.java }}
+      - name: Run tests
+        run: sbt test

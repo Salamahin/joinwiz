@@ -15,6 +15,7 @@ object ComputationEngineTest {
 }
 
 abstract class ComputationEngineTest[F[_]: ComputationEngine] extends AnyFunSuite with Matchers {
+
   import joinwiz.syntax._
 
   def entities[T <: Product: TypeTag](a: T*): F[T]
@@ -66,23 +67,27 @@ abstract class ComputationEngineTest[F[_]: ComputationEngine] extends AnyFunSuit
       .collect() should contain only ((l1, None), (l2, Some(r1)))
   }
 
-  test("extracts option value from option column") {
-    val l1 = (Entity(1, "e1"), None: Option[EntityWithOpt])
-    val l2 = (Entity(2, "e2"), Some(EntityWithOpt(Some(2))))
+  test("flattens optional value extracted from optional entity") {
+    val entity       = EntityWithOpt(Some(1))
+    val bothPresent  = (Some(entity), Some(entity))
+    val leftPresent  = (Some(entity), None)
+    val rightPresent = (None, Some(entity))
 
-    val r1 = Entity(2, "2")
-    val r2 = Entity(23, "23")
+    val ds = entities(
+      bothPresent,
+      leftPresent,
+      rightPresent
+    )
 
-    val left  = entities(l1, l2)
-    val right = entities(r1, r2)
-
-    left
-      .leftJoin(right) {
-        case (_ wiz optB, c) => optB(_.optUuid).flatten =:= c(_.uuid)
+    ds
+      .innerJoin(ds) {
+        case (_ wiz l2, _ wiz r2) => l2(_.optUuid) =:= r2(_.optUuid)
       }
       .collect() should contain only (
-      (l1, None),
-      (l2, Some(r1))
+      (bothPresent, bothPresent),
+      (bothPresent, rightPresent),
+      (rightPresent, bothPresent),
+      (rightPresent, rightPresent)
     )
   }
 
@@ -242,8 +247,11 @@ abstract class ComputationEngineTest[F[_]: ComputationEngine] extends AnyFunSuit
   }
 
 }
+
 import joinwiz.spark._
+
 class SparkComputationEngineTest extends ComputationEngineTest[Dataset] with Matchers with SparkSuite {
+
   import ss.implicits._
 
   override def entities[T <: Product: TypeTag](a: T*): Dataset[T] = a.toDS

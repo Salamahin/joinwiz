@@ -36,7 +36,7 @@ class TWindowTest extends AnyFunSuite with Matchers {
     val t1 = OrderByTestee(1, 1, 1)
     val t2 = OrderByTestee(1, 2, 1)
 
-    List(t1, t2).sorted(testee) should contain inOrderOnly(t2, t1)
+    List(t1, t2).sorted(testee) should contain inOrderOnly (t2, t1)
   }
 
   test("can chain asc and desc orderings") {
