@@ -27,6 +27,13 @@ specific behaviour still can be isolated easily.
 libraryDependencies += "io.github.salamahin" %% "joinwiz_core" % joinwiz_version
 ```
 
+###Attention!
+To be sure that library extracts correctly join keys of primitive types, add `"-Ydelambdafy:inline"` to compiler settings of your project
+
+```scala
+scalacOptions ++= Seq("-Ydelambdafy:inline")
+```
+
 ## Primitive join
 
 Note that result has type of `(A, Option[B])` - no more NPE's when mapping!

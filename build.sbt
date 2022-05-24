@@ -20,7 +20,7 @@ releaseProcess := Seq[ReleaseStep](
 )
 
 ThisBuild / organization := "io.github.salamahin"
-ThisBuild / crossScalaVersions := Seq("2.12.14", "2.11.12")
+ThisBuild / crossScalaVersions := Seq("2.13.8", "2.12.14", "2.11.12")
 ThisBuild / publishMavenStyle := true
 ThisBuild / publishTo := sonatypePublishToBundle.value
 ThisBuild / licenses := Seq("Apache 2" -> new URL("http://www.apache.org/licenses/LICENSE-2.0.txt"))
@@ -44,7 +44,7 @@ lazy val commonSettings = Seq(
     "-Ydelambdafy:inline"
   )
 )
-val sparkV       = Map("2.11" -> "2.3.2", "2.12" -> "2.4.5")
+val sparkV       = Map("2.11" -> "2.3.2", "2.12" -> "2.4.5", "2.13" -> "3.2.1")
 def scalaTest    = Def.setting { "org.scalatest" %% "scalatest" % "3.1.0" % Test }
 def scalaReflect = Def.setting { "org.scala-lang" % "scala-reflect" % scalaVersion.value }
 def sparkCore    = Def.setting { "org.apache.spark" %% "spark-core" % sparkV(scalaBinaryVersion.value) }

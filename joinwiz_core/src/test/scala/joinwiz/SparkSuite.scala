@@ -9,7 +9,7 @@ trait SparkSuite extends BeforeAndAfterAll {
   lazy val ss: SparkSession                = _ss
   @transient private var _ss: SparkSession = _
 
-  override def beforeAll() {
+  override def beforeAll(): Unit = {
     super.beforeAll()
 
     _ss = SparkSession

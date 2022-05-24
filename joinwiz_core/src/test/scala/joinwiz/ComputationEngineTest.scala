@@ -62,7 +62,7 @@ abstract class ComputationEngineTest[F[_]: ComputationEngine] extends AnyFunSuit
 
     left
       .leftJoin(right) {
-        case (_ wiz maybeLeft, right) => maybeLeft(_.uuid) =:= right(_.uuid)
+        case (_ wiz maybeLeft, right) => maybeLeft((e: Entity) => e.uuid) =:= right(_.uuid)
       }
       .collect() should contain only ((l1, None), (l2, Some(r1)))
   }
@@ -81,7 +81,7 @@ abstract class ComputationEngineTest[F[_]: ComputationEngine] extends AnyFunSuit
 
     ds
       .innerJoin(ds) {
-        case (_ wiz l2, _ wiz r2) => l2(_.optUuid) =:= r2(_.optUuid)
+        case (_ wiz l2, _ wiz r2) => l2((e: EntityWithOpt) => e.optUuid) =:= r2((e: EntityWithOpt) => e.optUuid)
       }
       .collect() should contain only (
       (bothPresent, bothPresent),
@@ -115,7 +115,7 @@ abstract class ComputationEngineTest[F[_]: ComputationEngine] extends AnyFunSuit
 
   test("can flatMap") {
     entities(Entity(1, "a b c d"))
-      .flatMap(x => x.value.split(" "))
+      .flatMap(x => x.value.split(" ").toSeq)
       .collect() should contain only ("a", "b", "c", "d")
   }
 
@@ -254,5 +254,5 @@ class SparkComputationEngineTest extends ComputationEngineTest[Dataset] with Mat
 
   import ss.implicits._
 
-  override def entities[T <: Product: TypeTag](a: T*): Dataset[T] = a.toDS
+  override def entities[T <: Product: TypeTag](a: T*): Dataset[T] = a.toDS()
 }

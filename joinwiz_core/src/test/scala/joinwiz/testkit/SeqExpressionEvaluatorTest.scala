@@ -39,7 +39,7 @@ class SeqExpressionEvaluatorTest extends AnyFunSuite with Matchers {
   }
 
   test("can check left > right") {
-    as.innerJoin(bs)((l, r) => l(_.value) > r(_.value)) should be('empty)
+    as.innerJoin(bs)((l, r) => l(_.value) > r(_.value)) should be(empty)
   }
 
   test("can check left >= right") {
