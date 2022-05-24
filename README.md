@@ -24,14 +24,8 @@ specific behaviour still can be isolated easily.
 ## Try it
 
 ```scala
+scalacOptions += "-Ydelambdafy:inline"
 libraryDependencies += "io.github.salamahin" %% "joinwiz_core" % joinwiz_version
-```
-
-###Attention!
-To be sure that library extracts correctly join keys of primitive types, add `"-Ydelambdafy:inline"` to compiler settings of your project
-
-```scala
-scalacOptions ++= Seq("-Ydelambdafy:inline")
 ```
 
 ## Primitive join
