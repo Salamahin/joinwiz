@@ -4,6 +4,7 @@ import joinwiz.api.{Collect, Distinct, Filter, FlatMap, GroupByKey, Join, KeyVal
 import joinwiz.syntax.{JOIN_CONDITION, WINDOW_EXPRESSION}
 import joinwiz.window.TWindowSpec
 
+import scala.collection.Iterable
 import scala.reflect.runtime.universe
 import scala.reflect.runtime.universe.TypeTag
 
@@ -29,7 +30,7 @@ package object testkit {
     }
 
     override def flatMap: FlatMap[Seq] = new FlatMap[Seq] {
-      override def apply[T, U: TypeTag](ft: Seq[T])(func: T => TraversableOnce[U]): Seq[U] =
+      override def apply[T, U: TypeTag](ft: Seq[T])(func: T => Iterable[U]): Seq[U] =
         ft.flatMap(func)
     }
 
@@ -54,17 +55,24 @@ package object testkit {
 
           override def reduceGroups(f: (T, T) => T): Seq[(K, T)] =
             ft.groupBy(func)
-              .mapValues(_.reduce(f))
+              .map {
+                case (k, vals) => (k, vals.reduce(f))
+              }
               .toSeq
 
           override def underlying: Seq[T] = ft
 
           override def keyFunc: T => K = func
 
-          override def count(): Seq[(K, Long)] = ft.groupBy(func).mapValues(_.size: Long).toSeq
+          override def count(): Seq[(K, Long)] = ft.
+            groupBy(func)
+            .map {
+              case (k, vals) => (k, vals.size: Long)
+            }
+            .toSeq
 
           override def cogroup[U, R: universe.TypeTag](other: KeyValueGroupped[Seq, U, K])(
-            f: (K, Iterator[T], Iterator[U]) => TraversableOnce[R]
+            f: (K, Iterator[T], Iterator[U]) => Iterable[R]
           ): Seq[R] = {
             val ftGroupped    = ft.groupBy(func)
             val otherGroupped = other.underlying.groupBy(other.keyFunc)

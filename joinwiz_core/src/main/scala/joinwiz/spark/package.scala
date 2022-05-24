@@ -7,6 +7,7 @@ import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder
 import org.apache.spark.sql.functions.{col, struct}
 import org.apache.spark.sql.{Dataset, Encoder}
 
+import scala.collection.Iterable
 import scala.reflect.runtime.universe.TypeTag
 
 package object spark {
@@ -55,7 +56,7 @@ package object spark {
     }
 
     override def flatMap: FlatMap[Dataset] = new FlatMap[Dataset] {
-      override def apply[L, R: TypeTag](ft: Dataset[L])(func: L => TraversableOnce[R]): Dataset[R] =
+      override def apply[L, R: TypeTag](ft: Dataset[L])(func: L => Iterable[R]): Dataset[R] =
         ft.flatMap(func)(ExpressionEncoder())
     }
 
@@ -81,7 +82,7 @@ package object spark {
 
           override def cogroup[U, R: TypeTag](
             other: KeyValueGroupped[Dataset, U, K]
-          )(f: (K, Iterator[T], Iterator[U]) => TraversableOnce[R]): Dataset[R] = {
+          )(f: (K, Iterator[T], Iterator[U]) => Iterable[R]): Dataset[R] = {
             val otherDs = other.underlying.groupByKey(other.keyFunc)(ExpressionEncoder[K]())
 
             ft.groupByKey(func)(ExpressionEncoder[K]())
@@ -100,7 +101,7 @@ package object spark {
       }
 
     override def collect: Collect[Dataset] = new Collect[Dataset] {
-      override def apply[T](ft: Dataset[T]): Seq[T] = ft.collect()
+      override def apply[T](ft: Dataset[T]): Seq[T] = ft.collect().toSeq
     }
 
     override def withWindow: WithWindow[Dataset] = new WithWindow[Dataset] {
@@ -109,7 +110,7 @@ package object spark {
 
         fo.withColumn("joinwiz_window", func(window()))
           .select(
-            struct(fo.columns.map(col): _*),
+            struct(fo.columns.map(col).toSeq: _*),
             col("joinwiz_window")
           )
           .as[(T, S)](ExpressionEncoder[(T, S)]())
