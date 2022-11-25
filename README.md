@@ -25,7 +25,7 @@ object Runner extends App {
   case class B(fk: Option[String])
 
   val dsA = Seq(A("pk1")).toDS()
-  val dsB = Seq(B(Some("pk1"))).toDS()I
+  val dsB = Seq(B(Some("pk1"))).toDS()
 
   import JoinWiz._
 
