@@ -44,15 +44,29 @@ lazy val commonSettings = Seq(
     "-Ydelambdafy:inline"
   )
 )
-val sparkV       = Map("2.11" -> "2.3.2", "2.12" -> "2.4.5", "2.13" -> "3.2.1")
-def scalaTest    = Def.setting { "org.scalatest" %% "scalatest" % "3.1.0" % Test }
-def scalaReflect = Def.setting { "org.scala-lang" % "scala-reflect" % scalaVersion.value }
-def sparkCore    = Def.setting { "org.apache.spark" %% "spark-core" % sparkV(scalaBinaryVersion.value) }
-def sparkSql     = Def.setting { "org.apache.spark" %% "spark-sql" % sparkV(scalaBinaryVersion.value) }
+val sparkV = Map("2.11" -> "2.3.2", "2.12" -> "2.4.5", "2.13" -> "3.2.1")
+def scalaTest = Def.setting {
+  "org.scalatest" %% "scalatest" % "3.1.0" % Test
+}
+def scalaReflect = Def.setting {
+  "org.scala-lang" % "scala-reflect" % scalaVersion.value
+}
+def sparkCore = Def.setting {
+  "org.apache.spark" %% "spark-core" % sparkV(scalaBinaryVersion.value)
+}
+def sparkSql = Def.setting {
+  "org.apache.spark" %% "spark-sql" % sparkV(scalaBinaryVersion.value)
+}
+def shapeless = Def.setting {
+  "com.chuusai" %% "shapeless" % "2.4.0-M1"
+}
+
 
 lazy val joinwiz_macro = project
   .settings(commonSettings: _*)
-  .settings(libraryDependencies ++= scalaReflect.value :: sparkCore.value :: sparkSql.value :: Nil)
+  .settings(libraryDependencies ++=
+    scalaReflect.value :: sparkCore.value :: sparkSql.value :: shapeless.value :: Nil
+  )
 
 lazy val joinwiz_core = project
   .dependsOn(joinwiz_macro)
