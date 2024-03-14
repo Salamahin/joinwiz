@@ -22,11 +22,11 @@ trait LowLevelMapSyntax {
   implicit class IdRTColMapSyntax[L, R, T](thisCol: RTCol[L, R, Id[T]]) extends BasicRTColMapSyntax[Id, L, R, T](thisCol)
 
   implicit class LTColExprSyntax[L, R, T](thisCol: LTCol[L, R, Boolean]) {
-    val expr: Expr[L, R] = Expr.expr[L, R]((l, _) => thisCol(l))(thisCol.column)
+    val expr: JoinCondition[L, R] = JoinCondition.joinCondition[L, R]((l, _) => thisCol(l))(thisCol.column)
   }
 
   implicit class RTColExprSyntax[L, R, T](thisCol: RTCol[L, R, Boolean]) {
-    val expr: Expr[L, R] = Expr.expr[L, R]((_, r) => thisCol(r))(thisCol.column)
+    val expr: JoinCondition[L, R] = JoinCondition.joinCondition[L, R]((_, r) => thisCol(r))(thisCol.column)
   }
 }
 

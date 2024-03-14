@@ -1,13 +1,21 @@
 package joinwiz
 
+import org.apache.spark.sql.Column
+import org.apache.spark.sql.functions.col
+
 import scala.annotation.tailrec
 import scala.language.experimental.macros
 import scala.reflect.macros.whitebox
 
-case class Tracker[ORIG, T](path: Seq[String], get: ORIG => T)
+class LTColumn[LEFT, RIGHT, +T](val path: Seq[String], val get: LEFT => T) {
+  def value(l: LEFT): T = get(l)
+  def toColumn: Column  = col(path.mkString("."))
+}
 
-class LTColumn[LEFT, RIGHT, +T](val path: Seq[String], val get: LEFT => T)
-class RTColumn[LEFT, RIGHT, +T](val path: Seq[String], val get: RIGHT => T)
+class RTColumn[LEFT, RIGHT, +T](val path: Seq[String], val get: RIGHT => T) {
+  def value(l: RIGHT): T = get(l)
+  def toColumn: Column   = col(path.mkString("."))
+}
 
 object TColumn {
   def left[T]: LTColumn[T, T, T]  = new LTColumn(alias.left :: Nil, identity)

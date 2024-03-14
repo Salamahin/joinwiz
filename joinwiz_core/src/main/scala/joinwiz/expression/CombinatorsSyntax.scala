@@ -1,9 +1,9 @@
 package joinwiz.expression
 
-import Expr._
+import JoinCondition._
 
 trait CombinatorsSyntax {
-  implicit class CombineExpressionsSyntax[L, R](thisExpr: Expr[L, R]) {
-    def &&(thatExpr: Expr[L, R]): Expr[L, R] = expr[L, R]((l, r) => thisExpr(l, r) && thatExpr(l, r))(thisExpr() && thatExpr())
+  implicit class CombineExpressionsSyntax[L, R](thisExpr: JoinCondition[L, R]) {
+    def &&(thatExpr: JoinCondition[L, R]): JoinCondition[L, R] = joinCondition[L, R]((l, r) => thisExpr(l, r) && thatExpr(l, r))(thisExpr() && thatExpr())
   }
 }

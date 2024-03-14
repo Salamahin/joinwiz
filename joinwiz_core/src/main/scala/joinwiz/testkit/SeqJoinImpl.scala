@@ -1,8 +1,8 @@
 package joinwiz.testkit
 
-import joinwiz.expression.Expr
+import joinwiz.expression.JoinCondition
 
-class SeqJoinImpl[L, R](op: Expr[L, R], left: Seq[L], right: Seq[R]) {
+class SeqJoinImpl[L, R](op: JoinCondition[L, R], left: Seq[L], right: Seq[R]) {
 
   def leftJoin() = {
     val joined          = innerJoin()
