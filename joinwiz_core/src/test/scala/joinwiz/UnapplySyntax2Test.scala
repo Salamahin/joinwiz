@@ -4,10 +4,10 @@ import joinwiz.expression.UnapplySyntax2
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
 
-case class A(valueA: String)
-case class B(valueB: String)
-
 class UnapplySyntax2Test extends AnyFunSuite with Matchers with UnapplySyntax2 with ApplyTColumnSyntax {
+  case class A(valueA: String)
+  case class B(valueB: String)
+
   private val testeeA = A("value1")
   private val testeeB = B("value2")
 
