@@ -1,7 +1,6 @@
 package joinwiz.expression
 
-import joinwiz.Expr
-import joinwiz.Expr._
+import Expr._
 
 trait CombinatorsSyntax {
   implicit class CombineExpressionsSyntax[L, R](thisExpr: Expr[L, R]) {

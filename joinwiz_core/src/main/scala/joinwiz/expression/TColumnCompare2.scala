@@ -2,9 +2,7 @@ package joinwiz.expression
 
 import joinwiz.Id
 
-trait TColCompare[F[_]] {
-  def map[T, U](ft: F[T])(f: T => U): F[U]
-
+trait TColumnCompare2[F[_]] {
   def equals[T](thisFt: F[T], thatT: T): Boolean
   def equals[T](thisFt: F[T], thatOptT: Option[T]): Boolean
 
@@ -12,7 +10,7 @@ trait TColCompare[F[_]] {
   def compare[T: Ordering](thisFt: F[T], thatT: Option[T])(expected: Int*): Boolean
 }
 
-object TColCompare {
+object TColumnCompare2 {
   private def compareEither[T](x: T, y: T)(expected: Int*)(implicit o: Ordering[T]) = {
     val compared = o.compare(x, y)
 
@@ -40,9 +38,7 @@ object TColCompare {
     }
   }
 
-  implicit val compareOfOptionTCol: TColCompare[Option] = new TColCompare[Option] {
-    override def map[T, U](ft: Option[T])(f: T => U): Option[U] = ft map f
-
+  implicit val compareOfOptionTColumn: TColumnCompare2[Option] = new TColumnCompare2[Option] {
     override def equals[T](thisFt: Option[T], thatT: T): Boolean            = thisFt.contains(thatT)
     override def equals[T](thisFt: Option[T], thatOptT: Option[T]): Boolean = thisFt.isDefined && thisFt == thatOptT
 
@@ -50,9 +46,7 @@ object TColCompare {
     override def compare[T: Ordering](thisFt: Option[T], thatT: Option[T])(expected: Int*): Boolean = compareEither(thisFt, thatT)(expected: _*)
   }
 
-  implicit val compareOfIdTCol: TColCompare[Id] = new TColCompare[Id] {
-    override def map[T, U](ft: Id[T])(f: T => U): Id[U] = f(ft)
-
+  implicit val compareOfIdTColumn: TColumnCompare2[Id] = new TColumnCompare2[Id] {
     override def equals[T](thisFt: Id[T], thatT: T): Boolean            = thisFt == thatT
     override def equals[T](thisFt: Id[T], thatOptT: Option[T]): Boolean = thatOptT.contains(thisFt)
 
