@@ -6,7 +6,7 @@ import org.scalatest.matchers.should.Matchers
 case class Outer(inner1: Inner, maybeInner2: Option[Inner])
 case class Inner(value: String, maybeValue: Option[String])
 
-class ApplyTColumnSyntaxTest extends AnyFunSuite with Matchers with TColumnSyntax {
+class ApplyTColumnSyntaxTest extends AnyFunSuite with Matchers with ApplyTColumnSyntax {
   private val testee = Outer(
     inner1 = Inner(
       value      = "value1",

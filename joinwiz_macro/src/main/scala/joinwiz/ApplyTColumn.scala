@@ -14,7 +14,7 @@ object TColumn {
   def right[T]: RTColumn[T, T, T] = new RTColumn(alias.right :: Nil, identity)
 }
 
-trait TColumnSyntax {
+trait ApplyTColumnSyntax {
   implicit class ApplyLTColumnSyntax[LEFT, RIGHT, T](val ltCol: LTColumn[LEFT, RIGHT, T]) {
     def apply[E](expr: T => E): LTColumn[LEFT, RIGHT, E] = macro Macro2Impl.leftColumn[LEFT, RIGHT, T, E]
     def >>[E](expr: T => E): LTColumn[LEFT, RIGHT, E] = macro Macro2Impl.leftColumn[LEFT, RIGHT, T, E]
