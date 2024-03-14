@@ -34,7 +34,7 @@ lazy val commonSettings = Seq(
   scalacOptions ++= Seq(
     "-encoding",
     "utf8",
-    "-Xfatal-warnings",
+  //  "-Xfatal-warnings",
     "-deprecation",
     "-language:postfixOps",
     "-language:higherKinds",

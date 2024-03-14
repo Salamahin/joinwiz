@@ -1,6 +1,6 @@
 package joinwiz.testkit
 
-import joinwiz.Expr
+import joinwiz.expression.Expr
 
 class SeqJoinImpl[L, R](op: Expr[L, R], left: Seq[L], right: Seq[R]) {
 

@@ -2,6 +2,7 @@ package joinwiz.expression
 
 import joinwiz.{ApplyLTCol, ApplyRTCol}
 
+@deprecated
 trait UnapplySyntax {
 
   object wiz {

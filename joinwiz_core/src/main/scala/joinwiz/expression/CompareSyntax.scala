@@ -1,7 +1,7 @@
 package joinwiz.expression
 
-import joinwiz.Expr.expr
-import joinwiz.{Expr, Id, LTCol, RTCol}
+import Expr.expr
+import joinwiz.{Id, LTCol, RTCol}
 
 import java.sql.{Date, Timestamp}
 

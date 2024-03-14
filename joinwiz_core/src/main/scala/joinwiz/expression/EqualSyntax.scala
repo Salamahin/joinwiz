@@ -1,7 +1,7 @@
 package joinwiz.expression
 
-import joinwiz.Expr.expr
-import joinwiz.{Expr, Id, LTCol, RTCol}
+import Expr.expr
+import joinwiz.{Id, LTCol, RTCol}
 
 trait LowLevelEqualSyntax {
   import org.apache.spark.sql.functions.lit

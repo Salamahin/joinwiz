@@ -1,7 +1,7 @@
 package joinwiz.expression
 
 import joinwiz.syntax.{IdLTColMapSyntax, IdRTColMapSyntax, LTColExprSyntax, RTColExprSyntax}
-import joinwiz.{Expr, LTCol, RTCol}
+import joinwiz.{LTCol, RTCol}
 
 trait IsEmptySyntax {
   implicit class LTColOptionIsEmptySyntax[L, R, T](lt: LTCol[L, R, Option[T]]) {

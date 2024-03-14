@@ -1,6 +1,6 @@
 package joinwiz.expression
 
-import joinwiz.{Expr, Id, LTCol, RTCol}
+import joinwiz.{Id, LTCol, RTCol}
 import org.apache.spark.sql.Column
 
 trait LowLevelMapSyntax {

@@ -8,18 +8,6 @@ import scala.language.experimental.macros
 import scala.language.higherKinds
 import scala.reflect.macros.whitebox
 
-trait Expr[L, R] {
-  def apply(): Column
-  def apply(left: L, right: R): Boolean
-}
-
-object Expr {
-  def expr[L, R](f: (L, R) => Boolean)(c: Column): Expr[L, R] = new Expr[L, R] {
-    override def apply(): Column                   = c
-    override def apply(left: L, right: R): Boolean = f(left, right)
-  }
-}
-
 sealed trait TCol[O, +T] {
   def column: Column
   def apply(value: O): T
@@ -56,18 +44,11 @@ class ApplyRTCol[LO, RO, E](val names: Seq[String], val orig: RO => E) extends S
 }
 
 object ApplyLTCol {
-  def apply[L, R] = new ApplyLTCol[L, R, L](names = Left.alias :: Nil, identity)
+  def apply[L, R] = new ApplyLTCol[L, R, L](names = alias.left :: Nil, identity)
 }
 
 object ApplyRTCol {
-  def apply[L, R] = new ApplyRTCol[L, R, R](names = Right.alias :: Nil, identity)
-}
-
-private[joinwiz] object Left {
-  val alias = "LEFT"
-}
-private[joinwiz] object Right {
-  val alias = "RIGHT"
+  def apply[L, R] = new ApplyRTCol[L, R, R](names = alias.right :: Nil, identity)
 }
 
 trait TWindow[O, E] {

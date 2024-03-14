@@ -16,9 +16,9 @@ package object spark {
     override def join: Join[Dataset] = new Join[Dataset] {
 
       def joinWiz[L, R](fl: Dataset[L], fr: Dataset[R], joinType: String)(joinBy: JOIN_CONDITION[L, R]): Dataset[(L, R)] = {
-        fl.as(joinwiz.Left.alias)
+        fl.as(joinwiz.alias.left)
           .joinWith(
-            fr.as(joinwiz.Right.alias),
+            fr.as(joinwiz.alias.right),
             joinBy(ApplyLTCol[L, R], ApplyRTCol[L, R])(),
             joinType
           )
@@ -40,9 +40,9 @@ package object spark {
       override def left_anti[L: TypeTag, R](fl: Dataset[L], fr: Dataset[R])(expr: JOIN_CONDITION[L, R]): Dataset[L] = {
         implicit val enc: Encoder[L] = ExpressionEncoder[L]()
 
-        fl.as(joinwiz.Left.alias)
+        fl.as(joinwiz.alias.left)
           .join(
-            fr.as(joinwiz.Right.alias),
+            fr.as(joinwiz.alias.right),
             expr(ApplyLTCol[L, R], ApplyRTCol[L, R])(),
             "left_anti"
           )
