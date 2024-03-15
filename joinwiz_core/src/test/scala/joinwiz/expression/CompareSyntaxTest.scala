@@ -1,13 +1,13 @@
 package joinwiz.expression
 
-import joinwiz.{ApplyLTCol, ApplyRTCol}
+import joinwiz.TColumn
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
 
 class CompareSyntaxTest extends AnyFunSuite with Matchers {
   import joinwiz.syntax._
 
-  private val evaluate = (ApplyLTCol[Left, Right], ApplyRTCol[Left, Right])
+  private val evaluate = (TColumn.left[Left, Right], TColumn.right[Left, Right])
 
   case class Left(pk: Int = Int.MinValue, opt: Option[Int] = None)
 

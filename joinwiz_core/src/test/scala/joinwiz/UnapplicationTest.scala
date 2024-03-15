@@ -15,8 +15,8 @@ class UnapplicationTest extends AnyFunSuite with Matchers {
   private type ABC = ((A, B), C)
   private type BCD = (B, (C, D))
 
-  private val leftTestee  = (ApplyLTCol[ABC, D], ApplyRTCol[ABC, D])
-  private val rightTestee = (ApplyLTCol[A, BCD], ApplyRTCol[A, BCD])
+  private val leftTestee  = (TColumn.left[ABC, D], TColumn.right[ABC, D])
+  private val rightTestee = (TColumn.left[A, BCD], TColumn.right[A, BCD])
 
   import joinwiz.syntax._
 
