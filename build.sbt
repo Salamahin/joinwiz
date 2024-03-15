@@ -5,6 +5,8 @@ name := "joinwiz"
 releaseCrossBuild := true
 releaseIgnoreUntrackedFiles := true
 releaseVersionBump := sbtrelease.Version.Bump.Bugfix
+releaseCommitMessage := "Set version to ${(version in ThisBuild).value}"
+releaseTagName := "v${(version in ThisBuild).value}"
 
 releaseProcess := Seq[ReleaseStep](
   checkSnapshotDependencies,
