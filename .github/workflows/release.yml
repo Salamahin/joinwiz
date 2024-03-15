@@ -1,9 +1,4 @@
-name: Release to Maven Central
-
-on:
-  push:
-    branches:
-      - master
+name: cd
 
 jobs:
   release:
