@@ -2,9 +2,11 @@ import sbt.url
 import sbtrelease.ReleaseStateTransformations._
 
 name := "joinwiz"
+
+releaseVersionBump := sbtrelease.Version.Bump.Next
+releaseVersionFile := baseDirectory.value / "version.sbt"
 releaseCrossBuild := true
 releaseIgnoreUntrackedFiles := true
-releaseVersionBump := sbtrelease.Version.Bump.Bugfix
 
 releaseProcess := Seq[ReleaseStep](
   checkSnapshotDependencies,
