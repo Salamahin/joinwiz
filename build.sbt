@@ -4,6 +4,8 @@ import sbtrelease.ReleaseStateTransformations._
 name := "joinwiz"
 releaseCrossBuild := true
 releaseIgnoreUntrackedFiles := true
+releaseVersionBump := sbtrelease.Version.Bump.Bugfix
+
 releaseProcess := Seq[ReleaseStep](
   checkSnapshotDependencies,
   inquireVersions,
