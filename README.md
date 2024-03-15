@@ -1,8 +1,7 @@
 # joinwiz
 
-[![Build Status](https://travis-ci.com/Salamahin/joinwiz.svg?branch=master)](https://travis-ci.com/Salamahin/joinwiz)
+[![build](https://github.com/Salamahin/joinwiz/actions/workflows/ci.yml/badge.svg)](https://github.com/Salamahin/joinwiz/actions/workflows/ci.yml)
 [![joinwiz Scala version support](https://index.scala-lang.org/salamahin/joinwiz/joinwiz/latest-by-scala-version.svg)](https://index.scala-lang.org/salamahin/joinwiz/joinwiz)
-![Github action status](https://github.com/Salamahin/joinwiz/actions/workflows/tests.yml/badge.svg?branch=master)
 
 Tiny library improves Spark's dataset join API and improves unit-testing experience of (some) Spark transformations
 
