@@ -10,15 +10,13 @@ object syntax
     extends EqualSyntax
     with CompareSyntax
     with CombinatorsSyntax
-    with MapSyntax
-    with IsEmptySyntax
     with Wrappers
     with UnapplySyntax
-    with ExtractTColSyntax
+    with ApplyTColumnSyntax
     with CommonWindowFunctions
     with WindowExpressionSyntax {
 
-  type JOIN_CONDITION[L, R]    = (ApplyLTCol[L, R, L], ApplyRTCol[L, R, R]) => JoinCondition[L, R]
+  type JOIN_CONDITION[L, R]    = (LTColumn[L, R, L], RTColumn[L, R, R]) => JoinCondition[L, R]
   type WINDOW_EXPRESSION[T, S] = ApplyTWindow[T] => TWindowSpec[T, S]
 
   implicit class DatasetLikeSyntax[F[_], T: TypeTag](ft: F[T])(implicit ce: ComputationEngine[F]) {

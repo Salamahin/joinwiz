@@ -1,32 +1,32 @@
 package joinwiz.expression
 
-import JoinCondition.joinCondition
-import joinwiz.{Id, LTCol, RTCol}
+import joinwiz.expression.JoinCondition.joinCondition
+import joinwiz.{Id, LTColumn, RTColumn}
 
 trait LowLevelEqualSyntax {
   import org.apache.spark.sql.functions.lit
 
-  abstract class BasicLTColEqualSyntax[F[_], L, R, T](thisCol: LTCol[L, R, F[T]])(implicit op: TColCompare[F]) {
-    def =:=(thatCol: LTCol[L, R, T]): JoinCondition[L, R]     = joinCondition[L, R]((l, _) => op.equals(thisCol(l), thatCol(l)))(thisCol.column === thatCol.column)
-    def =:=(thatCol: RTCol[L, R, T]): JoinCondition[L, R]     = joinCondition[L, R]((l, r) => op.equals(thisCol(l), thatCol(r)))(thisCol.column === thatCol.column)
-    def =:=(thatCol: LTColOptW[L, R, T]): JoinCondition[L, R] = joinCondition[L, R]((l, _) => op.equals(thisCol(l), thatCol.wrapped(l)))(thisCol.column === thatCol.wrapped.column)
-    def =:=(thatCol: RTColOptW[L, R, T]): JoinCondition[L, R] = joinCondition[L, R]((l, r) => op.equals(thisCol(l), thatCol.wrapped(r)))(thisCol.column === thatCol.wrapped.column)
-    def =:=(const: T): JoinCondition[L, R]                    = joinCondition[L, R]((l, _) => op.equals(thisCol(l), const))(thisCol.column === lit(const))
+  abstract class BasicLTColEqualSyntax[F[_], L, R, T](thisCol: LTColumn[L, R, F[T]])(implicit op: TColumnCompare[F]) {
+    def =:=(thatCol: LTColumn[L, R, T]): JoinCondition[L, R]     = joinCondition[L, R]((l, _) => op.equals(thisCol.value(l), thatCol.value(l)))(thisCol.toColumn === thatCol.toColumn)
+    def =:=(thatCol: RTColumn[L, R, T]): JoinCondition[L, R]     = joinCondition[L, R]((l, r) => op.equals(thisCol.value(l), thatCol.value(r)))(thisCol.toColumn === thatCol.toColumn)
+    def =:=(thatCol: LTColumnOptW[L, R, T]): JoinCondition[L, R] = joinCondition[L, R]((l, _) => op.equals(thisCol.value(l), thatCol.wrapped.value(l)))(thisCol.toColumn === thatCol.wrapped.toColumn)
+    def =:=(thatCol: RTColumnOptW[L, R, T]): JoinCondition[L, R] = joinCondition[L, R]((l, r) => op.equals(thisCol.value(l), thatCol.wrapped.value(r)))(thisCol.toColumn === thatCol.wrapped.toColumn)
+    def =:=(const: T): JoinCondition[L, R]                       = joinCondition[L, R]((l, _) => op.equals(thisCol.value(l), const))(thisCol.toColumn === lit(const))
   }
 
-  abstract class BasicRTColEqualSyntax[F[_], L, R, T](thisCol: RTCol[L, R, F[T]])(implicit op: TColCompare[F]) {
-    def =:=(thatCol: LTCol[L, R, T]): JoinCondition[L, R]     = joinCondition[L, R]((l, r) => op.equals(thisCol(r), thatCol(l)))(thisCol.column === thatCol.column)
-    def =:=(thatCol: RTCol[L, R, T]): JoinCondition[L, R]     = joinCondition[L, R]((_, r) => op.equals(thisCol(r), thatCol(r)))(thisCol.column === thatCol.column)
-    def =:=(thatCol: LTColOptW[L, R, T]): JoinCondition[L, R] = joinCondition[L, R]((l, r) => op.equals(thisCol(r), thatCol.wrapped(l)))(thisCol.column === thatCol.wrapped.column)
-    def =:=(thatCol: RTColOptW[L, R, T]): JoinCondition[L, R] = joinCondition[L, R]((_, r) => op.equals(thisCol(r), thatCol.wrapped(r)))(thisCol.column === thatCol.wrapped.column)
-    def =:=(const: T): JoinCondition[L, R]                    = joinCondition[L, R]((_, r) => op.equals(thisCol(r), const))(thisCol.column === lit(const))
+  abstract class BasicRTColEqualSyntax[F[_], L, R, T](thisCol: RTColumn[L, R, F[T]])(implicit op: TColumnCompare[F]) {
+    def =:=(thatCol: LTColumn[L, R, T]): JoinCondition[L, R]     = joinCondition[L, R]((l, r) => op.equals(thisCol.value(r), thatCol.value(l)))(thisCol.toColumn === thatCol.toColumn)
+    def =:=(thatCol: RTColumn[L, R, T]): JoinCondition[L, R]     = joinCondition[L, R]((_, r) => op.equals(thisCol.value(r), thatCol.value(r)))(thisCol.toColumn === thatCol.toColumn)
+    def =:=(thatCol: LTColumnOptW[L, R, T]): JoinCondition[L, R] = joinCondition[L, R]((l, r) => op.equals(thisCol.value(r), thatCol.wrapped.value(l)))(thisCol.toColumn === thatCol.wrapped.toColumn)
+    def =:=(thatCol: RTColumnOptW[L, R, T]): JoinCondition[L, R] = joinCondition[L, R]((_, r) => op.equals(thisCol.value(r), thatCol.wrapped.value(r)))(thisCol.toColumn === thatCol.wrapped.toColumn)
+    def =:=(const: T): JoinCondition[L, R]                       = joinCondition[L, R]((_, r) => op.equals(thisCol.value(r), const))(thisCol.toColumn === lit(const))
   }
 
-  implicit class LTColEqualSyntax[L, R, T](thisCol: LTCol[L, R, T]) extends BasicLTColEqualSyntax[Id, L, R, T](thisCol)
-  implicit class RTColEqualSyntax[L, R, T](thisCol: RTCol[L, R, T]) extends BasicRTColEqualSyntax[Id, L, R, T](thisCol)
+  implicit class LTColEqualSyntax[L, R, T](thisCol: LTColumn[L, R, T]) extends BasicLTColEqualSyntax[Id, L, R, T](thisCol)
+  implicit class RTColEqualSyntax[L, R, T](thisCol: RTColumn[L, R, T]) extends BasicRTColEqualSyntax[Id, L, R, T](thisCol)
 }
 
 trait EqualSyntax extends LowLevelEqualSyntax {
-  implicit class OptionalLTColEqualSyntax[L, R, T](thisCol: LTCol[L, R, Option[T]]) extends BasicLTColEqualSyntax[Option, L, R, T](thisCol)
-  implicit class OptionalRTColEqualSyntax[L, R, T](thisCol: RTCol[L, R, Option[T]]) extends BasicRTColEqualSyntax[Option, L, R, T](thisCol)
+  implicit class OptionalLTColEqualSyntax[L, R, T](thisCol: LTColumn[L, R, Option[T]]) extends BasicLTColEqualSyntax[Option, L, R, T](thisCol)
+  implicit class OptionalRTColEqualSyntax[L, R, T](thisCol: RTColumn[L, R, Option[T]]) extends BasicRTColEqualSyntax[Option, L, R, T](thisCol)
 }

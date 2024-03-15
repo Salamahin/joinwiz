@@ -4,7 +4,6 @@ import joinwiz.api.{Collect, Distinct, Filter, FlatMap, GroupByKey, Join, KeyVal
 import joinwiz.syntax.{JOIN_CONDITION, WINDOW_EXPRESSION}
 import joinwiz.window.TWindowSpec
 
-import scala.collection.Iterable
 import scala.reflect.runtime.universe
 import scala.reflect.runtime.universe.TypeTag
 
@@ -13,15 +12,15 @@ package object testkit {
   implicit val fakeComputationEngine: ComputationEngine[Seq] = new ComputationEngine[Seq] {
     override def join: Join[Seq] = new Join[Seq] {
       override def inner[T, U](ft: Seq[T], fu: Seq[U])(expr: JOIN_CONDITION[T, U]): Seq[(T, U)] = {
-        new SeqJoinImpl[T, U](expr(ApplyLTCol[T, U], ApplyRTCol[T, U]), ft, fu).innerJoin()
+        new SeqJoinImpl[T, U](expr(TColumn.left, TColumn.right), ft, fu).innerJoin()
       }
 
       override def left[T: TypeTag, U: TypeTag](ft: Seq[T], fu: Seq[U])(expr: JOIN_CONDITION[T, U]): Seq[(T, Option[U])] = {
-        new SeqJoinImpl[T, U](expr(ApplyLTCol[T, U], ApplyRTCol[T, U]), ft, fu).leftJoin()
+        new SeqJoinImpl[T, U](expr(TColumn.left, TColumn.right), ft, fu).leftJoin()
       }
 
       override def left_anti[T: TypeTag, U](ft: Seq[T], fu: Seq[U])(expr: JOIN_CONDITION[T, U]): Seq[T] = {
-        new SeqJoinImpl[T, U](expr(ApplyLTCol[T, U], ApplyRTCol[T, U]), ft, fu).leftAntiJoin()
+        new SeqJoinImpl[T, U](expr(TColumn.left, TColumn.right), ft, fu).leftAntiJoin()
       }
     }
 
@@ -64,12 +63,12 @@ package object testkit {
 
           override def keyFunc: T => K = func
 
-          override def count(): Seq[(K, Long)] = ft.
-            groupBy(func)
-            .map {
-              case (k, vals) => (k, vals.size: Long)
-            }
-            .toSeq
+          override def count(): Seq[(K, Long)] =
+            ft.groupBy(func)
+              .map {
+                case (k, vals) => (k, vals.size: Long)
+              }
+              .toSeq
 
           override def cogroup[U, R: universe.TypeTag](other: KeyValueGroupped[Seq, U, K])(
             f: (K, Iterator[T], Iterator[U]) => Iterable[R]

@@ -7,7 +7,6 @@ import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder
 import org.apache.spark.sql.functions.{col, struct}
 import org.apache.spark.sql.{Dataset, Encoder}
 
-import scala.collection.Iterable
 import scala.reflect.runtime.universe.TypeTag
 
 package object spark {
@@ -16,10 +15,10 @@ package object spark {
     override def join: Join[Dataset] = new Join[Dataset] {
 
       def joinWiz[L, R](fl: Dataset[L], fr: Dataset[R], joinType: String)(joinBy: JOIN_CONDITION[L, R]): Dataset[(L, R)] = {
-        fl.as(joinwiz.Left.alias)
+        fl.as(joinwiz.alias.left)
           .joinWith(
-            fr.as(joinwiz.Right.alias),
-            joinBy(ApplyLTCol[L, R], ApplyRTCol[L, R])(),
+            fr.as(joinwiz.alias.right),
+            joinBy(TColumn.left, TColumn.right)(),
             joinType
           )
       }
@@ -40,10 +39,10 @@ package object spark {
       override def left_anti[L: TypeTag, R](fl: Dataset[L], fr: Dataset[R])(expr: JOIN_CONDITION[L, R]): Dataset[L] = {
         implicit val enc: Encoder[L] = ExpressionEncoder[L]()
 
-        fl.as(joinwiz.Left.alias)
+        fl.as(joinwiz.alias.left)
           .join(
-            fr.as(joinwiz.Right.alias),
-            expr(ApplyLTCol[L, R], ApplyRTCol[L, R])(),
+            fr.as(joinwiz.alias.right),
+            expr(TColumn.left, TColumn.right)(),
             "left_anti"
           )
           .as[L]

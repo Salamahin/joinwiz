@@ -3,7 +3,6 @@ package joinwiz
 import org.apache.spark.sql.Column
 import org.apache.spark.sql.functions.col
 
-import scala.annotation.tailrec
 import scala.language.experimental.macros
 import scala.reflect.macros.whitebox
 
@@ -18,8 +17,8 @@ class RTColumn[LEFT, RIGHT, +T](val path: Seq[String], val get: RIGHT => T) {
 }
 
 object TColumn {
-  def left[T]: LTColumn[T, T, T]  = new LTColumn(alias.left :: Nil, identity)
-  def right[T]: RTColumn[T, T, T] = new RTColumn(alias.right :: Nil, identity)
+  def left[L, R]: LTColumn[L, R, L]  = new LTColumn(alias.left :: Nil, identity)
+  def right[L, R]: RTColumn[L, R, R] = new RTColumn(alias.right :: Nil, identity)
 }
 
 trait ApplyTColumnSyntax {
@@ -161,21 +160,5 @@ object Macro2Impl {
          )
          """
     )
-  }
-
-  private def argName[E: c.WeakTypeTag, T: c.WeakTypeTag](c: whitebox.Context)(func: c.Expr[E => T]): String = {
-    import c.universe._
-
-    @tailrec
-    def extract(tree: c.Tree, acc: List[String]): List[String] = {
-      tree match {
-        case Ident(_)          => acc
-        case Select(q, n)      => extract(q, n.decodedName.toString :: acc)
-        case Function(_, body) => extract(body, acc)
-        case _                 => c.abort(c.enclosingPosition, s"Unsupported expression: $func, apply should be used for products member selection only")
-      }
-    }
-
-    extract(func.tree, Nil).mkString(".")
   }
 }

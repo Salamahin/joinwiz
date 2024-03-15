@@ -21,56 +21,56 @@ class ApplyTColumnSyntaxTest extends AnyFunSuite with Matchers with ApplyTColumn
   )
 
   test("LTColumn can extract a value and a path from a lambda") {
-    val li = TColumn.left[Outer](_.inner1)
+    val li = TColumn.left[Outer, Outer](_.inner1)
 
     li.get(testee) shouldBe testee.inner1
     li.path shouldBe ("LEFT" :: "inner1" :: Nil)
   }
 
   test("LTColumn can extract value sequentially in case of nested structures") {
-    val li = TColumn.left[Outer](_.inner1)(_.value)
+    val li = TColumn.left[Outer, Outer](_.inner1)(_.value)
 
     li.get(testee) shouldBe testee.inner1.value
     li.path shouldBe ("LEFT" :: "inner1" :: "value" :: Nil)
   }
 
   test("LTColumn can extract a value from an optional nested struct without calling a .map on it") {
-    val li = TColumn.left[Outer] >> (_.maybeInner2) >> (_.value)
+    val li = TColumn.left[Outer, Outer] >> (_.maybeInner2) >> (_.value)
 
     li.get(testee) shouldBe testee.maybeInner2.map(_.value)
     li.path shouldBe ("LEFT" :: "maybeInner2" :: "value" :: Nil)
   }
 
   test("LTColumn can extract an optional value from an optional nested struct without calling a .flatMap on it") {
-    val li = TColumn.left[Outer] >> (_.maybeInner2) >> (_.maybeValue)
+    val li = TColumn.left[Outer, Outer] >> (_.maybeInner2) >> (_.maybeValue)
 
     li.get(testee) shouldBe testee.maybeInner2.flatMap(_.maybeValue)
     li.path shouldBe ("LEFT" :: "maybeInner2" :: "maybeValue" :: Nil)
   }
 
   test("RTColumn can extract a value and a path from a lambda") {
-    val ri = TColumn.right[Outer](_.inner1)
+    val ri = TColumn.right[Outer, Outer](_.inner1)
 
     ri.get(testee) shouldBe testee.inner1
     ri.path shouldBe ("RIGHT" :: "inner1" :: Nil)
   }
 
   test("RTColumn can extract value sequentially in case of nested structures") {
-    val ri = TColumn.right[Outer](_.inner1)(_.value)
+    val ri = TColumn.right[Outer, Outer](_.inner1)(_.value)
 
     ri.get(testee) shouldBe testee.inner1.value
     ri.path shouldBe ("RIGHT" :: "inner1" :: "value" :: Nil)
   }
 
   test("RTColumn can extract a value from an optional nested struct without calling a .map on it") {
-    val ri = TColumn.right[Outer] >> (_.maybeInner2) >> (_.value)
+    val ri = TColumn.right[Outer, Outer] >> (_.maybeInner2) >> (_.value)
 
     ri.get(testee) shouldBe testee.maybeInner2.map(_.value)
     ri.path shouldBe ("RIGHT" :: "maybeInner2" :: "value" :: Nil)
   }
 
   test("RTColumn can extract an optional value from an optional nested struct without calling a .flatMap on it") {
-    val ri = TColumn.right[Outer] >> (_.maybeInner2) >> (_.maybeValue)
+    val ri = TColumn.right[Outer, Outer] >> (_.maybeInner2) >> (_.maybeValue)
 
     ri.get(testee) shouldBe testee.maybeInner2.flatMap(_.maybeValue)
     ri.path shouldBe ("RIGHT" :: "maybeInner2" :: "maybeValue" :: Nil)
