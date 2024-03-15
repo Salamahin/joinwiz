@@ -1,45 +1,23 @@
-name: release
-
+name: Release
 on:
-  workflow_dispatch:
-    inputs:
-      release:
-        description: 'Release the project'
-        required: false
-
+  push:
+    branches: [master, main]
+    tags: ["*"]
 jobs:
-  release:
-    name: Release Cross-Builded Scala Project
+  publish:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
-      - name: Set up JDK 11
-        uses: actions/setup-java@v2
+      - uses: actions/checkout@v4
         with:
-          java-version: 11
-          distribution: 'adopt'
-
-      - name: Cache sbt dependencies
-        uses: actions/cache@v2
+          fetch-depth: 0
+      - uses: actions/setup-java@v4
         with:
-          path: ~/.sbt
-          key: ${{ runner.os }}-sbt-${{ hashFiles('**/*.sbt') }}-${{ hashFiles('**/project/build.properties') }}
-          restore-keys: ${{ runner.os }}-sbt-
-
-      - name: Cache ivy2 dependencies
-        uses: actions/cache@v2
-        with:
-          path: ~/.ivy2/cache
-          key: ${{ runner.os }}-ivy2-${{ hashFiles('**/ivy*.xml') }}
-          restore-keys: ${{ runner.os }}-ivy2-
-
-      - name: Publish to Maven Central
-        run: sbt 'release'
+          distribution: temurin
+          java-version: 8
+          cache: sbt
+      - run: sbt ci-release
         env:
-          CI: true
+          PGP_PASSPHRASE: ${{ secrets.PGP_PASSPHRASE }}
           PGP_SECRET: ${{ secrets.PGP_SECRET }}
-          SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
           SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
+          SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}

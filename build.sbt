@@ -1,37 +1,16 @@
 import sbt.url
-import sbtrelease.ReleaseStateTransformations._
 
 name := "joinwiz"
 
-releaseVersionBump := sbtrelease.Version.Bump.Next
-releaseVersionFile := baseDirectory.value / "version.sbt"
 releaseCrossBuild := true
-releaseIgnoreUntrackedFiles := true
-
-releaseProcess := Seq[ReleaseStep](
-  checkSnapshotDependencies,
-  inquireVersions,
-  runClean,
-  setReleaseVersion,
-  commitReleaseVersion,
-  tagRelease,
-  releaseStepCommandAndRemaining("publishSigned"),
-  releaseStepCommand("sonatypeBundleRelease"),
-  setNextVersion,
-  commitNextVersion,
-  pushChanges
-)
-
-ThisBuild / organization := "io.github.salamahin"
-ThisBuild / crossScalaVersions := Seq("2.13.8", "2.12.14", "2.11.12")
-ThisBuild / publishMavenStyle := true
-ThisBuild / publishTo := sonatypePublishToBundle.value
-ThisBuild / licenses := Seq("Apache 2" -> new URL("http://www.apache.org/licenses/LICENSE-2.0.txt"))
-ThisBuild / homepage := Some(url("https://github.com/Salamahin/joinwiz"))
-ThisBuild / scmInfo := Some(ScmInfo(url("https://github.com/Salamahin/joinwiz"), "scm:git@github.com:Salamahin/joinwiz.git"))
-ThisBuild / developers := List(
-  Developer(id = "Salamahin", name = "Danila Goloshchapov", email = "danilasergeevich@gmail.com", url = url("https://github.com/Salamahin"))
-)
+inThisBuild(List(
+  organization := "io.github.salamahin",
+  homepage := Some(url("https://github.com/Salamahin/joinwiz")),
+  licenses := List("Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0")),
+  developers := List(
+    Developer(id = "Salamahin", name = "Danila Goloshchapov", email = "danilasergeevich@gmail.com", url = url("https://github.com/Salamahin"))
+  )
+))
 
 lazy val commonSettings = Seq(
   scalacOptions ++= Seq(
@@ -45,8 +24,10 @@ lazy val commonSettings = Seq(
     "-feature",
     "-language:existentials",
     "-Ydelambdafy:inline"
-  )
+  ),
+  crossScalaVersions := List("2.13.8", "2.12.14", "2.11.12")
 )
+
 val sparkV       = Map("2.11" -> "2.3.2", "2.12" -> "2.4.5", "2.13" -> "3.2.1")
 def scalaTest    = Def.setting { "org.scalatest" %% "scalatest" % "3.1.0" % Test }
 def scalaReflect = Def.setting { "org.scala-lang" % "scala-reflect" % scalaVersion.value }
