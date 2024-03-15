@@ -1,6 +1,6 @@
 package joinwiz.expression
 
-import joinwiz.{ApplyLTCol, ApplyRTCol}
+import joinwiz.TColumn
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
@@ -8,7 +8,7 @@ import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
 class EqualSyntaxTest extends AnyFunSuite with Matchers {
   import joinwiz.syntax._
 
-  private val evaluate = (ApplyLTCol[Left, Right], ApplyRTCol[Left, Right])
+  private val evaluate = (TColumn.left[Left, Right], TColumn.right[Left, Right])
 
   case class Left(pk: String = null, opt: Option[String] = None)
   case class Right(pk: String = null, opt: Option[String] = None)
