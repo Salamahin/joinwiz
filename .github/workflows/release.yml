@@ -1,11 +1,8 @@
 name: release
 on:
-  workflow_dispatch:
-    inputs:
-      release:
-        description: 'Release the project'
-        required: false
-
+  push:
+    branches: [master, main]
+    tags: ["*"]
 jobs:
   publish:
     runs-on: ubuntu-latest
