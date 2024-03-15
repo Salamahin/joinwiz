@@ -1,9 +1,6 @@
 import sbt.url
 import sbtrelease.ReleaseStateTransformations._
 
-releaseCommitMessage := "Set version to ${(version in ThisBuild).value}"
-releaseTagName := "v${(version in ThisBuild).value}"
-
 name := "joinwiz"
 releaseCrossBuild := true
 releaseIgnoreUntrackedFiles := true
