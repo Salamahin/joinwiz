@@ -21,6 +21,7 @@ jobs:
         uses: actions/setup-java@v2
         with:
           java-version: 8
+          distribution: 'adopt'
 
       - name: Cache SBT dependencies
         uses: actions/cache@v2
@@ -45,6 +46,7 @@ jobs:
         uses: actions/setup-java@v2
         with:
           java-version: 11
+          distribution: 'adopt'
 
       - name: Cache SBT dependencies
         uses: actions/cache@v2
@@ -69,6 +71,7 @@ jobs:
         uses: actions/setup-java@v2
         with:
           java-version: 11
+          distribution: 'adopt'
 
       - name: Cache SBT dependencies
         uses: actions/cache@v2
