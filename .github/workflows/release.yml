@@ -37,7 +37,7 @@ jobs:
           restore-keys: ${{ runner.os }}-ivy2-
 
       - name: Publish to Maven Central
-        run: sbt release
+        run: sbt 'release with-defaults'
         env:
           CI: true
           PGP_SECRET: ${{ secrets.PGP_SECRET }}
