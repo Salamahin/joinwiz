@@ -1,16 +1,34 @@
 import sbt.url
+import sbtrelease.ReleaseStateTransformations._
 
 name := "joinwiz"
-
 releaseCrossBuild := true
-inThisBuild(List(
-  organization := "io.github.salamahin",
-  homepage := Some(url("https://github.com/Salamahin/joinwiz")),
-  licenses := List("Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0")),
-  developers := List(
-    Developer(id = "Salamahin", name = "Danila Goloshchapov", email = "danilasergeevich@gmail.com", url = url("https://github.com/Salamahin"))
-  )
-))
+releaseIgnoreUntrackedFiles := true
+releaseProcess := Seq[ReleaseStep](
+  checkSnapshotDependencies,
+  inquireVersions,
+  runClean,
+  runTest,
+  setReleaseVersion,
+  commitReleaseVersion,
+  tagRelease,
+  releaseStepCommandAndRemaining("publishSigned"),
+  releaseStepCommand("sonatypeBundleRelease"),
+  setNextVersion,
+  commitNextVersion,
+  pushChanges
+)
+
+ThisBuild / organization := "io.github.salamahin"
+ThisBuild / crossScalaVersions := Seq("2.13.8", "2.12.14", "2.11.12")
+ThisBuild / publishMavenStyle := true
+ThisBuild / publishTo := sonatypePublishToBundle.value
+ThisBuild / licenses := Seq("Apache 2" -> new URL("http://www.apache.org/licenses/LICENSE-2.0.txt"))
+ThisBuild / homepage := Some(url("https://github.com/Salamahin/joinwiz"))
+ThisBuild / scmInfo := Some(ScmInfo(url("https://github.com/Salamahin/joinwiz"), "scm:git@github.com:Salamahin/joinwiz.git"))
+ThisBuild / developers := List(
+  Developer(id = "Salamahin", name = "Danila Goloshchapov", email = "danilasergeevich@gmail.com", url = url("https://github.com/Salamahin"))
+)
 
 lazy val commonSettings = Seq(
   scalacOptions ++= Seq(
