@@ -15,8 +15,8 @@ decimal join when spark casts both left and right values to double)
 
 The second reason is that unit testing with Spark is a nightmare. It takes seconds for local session to start which
 means you will be running your single suite for a minute or two. On the other hand Scala has an abstraction over type -
-higher kinds. Most popular spark transformations can be expressed on top of Datasets and any Seq, and `joinwiz-testkit`
-allows you to do so **without even creating a Spark context**, and that will your tests super fast. Of course not every
+higher kinds. Most popular spark transformations can be expressed on top of Datasets and any Seq, and you can check
+your logic **without even creating a Spark context**, and that will your tests super fast. Of course not every
 transformation has an analogue in Seq's terms (like `repartition` makes sence only for distributed collections) but such
 specific behaviour still can be isolated easily.
 
