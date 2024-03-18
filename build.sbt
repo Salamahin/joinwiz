@@ -1,23 +1,6 @@
 import sbt.url
-import sbtrelease.ReleaseStateTransformations._
 
 name := "joinwiz"
-releaseCrossBuild := true
-releaseIgnoreUntrackedFiles := true
-releaseProcess := Seq[ReleaseStep](
-  checkSnapshotDependencies,
-  inquireVersions,
-  runClean,
-  runTest,
-  setReleaseVersion,
-  commitReleaseVersion,
-  tagRelease,
-  releaseStepCommandAndRemaining("publishSigned"),
-  releaseStepCommand("sonatypeBundleRelease"),
-  setNextVersion,
-  commitNextVersion,
-  pushChanges
-)
 
 inThisBuild(
   List(
