@@ -26,11 +26,7 @@ inThisBuild(
         url   = url("https://github.com/Salamahin")
       )
     ),
-    scalaVersion := (sys.env.get("CI_SCALA_VERSION") match {
-      case Some("2.13") => scala213
-      case Some("2.12") => scala212
-      case Some("2.11") => scala211
-    })
+    crossScalaVersions := supportedScalaVersions,
   )
 )
 
