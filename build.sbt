@@ -7,11 +7,17 @@ lazy val scala212               = "2.12.14"
 lazy val scala211               = "2.11.12"
 lazy val supportedScalaVersions = scala211 :: scala212 :: scala213 :: Nil
 
-val sparkV       = Map("2.11" -> "2.3.2", "2.12" -> "2.4.5", "2.13" -> "3.2.1")
-def scalaTest    = Def.setting { "org.scalatest" %% "scalatest" % "3.1.0" % Test }
-def scalaReflect = Def.setting { "org.scala-lang" % "scala-reflect" % scalaVersion.value }
-def sparkCore    = Def.setting { "org.apache.spark" %% "spark-core" % sparkV(scalaBinaryVersion.value) }
-def sparkSql     = Def.setting { "org.apache.spark" %% "spark-sql" % sparkV(scalaBinaryVersion.value) }
+lazy val sparkV =
+  Def.setting(scalaVersion.value match {
+    case `scala211` => "2.3.2"
+    case `scala212` => "2.4.5"
+    case `scala213` => "3.2.1"
+  })
+
+lazy val scalaTest    = Def.setting { "org.scalatest"    %% "scalatest"    % "3.1.0" % Test }
+lazy val scalaReflect = Def.setting { "org.scala-lang"   % "scala-reflect" % scalaVersion.value }
+lazy val sparkCore    = Def.setting { "org.apache.spark" %% "spark-core"   % sparkV.value }
+lazy val sparkSql     = Def.setting { "org.apache.spark" %% "spark-sql"    % sparkV.value }
 
 inThisBuild(
   List(
@@ -26,7 +32,7 @@ inThisBuild(
         url   = url("https://github.com/Salamahin")
       )
     ),
-    crossScalaVersions := supportedScalaVersions,
+    crossScalaVersions := supportedScalaVersions
   )
 )
 
@@ -46,7 +52,6 @@ lazy val commonSettings = Seq(
   crossScalaVersions := supportedScalaVersions,
   libraryDependencies ++= scalaReflect.value :: sparkCore.value :: sparkSql.value :: Nil
 )
-
 
 lazy val joinwiz_macro = project
   .settings(commonSettings: _*)
