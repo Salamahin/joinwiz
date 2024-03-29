@@ -77,7 +77,9 @@ In case when several joins are made one-by-one it might be tricky to reference t
 usually you would see something like `_1._1._1.field` from left or right side.
 With help of `wiz` unapplication you can transform that to a nice lambdas:
 ```scala
-def doSequentialJoin(as: Dataset[A], bs: Dataset[B], cs: Dataset[C], ds: Dataset[D]): Dataset[(((A, Option[B]), Option[C]), Option[D])] = {
+def doSequentialJoin(as: Dataset[A], 
+                     bs: Dataset[B],
+                     cs: Dataset[C],                     ds: Dataset[D]): Dataset[(((A, Option[B]), Option[C]), Option[D])] = {
   import joinwiz.syntax._
   import joinwiz.spark._
   as
