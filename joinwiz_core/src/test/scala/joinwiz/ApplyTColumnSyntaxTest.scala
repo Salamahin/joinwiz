@@ -2,9 +2,12 @@ package joinwiz
 
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
+import ApplyTColumnSyntaxTest._
 
-case class Outer(inner1: Inner, maybeInner2: Option[Inner])
-case class Inner(value: String, maybeValue: Option[String])
+object ApplyTColumnSyntaxTest {
+  case class Outer(inner1: Inner, maybeInner2: Option[Inner])
+  case class Inner(value: String, maybeValue: Option[String])
+}
 
 class ApplyTColumnSyntaxTest extends AnyFunSuite with Matchers with ApplyTColumnSyntax {
   private val testee = Outer(

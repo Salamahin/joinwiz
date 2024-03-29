@@ -12,6 +12,8 @@ object ComputationEngineTest {
   case class Entity(uuid: Int, value: String)
   case class OtherEntity(uuid: Int, value: String)
   case class EntityWithOpt(optUuid: Option[Int])
+
+  case class Outer(inner: Entity)
 }
 
 abstract class ComputationEngineTest[F[_]: ComputationEngine] extends AnyFunSuite with Matchers {
@@ -79,8 +81,7 @@ abstract class ComputationEngineTest[F[_]: ComputationEngine] extends AnyFunSuit
       rightPresent
     )
 
-    ds
-      .innerJoin(ds) {
+    ds.innerJoin(ds) {
         case (_ wiz l2, _ wiz r2) => l2((e: EntityWithOpt) => e.optUuid) =:= r2((e: EntityWithOpt) => e.optUuid)
       }
       .collect() should contain only (
@@ -221,6 +222,21 @@ abstract class ComputationEngineTest[F[_]: ComputationEngine] extends AnyFunSuit
     val e5 = Entity(2, "up")
 
     (entities(e1, e2) unionByName entities(e3, e4, e5)).collect() should contain only (e1, e2, e3, e4, e5)
+  }
+
+  test("can join by inner struct") {
+    val l1 = Outer(Entity(1, "hello"))
+    val l2 = Outer(Entity(2, "world"))
+    val r  = Entity(1, "world")
+
+    val left  = entities(l1, l2)
+    val right = entities(r)
+
+    left
+      .innerJoin(right) {
+        case (left, right) => left >> (_.inner) >> (_.uuid) =:= right(_.uuid)
+      }
+      .collect() should contain only ((l1, r))
   }
 
   test("can build row_number") {
