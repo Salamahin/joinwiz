@@ -66,7 +66,8 @@ With help of `wiz` unapplication you can transform that to a nice lambdas:
 ```scala
 def doSequentialJoin(as: Dataset[A], 
                      bs: Dataset[B],
-                     cs: Dataset[C],                     ds: Dataset[D]): Dataset[(((A, Option[B]), Option[C]), Option[D])] = {
+                     cs: Dataset[C],
+                     ds: Dataset[D]): Dataset[(((A, Option[B]), Option[C]), Option[D])] = {
   import joinwiz.syntax._
   import joinwiz.spark._
   as
