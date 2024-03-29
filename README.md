@@ -2,22 +2,9 @@
 
 [![build](https://github.com/Salamahin/joinwiz/actions/workflows/ci.yml/badge.svg)](https://github.com/Salamahin/joinwiz/actions/workflows/ci.yml)
 
-Tiny library improves Spark's dataset join API and improves unit-testing experience of (some) Spark transformations
-
-## Why
-
-There are 2 main reasons - using typesafe Dataset API one still need to specify the joining condition with strings or
-expressions which is not convenient and possible can be reason of a silly mistake. On the other hand with the power of
-macroses one can extract fields are used in the expression in the same manner as it is implemented in various lens libs.
-That will let your IDE to help you build an expression and will prevent from comparing incompatible types (like string-
-decimal join when spark casts both left and right values to double)
-
-The second reason is that unit testing with Spark is a nightmare. It takes seconds for local session to start which
-means you will be running your single suite for a minute or two. On the other hand Scala has an abstraction over type -
-higher kinds. Most popular spark transformations can be expressed on top of Datasets and any Seq, and you can check
-your logic **without even creating a Spark context**, and that will your tests super fast. Of course not every
-transformation has an analogue in Seq's terms (like `repartition` makes sence only for distributed collections) but such
-specific behaviour still can be isolated easily.
+Tiny library improves Spark's dataset join API by allowing you to specify join columns with lambdas instead of strings,
+ensuring typesafety and allows you using autocomplete features of your IDE. Also improves unit-testing experience
+of (some) Spark transformations
 
 ## Try it
 
