@@ -1,7 +1,6 @@
 # joinwiz
 
 [![build](https://github.com/Salamahin/joinwiz/actions/workflows/ci.yml/badge.svg)](https://github.com/Salamahin/joinwiz/actions/workflows/ci.yml)
-[![joinwiz Scala version support](https://index.scala-lang.org/salamahin/joinwiz/joinwiz/latest-by-scala-version.svg)](https://index.scala-lang.org/salamahin/joinwiz/joinwiz)
 
 Tiny library improves Spark's dataset join API and improves unit-testing experience of (some) Spark transformations
 
@@ -22,79 +21,93 @@ specific behaviour still can be isolated easily.
 
 ## Try it
 
+[![joinwiz Scala version support](https://index.scala-lang.org/salamahin/joinwiz/joinwiz/latest-by-scala-version.svg)](https://index.scala-lang.org/salamahin/joinwiz/joinwiz)
 ```scala
 scalacOptions += "-Ydelambdafy:inline"
 libraryDependencies += "io.github.salamahin" %% "joinwiz_core" % joinwiz_version
 ```
 
-## Primitive join
-
-Note that result has type of `(A, Option[B])` - no more NPE's when mapping!
+## Simple join
 
 ```scala
-def doJoin[F[_]: ComputationEngine](as: F[A], bs: F[B]): F[(A, Option[B])] = {
+def doJoin(as: Dataset[A], bs: Dataset[B]): Dataset[(A, Option[B])] = {
   import joinwiz.syntax._
+  import joinwiz.spark._
   as.leftJoin(bs) {
     case (left, right) => left(_.field) =:= right(_.field)
   }
 }
+
 ```
+Note, that result has a type of `Dataset[(A, Option[B])]` which means you won't get an NPE when would try a map it to a different type.
+In addition the library checks if both left and right columns can be used in the joining expression, meaning they need to have
+the comparable type. 
+You are not limited to equal join only, one can use `>`, `<`, `&&`, consts and more
 
-Injecting an `ComputationEngine` allows to make an abstraction over exact kind, which means it's possible to run the
-code in 2 modes: with and without spark
 
+`ComputationEngine` allows to make an abstraction over exact kind, which means it's possible to run the
+code in 2 modes: with and without spark:
 ```scala
-import jointwiz.spark._
-val as: Dataset[A] = ???
-val bs: Dataset[B] = ???
-doJoin(as, bs) //will run using SparkSession and result is a Dataset
+def foo[F[_]: ComputationEngine](as: F[A], bs: F[B]): F[C] = {
+  import joinwiz.syntax._
+  as
+    .innerJoin(bs) {
+      case (a, b) => a(_.field) =:= b(_.field)
+    }
+    .map {
+      case (a, b) => C(a, b)
+    }
+}
+
+def runWithSpark(as: Dataset[A], bs: Dataset[B]): Dataset[C] = {
+  import joinwiz.spark._
+  foo(as, bs)
+}
+
+//can be used in unit-testing
+def runWithoutSpark(as: Seq[A], bs: Seq[B]): Seq[C] = {
+  import joinwiz.testkit._
+  foo(as, bs)
+}
 ```
-
-On the other hand for test purposes you can do the following
-
-```scala
-import jointwiz.testkit._
-val as: Seq[A] = ???
-val bs: Seq[B] = ???
-doJoin(as, bs) //will run without SparkSession and result is a Seq
-```
-
-Clearly testing without spark makes your unit-test run much faster
 
 ## Chained joins
 
-In case when several joins are made one-by-one it might be tricky to check which exactly col in which table is used. You
-can easily workaround this with `wiz` unapplication
-
+In case when several joins are made one-by-one it might be tricky to reference the exact column with a string identifier,
+usually you would see something like `_1._1._1.field` from left or right side.
+With help of `wiz` unapplication you can transform that to a nice lambdas:
 ```scala
-def doSequentialJoin[F[_]: ComputationEngine](as: F[A], bs: F[B], cs: F[C]) = {
+def doSequentialJoin(as: Dataset[A], bs: Dataset[B], cs: Dataset[C], ds: Dataset[D]): Dataset[(((A, Option[B]), Option[C]), Option[D])] = {
   import joinwiz.syntax._
+  import joinwiz.spark._
   as
     .leftJoin(bs) {
-      case (left, right) => left(_.field) =:= right(_.field)
+      case (a, b) => a(_.field) =:= b(_.field)
     }
     .leftJoin(cs) {
       case (_ wiz b, c) => b(_.field) =:= c(_.field)
     }
-}
-```
-
-Unapply can be used to extract a members from a product type even if the type of option kind
-
-## UDFs
-
-Mapping of the joining expression is supported. To make the changes usable in testkit, one must specify transformation
-implementation on both `Column` and type
-
-```scala
-def joinWithMap[F[_]: ComputationEngine](as: F[A], bs: F[B]) = {
-  import joinwiz.syntax._
-  as
-    .leftJoin(bs) {
-      case (left, right) => left(_.field).map(column => column.cast(StringType), value => value.toString) =:= right(_.field)
+    .leftJoin(ds) {
+      case (_ wiz _ wiz c, d) => c(_.field) =:= d(_.field)
     }
 }
 ```
+Unapply can be used to extract a members from a product type even if the type of option kind
+
+## Nested structures
+
+Assuming your case-class contains some nested structs, in such case you can still can use joinwiz to extract necessary column:
+```scala
+def doJoin[F[_]: ComputationEngine](as: F[A], bs: F[B]): F[(A, Option[B])] = {
+  import joinwiz.syntax._
+  as
+    .leftJoin(bs) {
+      case (left, right) => left >> (_.innerStruct) >> (_.field) =:= bs >> (_.field)
+    }
+}
+```
+
+Operation `>>` is an alias for `apply`
 
 ## Window functions
 
@@ -125,5 +138,4 @@ def addRowNumber[F[_]: ComputationEngine](as: F[A]): F[(A, Int)] = {
 * filter
 * collect
 
-You can find more examples of usage in
-appropriate [test](joinwiz_core/src/test/scala/joinwiz/ComputationEngineTest.scala)
+You can find more examples of usage in the appropriate [test](joinwiz_core/src/test/scala/joinwiz/ComputationEngineTest.scala)
