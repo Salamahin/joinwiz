@@ -4,7 +4,7 @@ import joinwiz.expression.JoinCondition
 
 class SeqJoinImpl[L, R](op: JoinCondition[L, R], left: Seq[L], right: Seq[R]) {
 
-  def leftJoin() = {
+  def leftJoin(): Seq[(L, Option[R])] = {
     val joined          = innerJoin()
     val (leftJoined, _) = joined.unzip
     val notJoined       = left diff leftJoined

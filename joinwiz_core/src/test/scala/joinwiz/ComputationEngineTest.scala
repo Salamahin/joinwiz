@@ -1,6 +1,7 @@
 package joinwiz
 
 import joinwiz.ComputationEngineTest._
+import joinwiz.expression.CanEqual
 import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder
 import org.apache.spark.sql.{Dataset, Encoders}
 import org.scalatest.funsuite.AnyFunSuite
