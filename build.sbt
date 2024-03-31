@@ -50,7 +50,7 @@ lazy val commonSettings = Seq(
     "-Ydelambdafy:inline"
   ),
   crossScalaVersions := supportedScalaVersions,
-  libraryDependencies ++= scalaReflect.value :: sparkCore.value :: sparkSql.value ::  Nil
+  libraryDependencies ++= scalaReflect.value :: sparkCore.value :: sparkSql.value :: Nil
 )
 
 lazy val joinwiz_macro = project

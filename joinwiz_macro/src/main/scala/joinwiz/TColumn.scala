@@ -8,12 +8,18 @@ import scala.reflect.macros.whitebox
 
 class LTColumn[LEFT, RIGHT, +T](val path: Seq[String], val get: LEFT => T) {
   def value(l: LEFT): T = get(l)
-  def toColumn: Column  = col(path.mkString("."))
+  def toColumn: Column  = {
+    val c = if( path == Seq(alias.left)) path :+ "value" else path
+    col(c.mkString("."))
+  }
 }
 
 class RTColumn[LEFT, RIGHT, +T](val path: Seq[String], val get: RIGHT => T) {
   def value(l: RIGHT): T = get(l)
-  def toColumn: Column   = col(path.mkString("."))
+  def toColumn: Column   = {
+    val c = if( path == Seq(alias.right)) path :+ "value" else path
+    col(c.mkString("."))
+  }
 }
 
 object TColumn {

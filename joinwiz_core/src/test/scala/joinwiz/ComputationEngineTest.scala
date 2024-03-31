@@ -1,7 +1,8 @@
 package joinwiz
 
 import joinwiz.ComputationEngineTest._
-import org.apache.spark.sql.Dataset
+import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder
+import org.apache.spark.sql.{Dataset, Encoders}
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
 
@@ -20,7 +21,7 @@ abstract class ComputationEngineTest[F[_]: ComputationEngine] extends AnyFunSuit
 
   import joinwiz.syntax._
 
-  def entities[T <: Product: TypeTag](a: T*): F[T]
+  def entities[T: TypeTag](a: T*): F[T]
 
   test("can inner join") {
     val l1 = Entity(1, "skipme-left")
@@ -239,6 +240,17 @@ abstract class ComputationEngineTest[F[_]: ComputationEngine] extends AnyFunSuit
       .collect() should contain only ((l1, r))
   }
 
+
+  test("can join by primitive values") {
+    val ds1 = entities("value1", "value2", "value3")
+    val ds2 = entities("value2", "value3", "value4")
+
+    ds1.innerJoin(ds2)(_ =:= _).collect() should contain only(
+      ("value2", "value2"),
+      ("value3", "value3"),
+    )
+  }
+
   test("can build row_number") {
     val e1 = Entity(1, "b")
     val e2 = Entity(1, "a")
@@ -267,8 +279,7 @@ abstract class ComputationEngineTest[F[_]: ComputationEngine] extends AnyFunSuit
 import joinwiz.spark._
 
 class SparkComputationEngineTest extends ComputationEngineTest[Dataset] with Matchers with SparkSuite {
-
-  import ss.implicits._
-
-  override def entities[T <: Product: TypeTag](a: T*): Dataset[T] = a.toDS()
+  override def entities[T: TypeTag](a: T*): Dataset[T] = {
+    ss.createDataset(a)(ExpressionEncoder())
+  }
 }
