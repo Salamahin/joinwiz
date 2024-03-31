@@ -18,7 +18,6 @@ class TWindowTest extends AnyFunSuite with Matchers {
     val testee = PartitionByTestee("string", -1, true, Math.PI)
 
     window(testee) should be(((("string", -1), true), Math.PI))
-    window.partitionByCols
     window.partitionByCols should contain inOrderOnly (
       col("a"),
       col("b"),
