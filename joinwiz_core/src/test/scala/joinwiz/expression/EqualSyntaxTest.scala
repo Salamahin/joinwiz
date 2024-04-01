@@ -143,7 +143,8 @@ class EqualSyntaxTest extends AnyFunSuite with Matchers {
       case (left, right) => left(_.opt) =:= right(_.opt)
     }
 
-    evaluated(Left(opt = Some("matching")), Right(opt = Some("matching"))) should be(true)
+    val xxxx = evaluated.apply(Left(opt = Some("matching")), Right(opt = Some("matching")))
+    xxxx should be(true)
     evaluated(Left(opt = Some("matching")), Right(opt = Some("non-matching"))) should be(false)
     evaluated(Left(opt = Some("matching")), Right(opt = None)) should be(false)
     evaluated(Left(opt = None), Right(opt             = None)) should be(false)
