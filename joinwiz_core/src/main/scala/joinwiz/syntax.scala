@@ -10,7 +10,6 @@ object syntax
     extends EqualSyntax
     with CompareSyntax
     with CombinatorsSyntax
-    with Wrappers
     with UnapplySyntax
     with ApplyTColumnSyntax
     with CommonWindowFunctions

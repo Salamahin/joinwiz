@@ -1,7 +1,6 @@
 package joinwiz
 
 import joinwiz.ComputationEngineTest._
-import joinwiz.expression.CanEqual
 import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder
 import org.apache.spark.sql.{Dataset, Encoders}
 import org.scalatest.funsuite.AnyFunSuite
@@ -279,7 +278,7 @@ abstract class ComputationEngineTest[F[_]: ComputationEngine] extends AnyFunSuit
 
 import joinwiz.spark._
 
-class SparkComputationEngineTest extends ComputationEngineTest[Dataset] with Matchers with SparkSuite {
+class SparkComputationEngineTest extends ComputationEngineTest[Dataset] with SparkSuite {
   override def entities[T: TypeTag](a: T*): Dataset[T] = {
     ss.createDataset(a)(ExpressionEncoder())
   }
