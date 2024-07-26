@@ -17,7 +17,6 @@ object ComputationEngineTest {
 }
 
 abstract class ComputationEngineTest[F[_]: ComputationEngine] extends AnyFunSuite with Matchers {
-
   import joinwiz.syntax._
 
   def entities[T <: Product: TypeTag](a: T*): F[T]
@@ -262,13 +261,79 @@ abstract class ComputationEngineTest[F[_]: ComputationEngine] extends AnyFunSuit
     )
   }
 
+  test("can use UDF of 1 argument as a joining condition") {
+    val l1 = Entity(1, "l1")
+    val l2 = Entity(2, "l2")
+
+    val r1 = Entity(2, "r1")
+    val r2 = Entity(3, "r2")
+
+    val left  = entities(l1, l2)
+    val right = entities(r1, r2)
+
+    left
+      .innerJoin(right)((l, _) => udf(l(_.uuid))(_ == 1))
+      .collect() should contain only ((l1, r1), (l1, r2))
+  }
+
+  test("can use UDF of 2 arguments as a joining condition") {
+    val l1 = Entity(1, "l1")
+    val l2 = Entity(2, "l2")
+
+    val r1 = Entity(1, "r1")
+    val r2 = Entity(3, "r2")
+
+    val left  = entities(l1, l2)
+    val right = entities(r1, r2)
+
+    left
+      .innerJoin(right)((l, r) => udf(l(_.uuid), r(_.uuid))((left, right) => left == right))
+      .collect() should contain only ((l1, r1))
+  }
+
+  test("can use UDF of 3 arguments as a joining condition") {
+    val l1 = Entity(1, "l1")
+    val l2 = Entity(1, "l2")
+    val l3 = Entity(2, "l3")
+
+    val r1 = Entity(1, "r1")
+    val r2 = Entity(3, "r2")
+
+    val left  = entities(l1, l2, l3)
+    val right = entities(r1, r2)
+
+    left
+      .innerJoin(right) { (l, r) => udf(l(_.uuid), l(_.uuid), r(_.uuid))(_ + _ + _ < 4) }
+      .collect() should contain only ((l1, r1), (l2, r1))
+  }
+
+  test("can use UDF of 4 arguments as a joining condition") {
+    val l1 = Entity(1, "l1")
+    val l2 = Entity(1, "l2")
+    val l3 = Entity(2, "l3")
+
+    val r1 = Entity(1, "r1")
+    val r2 = Entity(1, "r2")
+    val r3 = Entity(3, "r3")
+
+    val left  = entities(l1, l2, l3)
+    val right = entities(r1, r2, r3)
+
+    left
+      .innerJoin(right) { (l, r) => udf(l(_.uuid), l(_.uuid), r(_.uuid))(_ + _ + _ < 5) }
+      .collect() should contain only ((l1, r1), (l1, r2), (l2, r1), (l2, r2))
+  }
 }
 
-import joinwiz.spark._
+package spark {
+  class SparkComputationEngineTest extends ComputationEngineTest[Dataset] with SparkSuite {
+    import ss.implicits._
+    override def entities[T <: Product: TypeTag](a: T*): Dataset[T] = a.toDS()
+  }
+}
 
-class SparkComputationEngineTest extends ComputationEngineTest[Dataset] with Matchers with SparkSuite {
-
-  import ss.implicits._
-
-  override def entities[T <: Product: TypeTag](a: T*): Dataset[T] = a.toDS()
+package testkit {
+  class TestkitComputationEngineTest extends ComputationEngineTest[Seq] {
+    override def entities[T <: Product: TypeTag](a: T*): Seq[T] = a.toSeq
+  }
 }

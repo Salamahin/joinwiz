@@ -181,7 +181,7 @@ class SeqExpressionEvaluatorTest extends AnyFunSuite with Matchers {
       } should contain only (((a1, b2), c1))
   }
 
-  test("can join unapplying ApplyRight`wiz`") {
+  test("can join unapplying ApplyRight `wiz`") {
     as.innerJoin(bs zip cs) {
       case (a, _ wiz c) => a(_.value) =:= c(_.optValue)
     } should contain only ((a1, (b1, c1)))

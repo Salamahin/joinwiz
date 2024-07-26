@@ -6,14 +6,19 @@ import org.apache.spark.sql.functions.col
 import scala.language.experimental.macros
 import scala.reflect.macros.whitebox
 
-class LTColumn[LEFT, RIGHT, +T](val path: Seq[String], val get: LEFT => T) {
-  def value(l: LEFT): T = get(l)
-  def toColumn: Column  = col(path.mkString("."))
+trait TColumn[LEFT, RIGHT, +T] {
+  def value(l: LEFT, r: RIGHT): T
+  def toColumn: Column
 }
 
-class RTColumn[LEFT, RIGHT, +T](val path: Seq[String], val get: RIGHT => T) {
-  def value(l: RIGHT): T = get(l)
-  def toColumn: Column   = col(path.mkString("."))
+class LTColumn[LEFT, RIGHT, +T](val path: Seq[String], val get: LEFT => T) extends TColumn[LEFT, RIGHT, T] {
+  def value(l: LEFT, r: RIGHT): T = get(l)
+  def toColumn: Column            = col(path.mkString("."))
+}
+
+class RTColumn[LEFT, RIGHT, +T](val path: Seq[String], val get: RIGHT => T) extends TColumn[LEFT, RIGHT, T] {
+  def value(l: LEFT, r: RIGHT): T = get(r)
+  def toColumn: Column            = col(path.mkString("."))
 }
 
 object TColumn {

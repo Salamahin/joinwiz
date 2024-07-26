@@ -27,7 +27,7 @@ class ApplyTWindow[O] extends Serializable {
 }
 
 object TWindow {
-  def composeOrdering[T](first: Ordering[T], second: Ordering[T]) = new Ordering[T] {
+  def composeOrdering[T](first: Ordering[T], second: Ordering[T]): Ordering[T] = new Ordering[T] {
     override def compare(x: T, y: T): Int = {
       val compared = first.compare(x, y)
       if (compared == 0) second.compare(x, y)
