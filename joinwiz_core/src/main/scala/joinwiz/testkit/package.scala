@@ -9,7 +9,7 @@ import scala.reflect.runtime.universe.TypeTag
 
 package object testkit {
 
-  implicit val fakeComputationEngine: ComputationEngine[Seq] = new ComputationEngine[Seq] {
+  implicit val testkitComputationEngine: ComputationEngine[Seq] = new ComputationEngine[Seq] {
     override def join: Join[Seq] = new Join[Seq] {
       override def inner[T, U](ft: Seq[T], fu: Seq[U])(expr: JOIN_CONDITION[T, U]): Seq[(T, U)] = {
         new SeqJoinImpl[T, U](expr(TColumn.left, TColumn.right), ft, fu).innerJoin()
