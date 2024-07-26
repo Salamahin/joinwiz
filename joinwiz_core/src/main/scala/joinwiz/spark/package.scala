@@ -11,7 +11,7 @@ import scala.reflect.runtime.universe.TypeTag
 
 package object spark {
 
-  implicit val sparkBasedEngine: ComputationEngine[Dataset] = new ComputationEngine[Dataset] {
+  implicit val sparkComputationEngine: ComputationEngine[Dataset] = new ComputationEngine[Dataset] {
     override def join: Join[Dataset] = new Join[Dataset] {
 
       def joinWiz[L, R](fl: Dataset[L], fr: Dataset[R], joinType: String)(joinBy: JOIN_CONDITION[L, R]): Dataset[(L, R)] = {

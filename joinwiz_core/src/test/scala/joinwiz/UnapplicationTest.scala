@@ -30,7 +30,7 @@ class UnapplicationTest extends AnyFunSuite with Matchers {
 
   test("right unapplication of the joined entity does not affect the scope") {
     val expr = rightTestee match {
-      case (a, wiz(_, wiz(_, d))) => a(_.aString) =:= d(_.dString)
+      case (a, _ wiz (_ wiz d)) => a(_.aString) =:= d(_.dString)
     }
 
     expr().toString() should be("(LEFT.aString = RIGHT._2._2.dString)")

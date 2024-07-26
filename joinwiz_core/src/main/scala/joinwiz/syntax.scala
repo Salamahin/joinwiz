@@ -14,7 +14,8 @@ object syntax
     with UnapplySyntax
     with ApplyTColumnSyntax
     with CommonWindowFunctions
-    with WindowExpressionSyntax {
+    with WindowExpressionSyntax
+    with UdfSyntax {
 
   type JOIN_CONDITION[L, R]    = (LTColumn[L, R, L], RTColumn[L, R, R]) => JoinCondition[L, R]
   type WINDOW_EXPRESSION[T, S] = ApplyTWindow[T] => TWindowSpec[T, S]
