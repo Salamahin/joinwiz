@@ -99,6 +99,23 @@ def doJoin[F[_]: ComputationEngine](as: F[A], bs: F[B]): F[(A, Option[B])] = {
 
 Operation `>>` is an alias for `apply`
 
+## UDFs
+
+One can use UDF as a joining expressions
+
+```scala
+def doJoin[F[_] : ComputationEngine](as: F[A], bs: F[B]): F[(A, Option[B])] = {
+  import joinwiz.syntax._
+  as.leftJoin(bs) {
+    case (left, right) =>
+      udf(
+        left(_.field),
+        right(_.field)
+      )(_ + _ < 3)
+  }
+}
+```
+
 ## Window functions
 
 To add a new window function one has to inherit `joinwiz.window.WindowFunction`. After this can be used like following:
