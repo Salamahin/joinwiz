@@ -19,6 +19,9 @@ lazy val scalaReflect = Def.setting { "org.scala-lang"   % "scala-reflect" % sca
 lazy val sparkCore    = Def.setting { "org.apache.spark" %% "spark-core"   % sparkV.value }
 lazy val sparkSql     = Def.setting { "org.apache.spark" %% "spark-sql"    % sparkV.value }
 
+sonatypeCredentialHost := "s01.oss.sonatype.org"
+sonatypeRepository := "https://s01.oss.sonatype.org/service/local"
+
 inThisBuild(
   List(
     organization := "io.github.salamahin",
@@ -50,7 +53,7 @@ lazy val commonSettings = Seq(
     "-Ydelambdafy:inline"
   ),
   crossScalaVersions := supportedScalaVersions,
-  libraryDependencies ++= scalaReflect.value :: sparkCore.value :: sparkSql.value ::  Nil
+  libraryDependencies ++= scalaReflect.value :: sparkCore.value :: sparkSql.value :: Nil
 )
 
 lazy val joinwiz_macro = project
