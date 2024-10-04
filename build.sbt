@@ -20,31 +20,18 @@ lazy val scalaReflect = Def.setting { "org.scala-lang"   % "scala-reflect" % sca
 lazy val sparkCore    = Def.setting { "org.apache.spark" %% "spark-core"   % sparkV.value }
 lazy val sparkSql     = Def.setting { "org.apache.spark" %% "spark-sql"    % sparkV.value }
 
-sonatypeCredentialHost := "s01.oss.sonatype.org"
-sonatypeRepository := "https://s01.oss.sonatype.org/service/local"
-
-inThisBuild(
-  List(
-    organization := "io.github.salamahin",
-    homepage := Some(url("https://github.com/Salamahin/joinwiz")),
-    licenses := List("Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0")),
-    developers := List(
-      Developer(
-        id    = "Salamahin",
-        name  = "Danila Goloshchapov",
-        email = "danilasergeevich@gmail.com",
-        url   = url("https://github.com/Salamahin")
-      )
-    ),
-    crossScalaVersions := supportedScalaVersions
-  )
-)
-
-ThisBuild / sonatypeCredentialHost := sonatypeCentralHost
-sonatypeRepository := "https://s01.oss.sonatype.org/service/local"
-publish / skip := true
-
 lazy val commonSettings = Seq(
+  organization := "io.github.salamahin",
+  homepage := Some(url("https://github.com/Salamahin/joinwiz")),
+  licenses := List("Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0")),
+  developers := List(
+    Developer(
+      id    = "Salamahin",
+      name  = "Danila Goloshchapov",
+      email = "danilasergeevich@gmail.com",
+      url   = url("https://github.com/Salamahin")
+    )
+  ),
   scalacOptions ++= Seq(
     "-encoding",
     "utf8",
@@ -61,6 +48,11 @@ lazy val commonSettings = Seq(
   libraryDependencies ++= scalaReflect.value :: sparkCore.value :: sparkSql.value :: Nil
 )
 
+lazy val root = (project in file("."))
+  .aggregate(joinwiz_macro, joinwiz_core)
+  .settings(commonSettings: _*)
+  .settings(publish / skip := true)
+
 lazy val joinwiz_macro = project
   .settings(commonSettings: _*)
 
@@ -68,3 +60,5 @@ lazy val joinwiz_core = project
   .dependsOn(joinwiz_macro)
   .settings(commonSettings: _*)
   .settings(libraryDependencies += scalaTest.value)
+
+ThisBuild / sonatypeCredentialHost := sonatypeCentralHost
