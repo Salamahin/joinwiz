@@ -44,7 +44,7 @@ ThisBuild / scalacOptions ++= Seq(
   "-Ydelambdafy:inline"
 )
 //ThisBuild / sonatypeCredentialHost := sonatypeCentralHost
-ThisBuild / sonatypeCredentialHost := "s01.oss.sonatype.org"
+ThisBuild / sonatypeCredentialHost := sonatypeCentralHost
 sonatypeRepository := "https://s01.oss.sonatype.org/service/local"
 
 lazy val commonSettings = Seq(
