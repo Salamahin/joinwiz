@@ -31,7 +31,6 @@ ThisBuild / developers := List(
   )
 )
 ThisBuild / licenses := List("Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0"))
-ThisBuild / sonatypeCredentialHost := sonatypeCentralHost
 ThisBuild / scalacOptions ++= Seq(
   "-encoding",
   "utf8",
@@ -44,6 +43,9 @@ ThisBuild / scalacOptions ++= Seq(
   "-language:existentials",
   "-Ydelambdafy:inline"
 )
+//ThisBuild / sonatypeCredentialHost := sonatypeCentralHost
+ThisBuild / sonatypeCredentialHost := "s01.oss.sonatype.org"
+sonatypeRepository := "https://s01.oss.sonatype.org/service/local"
 
 lazy val commonSettings = Seq(
   crossScalaVersions := supportedScalaVersions,
