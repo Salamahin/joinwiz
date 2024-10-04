@@ -43,7 +43,7 @@ ThisBuild / scalacOptions ++= Seq(
   "-language:existentials",
   "-Ydelambdafy:inline"
 )
-//ThisBuild / sonatypeCredentialHost := sonatypeCentralHost
+ThisBuild / versionScheme := Some("early-semver")
 ThisBuild / sonatypeCredentialHost := sonatypeCentralHost
 sonatypeRepository := "https://s01.oss.sonatype.org/service/local"
 
@@ -59,8 +59,10 @@ lazy val root = (project in file("."))
 
 lazy val joinwiz_macro = project
   .settings(commonSettings: _*)
+  .settings(publish / skip := false)
 
 lazy val joinwiz_core = project
   .dependsOn(joinwiz_macro)
   .settings(commonSettings: _*)
   .settings(libraryDependencies += scalaTest.value)
+  .settings(publish / skip := false)
