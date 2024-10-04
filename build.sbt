@@ -2,6 +2,7 @@ import sbt.url
 import xerial.sbt.Sonatype.sonatypeCentralHost
 
 name := "joinwiz"
+version := s"1.4.${sys.env.getOrElse("GITHUB_RUN_NUMBER", "0")}"
 
 lazy val scala213               = "2.13.8"
 lazy val scala212               = "2.12.14"
@@ -45,6 +46,8 @@ ThisBuild / scalacOptions ++= Seq(
 )
 ThisBuild / versionScheme := Some("early-semver")
 ThisBuild / sonatypeCredentialHost := sonatypeCentralHost
+publishTo := sonatypePublishToBundle.value
+
 
 lazy val commonSettings = Seq(
   crossScalaVersions := supportedScalaVersions,
