@@ -1,4 +1,5 @@
 import sbt.url
+import xerial.sbt.Sonatype.sonatypeCentralHost
 
 name := "joinwiz"
 
@@ -39,7 +40,8 @@ inThisBuild(
   )
 )
 
-ThisBuild / sonatypeCredentialHost := xerial.sbt.Sonatype.sonatypeCentralHost
+ThisBuild / sonatypeCredentialHost := sonatypeCentralHost
+sonatypeRepository := "https://s01.oss.sonatype.org/service/local"
 publish / skip := true
 
 lazy val commonSettings = Seq(
