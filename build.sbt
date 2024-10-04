@@ -48,6 +48,7 @@ ThisBuild / scalacOptions ++= Seq(
 ThisBuild / sonatypeCredentialHost := sonatype01
 ThisBuild / publishTo := sonatypePublishToBundle.value
 ThisBuild / version := s"1.5.${sys.env.getOrElse("GITHUB_RUN_NUMBER", "0")}"
+ThisBuild / sonatypeLogLevel := "debug"
 
 lazy val commonSettings = Seq(
   libraryDependencies ++= scalaReflect.value :: sparkCore.value :: sparkSql.value :: Nil
