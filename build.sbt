@@ -21,6 +21,7 @@ lazy val scalaReflect = Def.setting { "org.scala-lang"   % "scala-reflect" % sca
 lazy val sparkCore    = Def.setting { "org.apache.spark" %% "spark-core"   % sparkV.value }
 lazy val sparkSql     = Def.setting { "org.apache.spark" %% "spark-sql"    % sparkV.value }
 
+ThisBuild / scalaVersion := scala213
 ThisBuild / organization := "io.github.salamahin"
 ThisBuild / homepage := Some(url("https://github.com/Salamahin/joinwiz"))
 ThisBuild / developers := List(
@@ -47,7 +48,6 @@ ThisBuild / scalacOptions ++= Seq(
 ThisBuild / versionScheme := Some("early-semver")
 ThisBuild / sonatypeCredentialHost := sonatypeCentralHost
 publishTo := sonatypePublishToBundle.value
-
 
 lazy val commonSettings = Seq(
   crossScalaVersions := supportedScalaVersions,
