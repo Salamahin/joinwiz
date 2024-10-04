@@ -2,7 +2,7 @@ import sbt.url
 import xerial.sbt.Sonatype.sonatypeCentralHost
 
 name := "joinwiz"
-version := s"1.4.${sys.env.getOrElse("GITHUB_RUN_NUMBER", "0")}"
+version := s"1.5.${sys.env.getOrElse("GITHUB_RUN_NUMBER", "0")}"
 
 lazy val scala213               = "2.13.8"
 lazy val scala212               = "2.12.14"
@@ -16,12 +16,13 @@ lazy val sparkV =
     case `scala213` => "3.2.1"
   })
 
-lazy val scalaTest    = Def.setting { "org.scalatest"    %% "scalatest"    % "3.1.0" % Test }
+lazy val scalaTest    = Def.setting { "org.scalatest"    %% "scalatest"    % "3.2.19" % Test }
 lazy val scalaReflect = Def.setting { "org.scala-lang"   % "scala-reflect" % scalaVersion.value }
 lazy val sparkCore    = Def.setting { "org.apache.spark" %% "spark-core"   % sparkV.value }
 lazy val sparkSql     = Def.setting { "org.apache.spark" %% "spark-sql"    % sparkV.value }
 
-ThisBuild / scalaVersion := scala213
+ThisBuild / scalaVersion := scala212
+ThisBuild / crossScalaVersions := supportedScalaVersions
 ThisBuild / organization := "io.github.salamahin"
 ThisBuild / homepage := Some(url("https://github.com/Salamahin/joinwiz"))
 ThisBuild / developers := List(
@@ -45,12 +46,10 @@ ThisBuild / scalacOptions ++= Seq(
   "-language:existentials",
   "-Ydelambdafy:inline"
 )
-ThisBuild / versionScheme := Some("early-semver")
 ThisBuild / sonatypeCredentialHost := sonatypeCentralHost
-publishTo := sonatypePublishToBundle.value
+ThisBuild / publishTo := sonatypePublishToBundle.value
 
 lazy val commonSettings = Seq(
-  crossScalaVersions := supportedScalaVersions,
   libraryDependencies ++= scalaReflect.value :: sparkCore.value :: sparkSql.value :: Nil
 )
 
@@ -61,10 +60,8 @@ lazy val root = (project in file("."))
 
 lazy val joinwiz_macro = project
   .settings(commonSettings: _*)
-  .settings(publish / skip := false)
 
 lazy val joinwiz_core = project
   .dependsOn(joinwiz_macro)
   .settings(commonSettings: _*)
   .settings(libraryDependencies += scalaTest.value)
-  .settings(publish / skip := false)
