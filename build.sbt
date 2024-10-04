@@ -40,6 +40,7 @@ inThisBuild(
 )
 
 ThisBuild / sonatypeCredentialHost := xerial.sbt.Sonatype.sonatypeCentralHost
+publish / skip := true
 
 lazy val commonSettings = Seq(
   scalacOptions ++= Seq(
