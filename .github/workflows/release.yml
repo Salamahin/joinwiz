@@ -1,7 +1,7 @@
 name: release
 on:
   push:
-    tags: ["*"]
+    tags: [ "*" ]
   workflow_dispatch:
 
 jobs:
@@ -16,9 +16,18 @@ jobs:
           distribution: temurin
           java-version: 8
           cache: sbt
-      - run: sbt publishSigned sonatypeReleaseAll
+
+      - name: Import PGP Key
+        run: |
+          echo "$PGP_SECRET" | gpg --batch --import
+        env:
+          PGP_SECRET: ${{ secrets.PGP_SECRET }}
+
+      - run: sbt "+publishSigned; sonatypeBundleRelease"
         env:
           PGP_PASSPHRASE: ${{ secrets.PGP_PASSPHRASE }}
-          PGP_SECRET: ${{ secrets.PGP_SECRET }}
           SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
           SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
+
+      - name: Clean Up PGP Keys
+        run: gpg --batch --yes --delete-secret-keys && gpg --batch --yes --delete-keys
