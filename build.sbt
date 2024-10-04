@@ -35,11 +35,11 @@ inThisBuild(
         url   = url("https://github.com/Salamahin")
       )
     ),
-    crossScalaVersions := supportedScalaVersions,
-    sonatypeCredentialHost := xerial.sbt.Sonatype.sonatypeCentralHost,
-    publish / skip := true
+    crossScalaVersions := supportedScalaVersions
   )
 )
+
+ThisBuild / sonatypeCredentialHost := xerial.sbt.Sonatype.sonatypeCentralHost
 
 lazy val commonSettings = Seq(
   scalacOptions ++= Seq(
