@@ -36,7 +36,8 @@ inThisBuild(
       )
     ),
     crossScalaVersions := supportedScalaVersions,
-    sonatypeCredentialHost := xerial.sbt.Sonatype.sonatypeCentralHost
+    sonatypeCredentialHost := xerial.sbt.Sonatype.sonatypeCentralHost,
+    publish / skip := true
   )
 )
 
