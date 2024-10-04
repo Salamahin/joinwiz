@@ -2,7 +2,6 @@ import sbt.url
 import xerial.sbt.Sonatype.sonatypeCentralHost
 
 name := "joinwiz"
-version := s"1.5.${sys.env.getOrElse("GITHUB_RUN_NUMBER", "0")}"
 
 lazy val scala213               = "2.13.8"
 lazy val scala212               = "2.12.14"
@@ -48,6 +47,7 @@ ThisBuild / scalacOptions ++= Seq(
 )
 ThisBuild / sonatypeCredentialHost := sonatypeCentralHost
 ThisBuild / publishTo := sonatypePublishToBundle.value
+ThisBuild / version := s"1.5.${sys.env.getOrElse("GITHUB_RUN_NUMBER", "0")}"
 
 lazy val commonSettings = Seq(
   libraryDependencies ++= scalaReflect.value :: sparkCore.value :: sparkSql.value :: Nil
