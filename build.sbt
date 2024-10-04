@@ -1,5 +1,5 @@
 import sbt.url
-import xerial.sbt.Sonatype.sonatype01
+import xerial.sbt.Sonatype.{sonatype01, sonatypeCentralHost}
 
 name := "joinwiz"
 
@@ -45,7 +45,7 @@ ThisBuild / scalacOptions ++= Seq(
   "-language:existentials",
   "-Ydelambdafy:inline"
 )
-ThisBuild / sonatypeCredentialHost := sonatype01
+ThisBuild / sonatypeCredentialHost := sonatypeCentralHost
 ThisBuild / publishTo := sonatypePublishToBundle.value
 ThisBuild / version := s"1.5.${sys.env.getOrElse("GITHUB_RUN_NUMBER", "0")}"
 ThisBuild / sonatypeLogLevel := "debug"
