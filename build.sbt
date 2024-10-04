@@ -1,5 +1,4 @@
 import sbt.url
-import xerial.sbt.Sonatype.sonatypeCentralHost
 
 name := "joinwiz"
 
@@ -44,8 +43,7 @@ ThisBuild / scalacOptions ++= Seq(
   "-Ydelambdafy:inline"
 )
 ThisBuild / versionScheme := Some("early-semver")
-ThisBuild / sonatypeCredentialHost := sonatypeCentralHost
-sonatypeRepository := "https://s01.oss.sonatype.org/service/local"
+ThisBuild / publishTo := sonatypePublishToBundle.value
 
 lazy val commonSettings = Seq(
   crossScalaVersions := supportedScalaVersions,
