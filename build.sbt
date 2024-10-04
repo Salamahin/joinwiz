@@ -35,7 +35,8 @@ inThisBuild(
         url   = url("https://github.com/Salamahin")
       )
     ),
-    crossScalaVersions := supportedScalaVersions
+    crossScalaVersions := supportedScalaVersions,
+    sonatypeCredentialHost := xerial.sbt.Sonatype.sonatypeCentralHost
   )
 )
 
