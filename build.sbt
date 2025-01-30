@@ -31,8 +31,6 @@ ThisBuild / developers := List(
     url   = url("https://github.com/Salamahin")
   )
 )
-ThisBuild / sonatypeCredentialHost := "s01.oss.sonatype.org"
-ThisBuild / sonatypeRepository := "https://s01.oss.sonatype.org/service/local"
 ThisBuild / versionScheme := Some("early-semver")
 ThisBuild / licenses := List("Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0"))
 ThisBuild / scalacOptions ++= Seq(
