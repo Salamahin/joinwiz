@@ -1,7 +1,7 @@
 name: release
 on:
   push:
-    tags: [ "*" ]
+    tags: [ "v*" ]
   workflow_dispatch:
 
 jobs:
@@ -21,17 +21,9 @@ jobs:
       - name: Setup Scala and sbt
         uses: olafurpg/setup-scala@v13
 
-      - name: Import PGP Key
-        run: |
-          echo "$PGP_SECRET" | base64 --decode | gpg --batch --import --yes
+      - run: sbt ci-release
         env:
           PGP_SECRET: ${{ secrets.PGP_SECRET }}
-
-      - run: sbt "+publishSigned; sonatypeBundleRelease"
-        env:
           PGP_PASSPHRASE: ${{ secrets.PGP_PASSPHRASE }}
-          SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
           SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
-
-      - name: Clean Up PGP Keys
-        run: gpg --batch --yes --delete-secret-keys && gpg --batch --yes --delete-keys
+          SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
