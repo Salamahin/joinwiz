@@ -24,7 +24,7 @@ jobs:
           distribution: 'adopt'
 
       - name: Set up sbt
-        uses: olafurpg/setup-sbt@v10
+        uses: actions/setup-sbt@v1
 
       - name: Cache SBT dependencies
         uses: actions/cache@v2
@@ -52,7 +52,7 @@ jobs:
           distribution: 'adopt'
 
       - name: Set up sbt
-        uses: olafurpg/setup-sbt@v10
+        uses: actions/setup-sbt@v1
 
       - name: Cache SBT dependencies
         uses: actions/cache@v2
@@ -80,7 +80,7 @@ jobs:
           distribution: 'adopt'
 
       - name: Set up sbt
-        uses: olafurpg/setup-sbt@v10
+        uses: actions/setup-sbt@v1
 
       - name: Cache SBT dependencies
         uses: actions/cache@v2
