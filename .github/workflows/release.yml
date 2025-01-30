@@ -17,6 +17,8 @@ jobs:
           java-version: 8
           cache: sbt
 
+      - uses: actions/setup-sbt@v2
+
       - name: Import PGP Key
         run: |
           echo "$PGP_SECRET" | base64 --decode | gpg --batch --import --yes
