@@ -23,6 +23,9 @@ jobs:
           java-version: 8
           distribution: 'adopt'
 
+      - name: Set up sbt
+        uses: olafurpg/setup-sbt@v10
+
       - name: Cache SBT dependencies
         uses: actions/cache@v2
         with:
@@ -48,6 +51,9 @@ jobs:
           java-version: 11
           distribution: 'adopt'
 
+      - name: Set up sbt
+        uses: olafurpg/setup-sbt@v10
+
       - name: Cache SBT dependencies
         uses: actions/cache@v2
         with:
@@ -72,6 +78,9 @@ jobs:
         with:
           java-version: 11
           distribution: 'adopt'
+
+      - name: Set up sbt
+        uses: olafurpg/setup-sbt@v10
 
       - name: Cache SBT dependencies
         uses: actions/cache@v2

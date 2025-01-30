@@ -16,7 +16,6 @@ jobs:
           distribution: temurin
           java-version: 8
           cache: sbt
-
       - uses: actions/setup-sbt@v2
 
       - name: Import PGP Key
