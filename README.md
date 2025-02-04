@@ -8,7 +8,7 @@ of (some) Spark transformations
 
 ## Try it
 
-[![joinwiz Scala version support](https://index.scala-lang.org/salamahin/joinwiz/joinwiz/latest-by-scala-version.svg)](https://index.scala-lang.org/salamahin/joinwiz/joinwiz)
+[![joinwiz_core Scala version support](https://index.scala-lang.org/salamahin/joinwiz/joinwiz_core/latest.svg)](https://index.scala-lang.org/salamahin/joinwiz/joinwiz_core)
 ```scala
 scalacOptions += "-Ydelambdafy:inline"
 libraryDependencies += "io.github.salamahin" %% "joinwiz_core" % joinwiz_version
