@@ -5,7 +5,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  publish:
+  publish_spark2:
+    name: Publish Spark 2 artifacts
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -21,7 +22,55 @@ jobs:
       - name: Setup Scala and sbt
         uses: olafurpg/setup-scala@v13
 
-      - run: sbt ci-release
+      - run: sbt -Dspark.version=2 ci-release
+        env:
+          PGP_SECRET: ${{ secrets.PGP_SECRET }}
+          PGP_PASSPHRASE: ${{ secrets.PGP_PASSPHRASE }}
+          SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
+          SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
+
+  publish_spark3:
+    name: Publish Spark 3 artifacts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 11
+          cache: sbt
+
+      - name: Setup Scala and sbt
+        uses: olafurpg/setup-scala@v13
+
+      - run: sbt -Dspark.version=3 ci-release
+        env:
+          PGP_SECRET: ${{ secrets.PGP_SECRET }}
+          PGP_PASSPHRASE: ${{ secrets.PGP_PASSPHRASE }}
+          SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
+          SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
+
+  publish_spark4:
+    name: Publish Spark 4 artifacts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+          cache: sbt
+
+      - name: Setup Scala and sbt
+        uses: olafurpg/setup-scala@v13
+
+      - run: sbt -Dspark.version=4 ci-release
         env:
           PGP_SECRET: ${{ secrets.PGP_SECRET }}
           PGP_PASSPHRASE: ${{ secrets.PGP_PASSPHRASE }}
