@@ -45,6 +45,14 @@ class InfixNotationTest extends AnyFunSuite with Matchers with InfixNotation {
     )
   }
 
+  test("SQL single quotes around string literals are stripped") {
+    toInfixNotation("(LEFT.pk = 'matching')") should be("(LEFT.pk = matching)")
+  }
+
+  test("prefix with SQL-quoted string literal") {
+    toInfixNotation("=(LEFT.pk, 'matching')") should be("(LEFT.pk = matching)")
+  }
+
   test("prefix with dotted column paths") {
     toInfixNotation("=(LEFT._1._1.aString, RIGHT.dString)") should be(
       "(LEFT._1._1.aString = RIGHT.dString)"
