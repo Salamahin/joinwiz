@@ -1,6 +1,7 @@
 package joinwiz
 
 import joinwiz.UnapplicationTest._
+import joinwiz.expression.InfixNotation
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
 
@@ -11,7 +12,7 @@ private object UnapplicationTest {
   case class D(dString: String, dOptString: Option[String])
 }
 
-class UnapplicationTest extends AnyFunSuite with Matchers {
+class UnapplicationTest extends AnyFunSuite with Matchers with InfixNotation {
   private type ABC = ((A, B), C)
   private type BCD = (B, (C, D))
 
@@ -25,7 +26,7 @@ class UnapplicationTest extends AnyFunSuite with Matchers {
       case (a wiz _ wiz _, d) => a(_.aString) =:= d(_.dString)
     }
 
-    expr().toString() should be("(LEFT._1._1.aString = RIGHT.dString)")
+    expr().toString() should equalInInfix("(LEFT._1._1.aString = RIGHT.dString)")
   }
 
   test("right unapplication of the joined entity does not affect the scope") {
@@ -33,6 +34,6 @@ class UnapplicationTest extends AnyFunSuite with Matchers {
       case (a, _ wiz (_ wiz d)) => a(_.aString) =:= d(_.dString)
     }
 
-    expr().toString() should be("(LEFT.aString = RIGHT._2._2.dString)")
+    expr().toString() should equalInInfix("(LEFT.aString = RIGHT._2._2.dString)")
   }
 }

@@ -5,7 +5,7 @@ import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
 
-class EqualSyntaxTest extends AnyFunSuite with Matchers {
+class EqualSyntaxTest extends AnyFunSuite with Matchers with InfixNotation {
   import joinwiz.syntax._
 
   private val evaluate = (TColumn.left[Left, Right], TColumn.right[Left, Right])
@@ -21,7 +21,7 @@ class EqualSyntaxTest extends AnyFunSuite with Matchers {
     evaluated(Left(pk = "matching"), Right(pk = "matching")) should be(true)
     evaluated(Left(pk = "matching"), Right(pk = "non-matching")) should be(false)
 
-    evaluated().expr.toString() should be("('LEFT.pk = 'RIGHT.pk)")
+    evaluated().toString() should equalInInfix("(LEFT.pk = RIGHT.pk)")
   }
 
   test("left T and right opt T can equal") {
@@ -33,7 +33,7 @@ class EqualSyntaxTest extends AnyFunSuite with Matchers {
     evaluated(Left(pk = "matching"), Right(opt = Some("non-matching"))) should be(false)
     evaluated(Left(pk = "matching"), Right(opt = None)) should be(false)
 
-    evaluated().expr.toString() should be("('LEFT.pk = 'RIGHT.opt)")
+    evaluated().toString() should equalInInfix("(LEFT.pk = RIGHT.opt)")
   }
 
   test("left T and left T can equal") {
@@ -43,7 +43,7 @@ class EqualSyntaxTest extends AnyFunSuite with Matchers {
 
     evaluated(Left(pk = "matching"), Right()) should be(true)
 
-    evaluated().expr.toString() should be("('LEFT.pk = 'LEFT.pk)")
+    evaluated().toString() should equalInInfix("(LEFT.pk = LEFT.pk)")
   }
 
   test("left T and left opt T can equal") {
@@ -55,7 +55,7 @@ class EqualSyntaxTest extends AnyFunSuite with Matchers {
     evaluated(Left(pk = "matching", opt = Some("non-matching")), Right()) should be(false)
     evaluated(Left(pk = "matching", opt = None), Right()) should be(false)
 
-    evaluated().expr.toString() should be("('LEFT.pk = 'LEFT.opt)")
+    evaluated().toString() should equalInInfix("(LEFT.pk = LEFT.opt)")
   }
 
   test("left T and const T can equal") {
@@ -66,7 +66,7 @@ class EqualSyntaxTest extends AnyFunSuite with Matchers {
     evaluated(Left(pk = "matching"), Right()) should be(true)
     evaluated(Left(pk = "non-matching"), Right()) should be(false)
 
-    evaluated().expr.toString() should be("('LEFT.pk = matching)")
+    evaluated().toString() should equalInInfix("(LEFT.pk = matching)")
   }
 
   test("right T and left T can equal") {
@@ -77,7 +77,7 @@ class EqualSyntaxTest extends AnyFunSuite with Matchers {
     evaluated(Left(pk = "matching"), Right(pk = "matching")) should be(true)
     evaluated(Left(pk = "matching"), Right(pk = "non-matching")) should be(false)
 
-    evaluated().expr.toString() should be("('RIGHT.pk = 'LEFT.pk)")
+    evaluated().toString() should equalInInfix("(RIGHT.pk = LEFT.pk)")
   }
 
   test("right T and left opt T can equal") {
@@ -89,7 +89,7 @@ class EqualSyntaxTest extends AnyFunSuite with Matchers {
     evaluated(Left(opt = Some("non-matching")), Right(pk = "matching")) should be(false)
     evaluated(Left(opt = None), Right(pk                 = "matching")) should be(false)
 
-    evaluated().expr.toString() should be("('RIGHT.pk = 'LEFT.opt)")
+    evaluated().toString() should equalInInfix("(RIGHT.pk = LEFT.opt)")
   }
 
   test("right T and right T can equal") {
@@ -99,7 +99,7 @@ class EqualSyntaxTest extends AnyFunSuite with Matchers {
 
     evaluated(Left(), Right(pk = "matching")) should be(true)
 
-    evaluated().expr.toString() should be("('RIGHT.pk = 'RIGHT.pk)")
+    evaluated().toString() should equalInInfix("(RIGHT.pk = RIGHT.pk)")
   }
 
   test("right T and right opt T can equal") {
@@ -111,7 +111,7 @@ class EqualSyntaxTest extends AnyFunSuite with Matchers {
     evaluated(Left(), Right(pk = "matching", opt = Some("non-matching"))) should be(false)
     evaluated(Left(), Right(pk = "matching", opt = None)) should be(false)
 
-    evaluated().expr.toString() should be("('RIGHT.pk = 'RIGHT.opt)")
+    evaluated().toString() should equalInInfix("(RIGHT.pk = RIGHT.opt)")
   }
 
   test("right T and const T can equal") {
@@ -122,7 +122,7 @@ class EqualSyntaxTest extends AnyFunSuite with Matchers {
     evaluated(Left(), Right(pk = "matching")) should be(true)
     evaluated(Left(), Right(pk = "non-matching")) should be(false)
 
-    evaluated().expr.toString() should be("('RIGHT.pk = matching)")
+    evaluated().toString() should equalInInfix("(RIGHT.pk = matching)")
   }
 
   test("left opt T and right T can equal") {
@@ -135,7 +135,7 @@ class EqualSyntaxTest extends AnyFunSuite with Matchers {
     evaluated(Left(opt = Some("non-matching")), Right(pk = "matching")) should be(false)
     evaluated(Left(opt = None), Right(pk                 = "matching")) should be(false)
 
-    evaluated().expr.toString() should be("('LEFT.opt = 'RIGHT.pk)")
+    evaluated().toString() should equalInInfix("(LEFT.opt = RIGHT.pk)")
   }
 
   test("left opt T and right opt T can equal") {
@@ -148,7 +148,7 @@ class EqualSyntaxTest extends AnyFunSuite with Matchers {
     evaluated(Left(opt = Some("matching")), Right(opt = None)) should be(false)
     evaluated(Left(opt = None), Right(opt             = None)) should be(false)
 
-    evaluated().expr.toString() should be("('LEFT.opt = 'RIGHT.opt)")
+    evaluated().toString() should equalInInfix("(LEFT.opt = RIGHT.opt)")
   }
 
   test("left opt T and left T can equal") {
@@ -161,7 +161,7 @@ class EqualSyntaxTest extends AnyFunSuite with Matchers {
     evaluated(Left(opt = Some("non-matching"), pk = "matching"), Right()) should be(false)
     evaluated(Left(opt = None, pk                 = "matching"), Right()) should be(false)
 
-    evaluated().expr.toString() should be("('LEFT.opt = 'LEFT.pk)")
+    evaluated().toString() should equalInInfix("(LEFT.opt = LEFT.pk)")
   }
 
   test("left opt T and left opt T can equal") {
@@ -172,7 +172,7 @@ class EqualSyntaxTest extends AnyFunSuite with Matchers {
     evaluated(Left(opt = Some("matching")), Right()) should be(true)
     evaluated(Left(opt = None), Right()) should be(false)
 
-    evaluated().expr.toString() should be("('LEFT.opt = 'LEFT.opt)")
+    evaluated().toString() should equalInInfix("(LEFT.opt = LEFT.opt)")
   }
 
   test("left opt T and const T can equal") {
@@ -184,7 +184,7 @@ class EqualSyntaxTest extends AnyFunSuite with Matchers {
     evaluated(Left(opt = Some("non-matching")), Right()) should be(false)
     evaluated(Left(opt = None), Right()) should be(false)
 
-    evaluated().expr.toString() should be("('LEFT.opt = matching)")
+    evaluated().toString() should equalInInfix("(LEFT.opt = matching)")
   }
 
   test("right opt T and left T can equal") {
@@ -197,7 +197,7 @@ class EqualSyntaxTest extends AnyFunSuite with Matchers {
     evaluated(Left(opt = Some("non-matching")), Right(pk = "matching")) should be(false)
     evaluated(Left(opt = None), Right(pk                 = "matching")) should be(false)
 
-    evaluated().expr.toString() should be("('RIGHT.pk = 'LEFT.opt)")
+    evaluated().toString() should equalInInfix("(RIGHT.pk = LEFT.opt)")
   }
 
   test("right opt T and left opt T can equal") {
@@ -210,7 +210,7 @@ class EqualSyntaxTest extends AnyFunSuite with Matchers {
     evaluated(Left(opt = Some("matching")), Right(opt = None)) should be(false)
     evaluated(Left(opt = None), Right(opt             = None)) should be(false)
 
-    evaluated().expr.toString() should be("('RIGHT.opt = 'LEFT.opt)")
+    evaluated().toString() should equalInInfix("(RIGHT.opt = LEFT.opt)")
   }
 
   test("right opt T and right T can equal") {
@@ -223,7 +223,7 @@ class EqualSyntaxTest extends AnyFunSuite with Matchers {
     evaluated(Left(), Right(opt = Some("non-matching"), pk = "matching")) should be(false)
     evaluated(Left(), Right(opt = None, pk                 = "matching")) should be(false)
 
-    evaluated().expr.toString() should be("('RIGHT.opt = 'RIGHT.pk)")
+    evaluated().toString() should equalInInfix("(RIGHT.opt = RIGHT.pk)")
   }
 
   test("right opt T and right opt T can equal") {
@@ -234,7 +234,7 @@ class EqualSyntaxTest extends AnyFunSuite with Matchers {
     evaluated(Left(), Right(opt = Some("matching"))) should be(true)
     evaluated(Left(), Right(opt = None)) should be(false)
 
-    evaluated().expr.toString() should be("('RIGHT.opt = 'RIGHT.opt)")
+    evaluated().toString() should equalInInfix("(RIGHT.opt = RIGHT.opt)")
   }
 
   test("right opt T and const T can equal") {
@@ -246,7 +246,7 @@ class EqualSyntaxTest extends AnyFunSuite with Matchers {
     evaluated(Left(), Right(opt = Some("non-matching"))) should be(false)
     evaluated(Left(), Right(opt = None)) should be(false)
 
-    evaluated().expr.toString() should be("('RIGHT.opt = matching)")
+    evaluated().toString() should equalInInfix("(RIGHT.opt = matching)")
   }
 
 }

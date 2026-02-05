@@ -6,12 +6,25 @@ Tiny library improves Spark's dataset join API by allowing you to specify join c
 ensuring typesafety and allows you using autocomplete features of your IDE. Also improves unit-testing experience
 of (some) Spark transformations
 
+## Version compatibility
+
+| joinwiz artifact | Spark | Scala | Java |
+|---|---|---|---|
+| `joinwiz_core-spark2` | 2.3.2 / 2.4.5 | 2.11 / 2.12 | 8+ |
+| `joinwiz_core-spark3` | 3.2.1 | 2.13 | 11+ |
+| `joinwiz_core-spark4` | 4.1.0 | 2.13 | 17+ |
+
 ## Try it
 
 [![joinwiz_core Scala version support](https://index.scala-lang.org/salamahin/joinwiz/joinwiz_core/latest.svg)](https://index.scala-lang.org/salamahin/joinwiz/joinwiz_core)
 ```scala
 scalacOptions += "-Ydelambdafy:inline"
-libraryDependencies += "io.github.salamahin" %% "joinwiz_core" % joinwiz_version
+// For Spark 3 with Scala 2.13:
+libraryDependencies += "io.github.salamahin" %% "joinwiz_core-spark3" % joinwiz_version
+// For Spark 4 with Scala 2.13:
+libraryDependencies += "io.github.salamahin" %% "joinwiz_core-spark4" % joinwiz_version
+// For Spark 2 with Scala 2.11 or 2.12:
+libraryDependencies += "io.github.salamahin" %% "joinwiz_core-spark2" % joinwiz_version
 ```
 
 ## Simple join
@@ -28,7 +41,7 @@ def doJoin(as: Dataset[A], bs: Dataset[B]): Dataset[(A, Option[B])] = {
 ```
 Note, that result has a type of `Dataset[(A, Option[B])]` which means you won't get an NPE when would try a map it to a different type.
 In addition the library checks if both left and right columns can be used in the joining expression, meaning they need to have
-the comparable type. 
+the comparable type.
 You are not limited to equal join only, one can use `>`, `<`, `&&`, consts and more
 
 
@@ -64,7 +77,7 @@ In case when several joins are made one-by-one it might be tricky to reference t
 usually you would see something like `_1._1._1.field` from left or right side.
 With help of `wiz` unapplication you can transform that to a nice lambdas:
 ```scala
-def doSequentialJoin(as: Dataset[A], 
+def doSequentialJoin(as: Dataset[A],
                      bs: Dataset[B],
                      cs: Dataset[C],
                      ds: Dataset[D]): Dataset[(((A, Option[B]), Option[C]), Option[D])] = {

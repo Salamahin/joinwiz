@@ -1,2 +1,7 @@
 .idea
 *.iml
+target/
+.DS_STORE
+.bsp
+.claude
+output/

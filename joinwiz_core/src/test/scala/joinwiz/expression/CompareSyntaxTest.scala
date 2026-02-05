@@ -4,7 +4,7 @@ import joinwiz.TColumn
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
 
-class CompareSyntaxTest extends AnyFunSuite with Matchers {
+class CompareSyntaxTest extends AnyFunSuite with Matchers with InfixNotation {
   import joinwiz.syntax._
 
   private val evaluate = (TColumn.left[Left, Right], TColumn.right[Left, Right])
@@ -21,7 +21,7 @@ class CompareSyntaxTest extends AnyFunSuite with Matchers {
     evaluated(Left(pk = 1), Right(pk = 1)) should be(false)
     evaluated(Left(pk = 0), Right(pk = 1)) should be(true)
 
-    evaluated().expr.toString() should be("('LEFT.pk < 'RIGHT.pk)")
+    evaluated().toString() should equalInInfix("(LEFT.pk < RIGHT.pk)")
   }
 
   test("left T can be <= than right T") {
@@ -33,7 +33,7 @@ class CompareSyntaxTest extends AnyFunSuite with Matchers {
     evaluated(Left(pk = 0), Right(pk = 1)) should be(true)
     evaluated(Left(pk = 0), Right(pk = -1)) should be(false)
 
-    evaluated().expr.toString() should be("('LEFT.pk <= 'RIGHT.pk)")
+    evaluated().toString() should equalInInfix("(LEFT.pk <= RIGHT.pk)")
   }
 
   test("left T can be > than right T") {
@@ -44,7 +44,7 @@ class CompareSyntaxTest extends AnyFunSuite with Matchers {
     evaluated(Left(pk = 1), Right(pk = 1)) should be(false)
     evaluated(Left(pk = 1), Right(pk = 0)) should be(true)
 
-    evaluated().expr.toString() should be("('LEFT.pk > 'RIGHT.pk)")
+    evaluated().toString() should equalInInfix("(LEFT.pk > RIGHT.pk)")
   }
 
   test("left T can be >= than right T") {
@@ -56,7 +56,7 @@ class CompareSyntaxTest extends AnyFunSuite with Matchers {
     evaluated(Left(pk = 1), Right(pk  = 0)) should be(true)
     evaluated(Left(pk = -1), Right(pk = 0)) should be(false)
 
-    evaluated().expr.toString() should be("('LEFT.pk >= 'RIGHT.pk)")
+    evaluated().toString() should equalInInfix("(LEFT.pk >= RIGHT.pk)")
   }
 
   test("left T can be < than right opt T") {
@@ -68,7 +68,7 @@ class CompareSyntaxTest extends AnyFunSuite with Matchers {
     evaluated(Left(pk = 0), Right(opt = Some(1))) should be(true)
     evaluated(Left(pk = 0), Right(opt = None)) should be(false)
 
-    evaluated().expr.toString() should be("('LEFT.pk < 'RIGHT.opt)")
+    evaluated().toString() should equalInInfix("(LEFT.pk < RIGHT.opt)")
   }
 
   test("left T can be <= than right opt T") {
@@ -81,7 +81,7 @@ class CompareSyntaxTest extends AnyFunSuite with Matchers {
     evaluated(Left(pk = 0), Right(opt = Some(-1))) should be(false)
     evaluated(Left(pk = 0), Right(opt = None)) should be(false)
 
-    evaluated().expr.toString() should be("('LEFT.pk <= 'RIGHT.opt)")
+    evaluated().toString() should equalInInfix("(LEFT.pk <= RIGHT.opt)")
   }
 
   test("left T can be > than right opt T") {
@@ -93,7 +93,7 @@ class CompareSyntaxTest extends AnyFunSuite with Matchers {
     evaluated(Left(pk = 1), Right(opt = Some(0))) should be(true)
     evaluated(Left(pk = 1), Right(opt = None)) should be(false)
 
-    evaluated().expr.toString() should be("('LEFT.pk > 'RIGHT.opt)")
+    evaluated().toString() should equalInInfix("(LEFT.pk > RIGHT.opt)")
   }
 
   test("left T can be >= than right opt T") {
@@ -106,7 +106,7 @@ class CompareSyntaxTest extends AnyFunSuite with Matchers {
     evaluated(Left(pk = -1), Right(opt = Some(0))) should be(false)
     evaluated(Left(pk = -1), Right(opt = None)) should be(false)
 
-    evaluated().expr.toString() should be("('LEFT.pk >= 'RIGHT.opt)")
+    evaluated().toString() should equalInInfix("(LEFT.pk >= RIGHT.opt)")
   }
 
   test("left T can be < than const") {
@@ -117,7 +117,7 @@ class CompareSyntaxTest extends AnyFunSuite with Matchers {
     evaluated(Left(pk = 1), Right()) should be(false)
     evaluated(Left(pk = 0), Right()) should be(true)
 
-    evaluated().expr.toString() should be("('LEFT.pk < 1)")
+    evaluated().toString() should equalInInfix("(LEFT.pk < 1)")
   }
 
   test("left T can be <= than const") {
@@ -129,7 +129,7 @@ class CompareSyntaxTest extends AnyFunSuite with Matchers {
     evaluated(Left(pk = 0), Right()) should be(true)
     evaluated(Left(pk = 2), Right()) should be(false)
 
-    evaluated().expr.toString() should be("('LEFT.pk <= 1)")
+    evaluated().toString() should equalInInfix("(LEFT.pk <= 1)")
   }
 
   test("left T can be > than const") {
@@ -140,7 +140,7 @@ class CompareSyntaxTest extends AnyFunSuite with Matchers {
     evaluated(Left(pk = 1), Right()) should be(false)
     evaluated(Left(pk = 2), Right()) should be(true)
 
-    evaluated().expr.toString() should be("('LEFT.pk > 1)")
+    evaluated().toString() should equalInInfix("(LEFT.pk > 1)")
   }
 
   test("left T can be >= than const") {
@@ -152,7 +152,7 @@ class CompareSyntaxTest extends AnyFunSuite with Matchers {
     evaluated(Left(pk = 2), Right()) should be(true)
     evaluated(Left(pk = 0), Right()) should be(false)
 
-    evaluated().expr.toString() should be("('LEFT.pk >= 1)")
+    evaluated().toString() should equalInInfix("(LEFT.pk >= 1)")
   }
 
   test("left opt T can be < than right T") {
@@ -164,7 +164,7 @@ class CompareSyntaxTest extends AnyFunSuite with Matchers {
     evaluated(Left(opt = Some(0)), Right(pk = 1)) should be(true)
     evaluated(Left(opt = None), Right(pk    = 1)) should be(false)
 
-    evaluated().expr.toString() should be("('LEFT.opt < 'RIGHT.pk)")
+    evaluated().toString() should equalInInfix("(LEFT.opt < RIGHT.pk)")
   }
 
   test("left opt T can be <= than right T") {
@@ -177,7 +177,7 @@ class CompareSyntaxTest extends AnyFunSuite with Matchers {
     evaluated(Left(opt = Some(0)), Right(pk = -1)) should be(false)
     evaluated(Left(opt = None), Right(pk    = -1)) should be(false)
 
-    evaluated().expr.toString() should be("('LEFT.opt <= 'RIGHT.pk)")
+    evaluated().toString() should equalInInfix("(LEFT.opt <= RIGHT.pk)")
   }
 
   test("left opt T can be > than right T") {
@@ -189,7 +189,7 @@ class CompareSyntaxTest extends AnyFunSuite with Matchers {
     evaluated(Left(opt = Some(1)), Right(pk = 0)) should be(true)
     evaluated(Left(opt = None), Right(pk    = 0)) should be(false)
 
-    evaluated().expr.toString() should be("('LEFT.opt > 'RIGHT.pk)")
+    evaluated().toString() should equalInInfix("(LEFT.opt > RIGHT.pk)")
   }
 
   test("left opt T can be >= than right T") {
@@ -202,7 +202,7 @@ class CompareSyntaxTest extends AnyFunSuite with Matchers {
     evaluated(Left(opt = Some(-1)), Right(pk = 0)) should be(false)
     evaluated(Left(opt = None), Right(pk     = 0)) should be(false)
 
-    evaluated().expr.toString() should be("('LEFT.opt >= 'RIGHT.pk)")
+    evaluated().toString() should equalInInfix("(LEFT.opt >= RIGHT.pk)")
   }
 
   test("left opt T can be < than right opt T") {
@@ -215,7 +215,7 @@ class CompareSyntaxTest extends AnyFunSuite with Matchers {
     evaluated(Left(opt = Some(0)), Right(opt = None)) should be(false)
     evaluated(Left(opt = None), Right(opt    = None)) should be(false)
 
-    evaluated().expr.toString() should be("('LEFT.opt < 'RIGHT.opt)")
+    evaluated().toString() should equalInInfix("(LEFT.opt < RIGHT.opt)")
   }
 
   test("left opt T can be <= than right opt T") {
@@ -229,7 +229,7 @@ class CompareSyntaxTest extends AnyFunSuite with Matchers {
     evaluated(Left(opt = Some(0)), Right(opt = None)) should be(false)
     evaluated(Left(opt = None), Right(opt    = None)) should be(false)
 
-    evaluated().expr.toString() should be("('LEFT.opt <= 'RIGHT.opt)")
+    evaluated().toString() should equalInInfix("(LEFT.opt <= RIGHT.opt)")
   }
 
   test("left opt T can be > than right opt T") {
@@ -242,7 +242,7 @@ class CompareSyntaxTest extends AnyFunSuite with Matchers {
     evaluated(Left(opt = Some(1)), Right(opt = None)) should be(false)
     evaluated(Left(opt = None), Right(opt    = None)) should be(false)
 
-    evaluated().expr.toString() should be("('LEFT.opt > 'RIGHT.opt)")
+    evaluated().toString() should equalInInfix("(LEFT.opt > RIGHT.opt)")
   }
 
   test("left opt T can be >= than right opt T") {
@@ -256,7 +256,7 @@ class CompareSyntaxTest extends AnyFunSuite with Matchers {
     evaluated(Left(opt = Some(-1)), Right(opt = None)) should be(false)
     evaluated(Left(opt = None), Right(opt     = None)) should be(false)
 
-    evaluated().expr.toString() should be("('LEFT.opt >= 'RIGHT.opt)")
+    evaluated().toString() should equalInInfix("(LEFT.opt >= RIGHT.opt)")
   }
 
   test("left opt T can be < than const") {
@@ -268,7 +268,7 @@ class CompareSyntaxTest extends AnyFunSuite with Matchers {
     evaluated(Left(opt = Some(0)), Right()) should be(true)
     evaluated(Left(opt = None), Right()) should be(false)
 
-    evaluated().expr.toString() should be("('LEFT.opt < 1)")
+    evaluated().toString() should equalInInfix("(LEFT.opt < 1)")
   }
 
   test("left opt T can be <= than const") {
@@ -281,7 +281,7 @@ class CompareSyntaxTest extends AnyFunSuite with Matchers {
     evaluated(Left(opt = Some(2)), Right()) should be(false)
     evaluated(Left(opt = None), Right()) should be(false)
 
-    evaluated().expr.toString() should be("('LEFT.opt <= 1)")
+    evaluated().toString() should equalInInfix("(LEFT.opt <= 1)")
   }
 
   test("left opt T can be > than const") {
@@ -293,7 +293,7 @@ class CompareSyntaxTest extends AnyFunSuite with Matchers {
     evaluated(Left(opt = Some(2)), Right()) should be(true)
     evaluated(Left(opt = None), Right()) should be(false)
 
-    evaluated().expr.toString() should be("('LEFT.opt > 1)")
+    evaluated().toString() should equalInInfix("(LEFT.opt > 1)")
   }
 
   test("left opt T can be >= than const") {
@@ -306,7 +306,7 @@ class CompareSyntaxTest extends AnyFunSuite with Matchers {
     evaluated(Left(opt = Some(0)), Right()) should be(false)
     evaluated(Left(opt = None), Right()) should be(false)
 
-    evaluated().expr.toString() should be("('LEFT.opt >= 1)")
+    evaluated().toString() should equalInInfix("(LEFT.opt >= 1)")
   }
 
   // tests for right
@@ -318,7 +318,7 @@ class CompareSyntaxTest extends AnyFunSuite with Matchers {
     evaluated(Left(pk = 1), Right(pk = 1)) should be(false)
     evaluated(Left(pk = 1), Right(pk = 0)) should be(true)
 
-    evaluated().expr.toString() should be("('RIGHT.pk < 'LEFT.pk)")
+    evaluated().toString() should equalInInfix("(RIGHT.pk < LEFT.pk)")
   }
 
   test("right T can be <= than left T") {
@@ -330,7 +330,7 @@ class CompareSyntaxTest extends AnyFunSuite with Matchers {
     evaluated(Left(pk = 1), Right(pk = 0)) should be(true)
     evaluated(Left(pk = 0), Right(pk = 1)) should be(false)
 
-    evaluated().expr.toString() should be("('RIGHT.pk <= 'LEFT.pk)")
+    evaluated().toString() should equalInInfix("(RIGHT.pk <= LEFT.pk)")
   }
 
   test("right T can be > than left T") {
@@ -341,7 +341,7 @@ class CompareSyntaxTest extends AnyFunSuite with Matchers {
     evaluated(Left(pk = 1), Right(pk = 1)) should be(false)
     evaluated(Left(pk = 0), Right(pk = 1)) should be(true)
 
-    evaluated().expr.toString() should be("('RIGHT.pk > 'LEFT.pk)")
+    evaluated().toString() should equalInInfix("(RIGHT.pk > LEFT.pk)")
   }
 
   test("right T can be >= than left T") {
@@ -353,7 +353,7 @@ class CompareSyntaxTest extends AnyFunSuite with Matchers {
     evaluated(Left(pk = 0), Right(pk = 1)) should be(true)
     evaluated(Left(pk = 0), Right(pk = -1)) should be(false)
 
-    evaluated().expr.toString() should be("('RIGHT.pk >= 'LEFT.pk)")
+    evaluated().toString() should equalInInfix("(RIGHT.pk >= LEFT.pk)")
   }
 
   test("right T can be < than left opt T") {
@@ -365,7 +365,7 @@ class CompareSyntaxTest extends AnyFunSuite with Matchers {
     evaluated(Left(opt = Some(1)), Right(pk = 0)) should be(true)
     evaluated(Left(opt = None), Right(pk    = 1)) should be(false)
 
-    evaluated().expr.toString() should be("('RIGHT.pk < 'LEFT.opt)")
+    evaluated().toString() should equalInInfix("(RIGHT.pk < LEFT.opt)")
   }
 
   test("right T can be <= than left opt T") {
@@ -378,7 +378,7 @@ class CompareSyntaxTest extends AnyFunSuite with Matchers {
     evaluated(Left(opt = Some(-1)), Right(pk = 0)) should be(false)
     evaluated(Left(opt = None), Right(pk     = 0)) should be(false)
 
-    evaluated().expr.toString() should be("('RIGHT.pk <= 'LEFT.opt)")
+    evaluated().toString() should equalInInfix("(RIGHT.pk <= LEFT.opt)")
   }
 
   test("right T can be > than left opt T") {
@@ -390,7 +390,7 @@ class CompareSyntaxTest extends AnyFunSuite with Matchers {
     evaluated(Left(opt = Some(0)), Right(pk = 1)) should be(true)
     evaluated(Left(opt = None), Right(pk    = 1)) should be(false)
 
-    evaluated().expr.toString() should be("('RIGHT.pk > 'LEFT.opt)")
+    evaluated().toString() should equalInInfix("(RIGHT.pk > LEFT.opt)")
   }
 
   test("right T can be >= than left opt T") {
@@ -403,7 +403,7 @@ class CompareSyntaxTest extends AnyFunSuite with Matchers {
     evaluated(Left(opt = Some(0)), Right(pk = -1)) should be(false)
     evaluated(Left(opt = None), Right(pk    = -1)) should be(false)
 
-    evaluated().expr.toString() should be("('RIGHT.pk >= 'LEFT.opt)")
+    evaluated().toString() should equalInInfix("(RIGHT.pk >= LEFT.opt)")
   }
 
   test("right T can be < than const") {
@@ -414,7 +414,7 @@ class CompareSyntaxTest extends AnyFunSuite with Matchers {
     evaluated(Left(), Right(pk = 1)) should be(false)
     evaluated(Left(), Right(pk = 0)) should be(true)
 
-    evaluated().expr.toString() should be("('RIGHT.pk < 1)")
+    evaluated().toString() should equalInInfix("(RIGHT.pk < 1)")
   }
 
   test("right T can be <= than const") {
@@ -426,7 +426,7 @@ class CompareSyntaxTest extends AnyFunSuite with Matchers {
     evaluated(Left(), Right(pk = 0)) should be(true)
     evaluated(Left(), Right(pk = 2)) should be(false)
 
-    evaluated().expr.toString() should be("('RIGHT.pk <= 1)")
+    evaluated().toString() should equalInInfix("(RIGHT.pk <= 1)")
   }
 
   test("right T can be > than const") {
@@ -437,7 +437,7 @@ class CompareSyntaxTest extends AnyFunSuite with Matchers {
     evaluated(Left(), Right(pk = 1)) should be(false)
     evaluated(Left(), Right(pk = 2)) should be(true)
 
-    evaluated().expr.toString() should be("('RIGHT.pk > 1)")
+    evaluated().toString() should equalInInfix("(RIGHT.pk > 1)")
   }
 
   test("right T can be >= than const") {
@@ -449,7 +449,7 @@ class CompareSyntaxTest extends AnyFunSuite with Matchers {
     evaluated(Left(), Right(pk = 2)) should be(true)
     evaluated(Left(), Right(pk = 0)) should be(false)
 
-    evaluated().expr.toString() should be("('RIGHT.pk >= 1)")
+    evaluated().toString() should equalInInfix("(RIGHT.pk >= 1)")
   }
 
   test("right opt T can be < than right T") {
@@ -461,7 +461,7 @@ class CompareSyntaxTest extends AnyFunSuite with Matchers {
     evaluated(Left(pk = 1), Right(opt = Some(0))) should be(true)
     evaluated(Left(pk = 1), Right(opt = None)) should be(false)
 
-    evaluated().expr.toString() should be("('RIGHT.opt < 'LEFT.pk)")
+    evaluated().toString() should equalInInfix("(RIGHT.opt < LEFT.pk)")
   }
 
   test("right opt T can be <= than left T") {
@@ -474,7 +474,7 @@ class CompareSyntaxTest extends AnyFunSuite with Matchers {
     evaluated(Left(pk = -1), Right(opt = Some(0))) should be(false)
     evaluated(Left(pk = -1), Right(opt = None)) should be(false)
 
-    evaluated().expr.toString() should be("('RIGHT.opt <= 'LEFT.pk)")
+    evaluated().toString() should equalInInfix("(RIGHT.opt <= LEFT.pk)")
   }
 
   test("right opt T can be > than left T") {
@@ -486,7 +486,7 @@ class CompareSyntaxTest extends AnyFunSuite with Matchers {
     evaluated(Left(pk = 0), Right(opt = Some(1))) should be(true)
     evaluated(Left(pk = 0), Right(opt = None)) should be(false)
 
-    evaluated().expr.toString() should be("('RIGHT.opt > 'LEFT.pk)")
+    evaluated().toString() should equalInInfix("(RIGHT.opt > LEFT.pk)")
   }
 
   test("right opt T can be >= than left T") {
@@ -499,7 +499,7 @@ class CompareSyntaxTest extends AnyFunSuite with Matchers {
     evaluated(Left(pk = 0), Right(opt = Some(-1))) should be(false)
     evaluated(Left(pk = 0), Right(opt = None)) should be(false)
 
-    evaluated().expr.toString() should be("('RIGHT.opt >= 'LEFT.pk)")
+    evaluated().toString() should equalInInfix("(RIGHT.opt >= LEFT.pk)")
   }
 
   test("right opt T can be < than left opt T") {
@@ -512,7 +512,7 @@ class CompareSyntaxTest extends AnyFunSuite with Matchers {
     evaluated(Left(opt = None), Right(opt    = Some(0))) should be(false)
     evaluated(Left(opt = None), Right(opt    = None)) should be(false)
 
-    evaluated().expr.toString() should be("('RIGHT.opt < 'LEFT.opt)")
+    evaluated().toString() should equalInInfix("(RIGHT.opt < LEFT.opt)")
   }
 
   test("right opt T can be <= than left opt T") {
@@ -526,7 +526,7 @@ class CompareSyntaxTest extends AnyFunSuite with Matchers {
     evaluated(Left(opt = None), Right(opt     = Some(0))) should be(false)
     evaluated(Left(opt = None), Right(opt     = None)) should be(false)
 
-    evaluated().expr.toString() should be("('RIGHT.opt <= 'LEFT.opt)")
+    evaluated().toString() should equalInInfix("(RIGHT.opt <= LEFT.opt)")
   }
 
   test("right opt T can be > than left opt T") {
@@ -539,7 +539,7 @@ class CompareSyntaxTest extends AnyFunSuite with Matchers {
     evaluated(Left(opt = None), Right(opt    = Some(1))) should be(false)
     evaluated(Left(opt = None), Right(opt    = None)) should be(false)
 
-    evaluated().expr.toString() should be("('RIGHT.opt > 'LEFT.opt)")
+    evaluated().toString() should equalInInfix("(RIGHT.opt > LEFT.opt)")
   }
 
   test("right opt T can be >= than left opt T") {
@@ -553,7 +553,7 @@ class CompareSyntaxTest extends AnyFunSuite with Matchers {
     evaluated(Left(opt = None), Right(opt    = Some(-1))) should be(false)
     evaluated(Left(opt = None), Right(opt    = None)) should be(false)
 
-    evaluated().expr.toString() should be("('RIGHT.opt >= 'LEFT.opt)")
+    evaluated().toString() should equalInInfix("(RIGHT.opt >= LEFT.opt)")
   }
 
   test("right opt T can be < than const") {
@@ -565,7 +565,7 @@ class CompareSyntaxTest extends AnyFunSuite with Matchers {
     evaluated(Left(), Right(opt = Some(0))) should be(true)
     evaluated(Left(), Right(opt = None)) should be(false)
 
-    evaluated().expr.toString() should be("('RIGHT.opt < 1)")
+    evaluated().toString() should equalInInfix("(RIGHT.opt < 1)")
   }
 
   test("right opt T can be <= than const") {
@@ -578,7 +578,7 @@ class CompareSyntaxTest extends AnyFunSuite with Matchers {
     evaluated(Left(), Right(opt = Some(2))) should be(false)
     evaluated(Left(), Right(opt = None)) should be(false)
 
-    evaluated().expr.toString() should be("('RIGHT.opt <= 1)")
+    evaluated().toString() should equalInInfix("(RIGHT.opt <= 1)")
   }
 
   test("right opt T can be > than const") {
@@ -590,7 +590,7 @@ class CompareSyntaxTest extends AnyFunSuite with Matchers {
     evaluated(Left(), Right(opt = Some(2))) should be(true)
     evaluated(Left(), Right(opt = None)) should be(false)
 
-    evaluated().expr.toString() should be("('RIGHT.opt > 1)")
+    evaluated().toString() should equalInInfix("(RIGHT.opt > 1)")
   }
 
   test("right opt T can be >= than const") {
@@ -603,6 +603,6 @@ class CompareSyntaxTest extends AnyFunSuite with Matchers {
     evaluated(Left(), Right(opt = Some(0))) should be(false)
     evaluated(Left(), Right(opt = None)) should be(false)
 
-    evaluated().expr.toString() should be("('RIGHT.opt >= 1)")
+    evaluated().toString() should equalInInfix("(RIGHT.opt >= 1)")
   }
 }
