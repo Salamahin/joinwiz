@@ -49,7 +49,6 @@ ThisBuild / developers := List(
   )
 )
 ThisBuild / versionScheme := Some("early-semver")
-ThisBuild / sonatypeCredentialHost := "s01.oss.sonatype.org"
 ThisBuild / licenses := List("Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0"))
 ThisBuild / scalacOptions ++= Seq(
   "-encoding",
