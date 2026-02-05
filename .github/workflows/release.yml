@@ -19,8 +19,10 @@ jobs:
           java-version: 8
           cache: sbt
 
-      - name: Setup Scala and sbt
-        uses: olafurpg/setup-scala@v13
+      - name: Set up sbt
+        uses: coursier/setup-action@v1
+        with:
+          apps: sbt
 
       - run: sbt -Dspark.version=2 ci-release
         env:
@@ -43,8 +45,10 @@ jobs:
           java-version: 11
           cache: sbt
 
-      - name: Setup Scala and sbt
-        uses: olafurpg/setup-scala@v13
+      - name: Set up sbt
+        uses: coursier/setup-action@v1
+        with:
+          apps: sbt
 
       - run: sbt -Dspark.version=3 ci-release
         env:
@@ -67,8 +71,10 @@ jobs:
           java-version: 17
           cache: sbt
 
-      - name: Setup Scala and sbt
-        uses: olafurpg/setup-scala@v13
+      - name: Set up sbt
+        uses: coursier/setup-action@v1
+        with:
+          apps: sbt
 
       - run: sbt -Dspark.version=4 ci-release
         env:

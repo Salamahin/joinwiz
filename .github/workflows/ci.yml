@@ -23,8 +23,10 @@ jobs:
           java-version: 8
           distribution: 'temurin'
 
-      - name: Set up Scala and sbt
-        uses: olafurpg/setup-scala@v13
+      - name: Set up sbt
+        uses: coursier/setup-action@v1
+        with:
+          apps: sbt
 
       - name: Cache SBT dependencies
         uses: actions/cache@v4
@@ -51,8 +53,10 @@ jobs:
           java-version: 11
           distribution: 'temurin'
 
-      - name: Set up Scala and sbt
-        uses: olafurpg/setup-scala@v13
+      - name: Set up sbt
+        uses: coursier/setup-action@v1
+        with:
+          apps: sbt
 
       - name: Cache SBT dependencies
         uses: actions/cache@v4
@@ -79,8 +83,10 @@ jobs:
           java-version: 17
           distribution: 'temurin'
 
-      - name: Set up Scala and sbt
-        uses: olafurpg/setup-scala@v13
+      - name: Set up sbt
+        uses: coursier/setup-action@v1
+        with:
+          apps: sbt
 
       - name: Cache SBT dependencies
         uses: actions/cache@v4
