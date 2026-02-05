@@ -2,10 +2,10 @@ import sbt.url
 
 name := "joinwiz"
 
-lazy val sparkMajorVersion = sys.props.getOrElse("spark.version", "3")
+lazy val sparkMajorVersion = sys.props("spark.version")
 
 lazy val supportedScalaVersions = sparkMajorVersion match {
-  case "2" => List("2.11.12", "2.12.14")
+  case "2" => List("2.12.14")
   case "3" => List("2.13.8")
   case "4" => List("2.13.17")
   case v   => sys.error(s"Unsupported spark.version: $v. Use 2, 3, or 4.")
@@ -22,10 +22,7 @@ lazy val sparkSuffix = s"-spark$sparkMajorVersion"
 
 lazy val sparkV = Def.setting {
   sparkMajorVersion match {
-    case "2" => scalaVersion.value match {
-      case "2.11.12" => "2.3.2"
-      case "2.12.14" => "2.4.5"
-    }
+    case "2" => "2.4.5"
     case "3" => "3.2.1"
     case "4" => "4.1.0"
   }
