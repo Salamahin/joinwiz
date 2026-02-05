@@ -10,7 +10,7 @@ of (some) Spark transformations
 
 | joinwiz artifact | Spark | Scala | Java |
 |---|---|---|---|
-| `joinwiz_core-spark2` | 2.3.2 / 2.4.5 | 2.11 / 2.12 | 8+ |
+| `joinwiz_core-spark2` |  2.4.5 | 2.11 / 2.12 | 8+ |
 | `joinwiz_core-spark3` | 3.2.1 | 2.13 | 11+ |
 | `joinwiz_core-spark4` | 4.1.0 | 2.13 | 17+ |
 
