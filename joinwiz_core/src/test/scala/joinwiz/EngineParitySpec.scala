@@ -9,16 +9,10 @@ import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 
 import scala.language.higherKinds
 
-/**
-  * Feeds randomized data through the same `[F[_]: ComputationEngine]` program on both the Spark
-  * (`Dataset`) and testkit (`Seq`) interpreters and asserts the results match — guarding the two
-  * from drifting apart where [[ComputationEngineTest]]'s fixed examples wouldn't notice.
-  */
 object EngineParitySpec {
   case class L(uuid: Int, value: String)
   case class R(uuid: Int, tag: String)
 
-  // Written once over F; each is run through both Dataset and Seq below.
   object programs {
     import joinwiz.syntax._
 
@@ -53,7 +47,6 @@ class EngineParitySpec extends AnyFunSuite with Matchers with ScalaCheckDrivenPr
   implicit override val generatorDrivenConfig: PropertyCheckConfiguration =
     PropertyCheckConfiguration(minSuccessful = 8, sizeRange = 8)
 
-  // uuid drawn from a small domain so random left/right rows actually join often.
   private val genL: Gen[L] = for {
     uuid  <- Gen.choose(0, 3)
     value <- Gen.alphaLowerStr.map(_.take(3))

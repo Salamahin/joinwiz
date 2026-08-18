@@ -1,6 +1,5 @@
 name: scala-steward
 
-# Opens PRs bumping sbt library + plugin versions (the sbt side Dependabot can't do).
 on:
   schedule:
     - cron: "0 6 * * 1"

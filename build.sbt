@@ -49,7 +49,6 @@ ThisBuild / developers := List(
   )
 )
 ThisBuild / versionScheme := Some("early-semver")
-// Root and modules without a published predecessor have no baseline — don't fail MiMa for them.
 ThisBuild / mimaFailOnNoPrevious := false
 ThisBuild / sonatypeCredentialHost := xerial.sbt.Sonatype.sonatypeCentralHost
 ThisBuild / licenses := List("Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0"))
@@ -70,7 +69,6 @@ lazy val commonSettings = Seq(
   libraryDependencies ++= sparkCore.value :: sparkSql.value :: Nil
 )
 
-// Check binary compatibility against the previous release tag; empty (no check) when no tags exist.
 lazy val mimaSettings = Seq(
   mimaPreviousArtifacts := previousStableVersion
     .value
