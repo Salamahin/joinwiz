@@ -1,0 +1,17 @@
+name: scala-steward
+
+# Scala Steward opens PRs bumping sbt library + plugin dependencies (Spark, ScalaTest,
+# ScalaCheck, sbt plugins, ...). Runs weekly and on demand.
+on:
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+jobs:
+  scala-steward:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Launch Scala Steward
+        uses: scala-steward-org/scala-steward-action@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}

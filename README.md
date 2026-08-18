@@ -10,7 +10,7 @@ of (some) Spark transformations
 
 | joinwiz artifact | Spark | Scala | Java |
 |---|---|---|---|
-| `joinwiz_core-spark2` |  2.4.5 | 2.11 / 2.12 | 8+ |
+| `joinwiz_core-spark2` |  2.4.5 | 2.12 | 8+ |
 | `joinwiz_core-spark3` | 3.2.1 | 2.13 | 11+ |
 | `joinwiz_core-spark4` | 4.1.0 | 2.13 | 17+ |
 
@@ -23,7 +23,7 @@ scalacOptions += "-Ydelambdafy:inline"
 libraryDependencies += "io.github.salamahin" %% "joinwiz_core-spark3" % joinwiz_version
 // For Spark 4 with Scala 2.13:
 libraryDependencies += "io.github.salamahin" %% "joinwiz_core-spark4" % joinwiz_version
-// For Spark 2 with Scala 2.11 or 2.12:
+// For Spark 2 with Scala 2.12:
 libraryDependencies += "io.github.salamahin" %% "joinwiz_core-spark2" % joinwiz_version
 ```
 
@@ -159,3 +159,50 @@ def addRowNumber[F[_]: ComputationEngine](as: F[A]): F[(A, Int)] = {
 * collect
 
 You can find more examples of usage in the appropriate [test](joinwiz_core/src/test/scala/joinwiz/ComputationEngineTest.scala)
+
+## Testing without Spark
+
+Any transformation written generically over `F[_]: ComputationEngine` can be exercised in a
+plain unit test — no `SparkSession`, no serialization, no JVM warm-up — by running it through the
+`Seq` interpreter from `joinwiz.testkit`:
+
+```scala
+import joinwiz.syntax._
+
+def enrich[F[_]: ComputationEngine](users: F[User], orders: F[Order]): F[(User, Option[Order])] =
+  users.leftJoin(orders)((u, o) => u(_.id) =:= o(_.userId))
+
+// production
+def enrichSpark(users: Dataset[User], orders: Dataset[Order]) = {
+  import joinwiz.spark._
+  enrich(users, orders)
+}
+
+// test — same code, ordinary Seq, assert on the result directly
+def enrichLocally(users: Seq[User], orders: Seq[Order]) = {
+  import joinwiz.testkit._
+  enrich(users, orders)
+}
+```
+
+The two interpreters are held to the same behaviour by
+[`EngineParitySpec`](joinwiz_core/src/test/scala/joinwiz/EngineParitySpec.scala), a property-based
+suite that feeds randomized data through both `Dataset` and `Seq` and asserts the results match.
+
+## Development
+
+The build is parameterized by Spark major version via the `spark.version` system property
+(`2`, `3` or `4`), each pinned to its own Scala/JDK combination (see the table above). Use the
+matching JDK when running a given line locally.
+
+```bash
+sbt -Dspark.version=4 +test          # compile & test against Spark 4 / Scala 2.13 (JDK 17)
+sbt -Dspark.version=3 +test          # Spark 3 / Scala 2.13 (JDK 11)
+sbt -Dspark.version=2 +test          # Spark 2 / Scala 2.12 (JDK 8)
+
+sbt -Dspark.version=4 scalafmtAll    # apply formatting (checked in CI)
+```
+
+Spark itself is a `Provided` dependency, so consuming applications supply `spark-core` /
+`spark-sql` from their own runtime; the test suite pulls them in through the test classpath.
+

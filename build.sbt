@@ -28,12 +28,17 @@ lazy val sparkV = Def.setting {
   }
 }
 
-lazy val scalaTest    = Def.setting { "org.scalatest"    %% "scalatest"    % "3.2.19" % Test }
-lazy val scalaReflect = Def.setting { "org.scala-lang"   % "scala-reflect" % scalaVersion.value }
-lazy val sparkCore    = Def.setting { "org.apache.spark" %% "spark-core"   % sparkV.value }
-lazy val sparkSql     = Def.setting { "org.apache.spark" %% "spark-sql"    % sparkV.value }
+lazy val scalaTest     = Def.setting { "org.scalatest"     %% "scalatest"       % "3.2.19" % Test }
+lazy val scalaCheck    = Def.setting { "org.scalacheck"    %% "scalacheck"      % "1.18.1" % Test }
+lazy val scalaTestPlus = Def.setting { "org.scalatestplus" %% "scalacheck-1-18" % "3.2.19.0" % Test }
+lazy val scalaReflect  = Def.setting { "org.scala-lang"    % "scala-reflect"    % scalaVersion.value }
+// Spark is `Provided`: consumers bring their own Spark on the classpath, joinwiz must not
+// pin (and drag in) a concrete Spark build. `Provided` deps are still on the Test classpath,
+// so the test suites keep a real Spark to run against.
+lazy val sparkCore = Def.setting { "org.apache.spark" %% "spark-core" % sparkV.value % Provided }
+lazy val sparkSql  = Def.setting { "org.apache.spark" %% "spark-sql"  % sparkV.value % Provided }
 
-ThisBuild / scalaVersion       := defaultScalaVersion
+ThisBuild / scalaVersion := defaultScalaVersion
 ThisBuild / crossScalaVersions := supportedScalaVersions
 ThisBuild / organization := "io.github.salamahin"
 ThisBuild / homepage := Some(url("https://github.com/Salamahin/joinwiz"))
@@ -46,6 +51,9 @@ ThisBuild / developers := List(
   )
 )
 ThisBuild / versionScheme := Some("early-semver")
+// The aggregate root and any module without a published predecessor have no MiMa baseline;
+// don't fail the task for them — modules that do set `mimaPreviousArtifacts` are still checked.
+ThisBuild / mimaFailOnNoPrevious := false
 ThisBuild / sonatypeCredentialHost := xerial.sbt.Sonatype.sonatypeCentralHost
 ThisBuild / licenses := List("Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0"))
 ThisBuild / scalacOptions ++= Seq(
@@ -62,7 +70,18 @@ ThisBuild / scalacOptions ++= Seq(
 )
 
 lazy val commonSettings = Seq(
-  libraryDependencies ++= scalaReflect.value :: sparkCore.value :: sparkSql.value :: Nil
+  libraryDependencies ++= sparkCore.value :: sparkSql.value :: Nil
+)
+
+// MiMa: report binary-compatibility breakage against the previous stable release.
+// `previousStableVersion` comes from sbt-dynver (bundled with sbt-ci-release) and reads git
+// tags, so it resolves to an empty set when no tags are present (e.g. a shallow checkout),
+// which keeps local builds green.
+lazy val mimaSettings = Seq(
+  mimaPreviousArtifacts := previousStableVersion
+    .value
+    .map(v => organization.value %% moduleName.value % v)
+    .toSet
 )
 
 lazy val root = (project in file("."))
@@ -73,9 +92,12 @@ lazy val root = (project in file("."))
 lazy val joinwiz_macro = (project in file("joinwiz_macro"))
   .settings(name := s"joinwiz_macro$sparkSuffix")
   .settings(commonSettings: _*)
+  .settings(mimaSettings: _*)
+  .settings(libraryDependencies += scalaReflect.value)
 
 lazy val joinwiz_core = (project in file("joinwiz_core"))
   .settings(name := s"joinwiz_core$sparkSuffix")
   .dependsOn(joinwiz_macro)
   .settings(commonSettings: _*)
-  .settings(libraryDependencies += scalaTest.value)
+  .settings(mimaSettings: _*)
+  .settings(libraryDependencies ++= scalaTest.value :: scalaCheck.value :: scalaTestPlus.value :: Nil)
