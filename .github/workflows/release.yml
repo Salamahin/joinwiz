@@ -20,7 +20,7 @@ jobs:
           cache: sbt
 
       - name: Set up sbt
-        uses: coursier/setup-action@v1
+        uses: coursier/setup-action@v3
         with:
           apps: sbt
 
@@ -46,7 +46,7 @@ jobs:
           cache: sbt
 
       - name: Set up sbt
-        uses: coursier/setup-action@v1
+        uses: coursier/setup-action@v3
         with:
           apps: sbt
 
@@ -72,7 +72,7 @@ jobs:
           cache: sbt
 
       - name: Set up sbt
-        uses: coursier/setup-action@v1
+        uses: coursier/setup-action@v3
         with:
           apps: sbt
 
