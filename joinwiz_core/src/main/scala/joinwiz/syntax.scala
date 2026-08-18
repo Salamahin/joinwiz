@@ -13,12 +13,18 @@ object syntax
     with Wrappers
     with UnapplySyntax
     with ApplyTColumnSyntax
+    with ApplyFColumnSyntax
+    with FilterWrappers
+    with FilterEqualSyntax
+    with FilterCompareSyntax
+    with FilterCombinatorsSyntax
     with CommonWindowFunctions
     with WindowExpressionSyntax
     with UdfSyntax {
 
-  type JOIN_CONDITION[L, R]    = (LTColumn[L, R, L], RTColumn[L, R, R]) => JoinCondition[L, R]
-  type WINDOW_EXPRESSION[T, S] = ApplyTWindow[T] => TWindowSpec[T, S]
+  type JOIN_CONDITION[L, R]     = (LTColumn[L, R, L], RTColumn[L, R, R]) => JoinCondition[L, R]
+  type WINDOW_EXPRESSION[T, S]  = ApplyTWindow[T] => TWindowSpec[T, S]
+  type FILTER_CONDITION[T]      = FColumn[T, T] => FilterCondition[T]
 
   implicit class DatasetLikeSyntax[F[_], T: TypeTag](ft: F[T])(implicit ce: ComputationEngine[F]) {
     def innerJoin[U](fu: F[U])(expr: JOIN_CONDITION[T, U]): F[(T, U)] =
@@ -30,6 +36,11 @@ object syntax
     def leftAntiJoin[U: TypeTag](fu: F[U])(expr: JOIN_CONDITION[T, U]): F[T] =
       ce.join.left_anti[T, U](ft, fu)(expr)
 
+    def fullJoin[U: TypeTag](fu: F[U])(expr: JOIN_CONDITION[T, U]): F[(Option[T], Option[U])] =
+      ce.join.full[T, U](ft, fu)(expr)
+
+    def broadcast(): F[T] = ce.broadcast(ft)
+
     def map[U: TypeTag](func: T => U): F[U] =
       ce.map(ft)(func)
 
@@ -38,6 +49,12 @@ object syntax
 
     def filter(func: T => Boolean): F[T] =
       ce.filter(ft)(func)
+
+    // Column-based sibling of `filter`: lowers to a Catalyst predicate (pushdown) instead of an
+    // opaque closure. A distinct name is required — an overloaded `filter` collides on JVM erasure
+    // (both are Function1) and, even hacked apart, defeats lambda-parameter inference.
+    def filterBy(expr: FILTER_CONDITION[T]): F[T] =
+      ce.filter.byColumn(ft)(expr(FColumn[T]))
 
     def distinct(): F[T] = ce.distinct(ft)
 

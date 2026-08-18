@@ -26,4 +26,13 @@ class SeqJoinImpl[L, R](op: JoinCondition[L, R], left: Seq[L], right: Seq[R]) {
     leftJoin().collect { case (left, None) => left }
   }
 
+  def fullJoin(): Seq[(Option[L], Option[R])] = {
+    val joined                 = innerJoin()
+    val (leftJoined, rightJoined) = joined.unzip
+    val leftOnly               = (left diff leftJoined).map(l => (Option(l), Option.empty[R]))
+    val rightOnly              = (right diff rightJoined).map(r => (Option.empty[L], Option(r)))
+
+    joined.map { case (l, r) => (Option(l), Option(r)) } ++ leftOnly ++ rightOnly
+  }
+
 }

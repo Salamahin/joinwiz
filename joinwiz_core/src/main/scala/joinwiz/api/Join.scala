@@ -10,4 +10,6 @@ trait Join[F[_]] {
   def left[LEFT: TypeTag, RIGHT: TypeTag](ft: F[LEFT], fu: F[RIGHT])(expr: JOIN_CONDITION[LEFT, RIGHT]): F[(LEFT, Option[RIGHT])]
 
   def left_anti[LEFT: TypeTag, RIGHT](ft: F[LEFT], fu: F[RIGHT])(expr: JOIN_CONDITION[LEFT, RIGHT]): F[LEFT]
+
+  def full[LEFT: TypeTag, RIGHT: TypeTag](ft: F[LEFT], fu: F[RIGHT])(expr: JOIN_CONDITION[LEFT, RIGHT]): F[(Option[LEFT], Option[RIGHT])]
 }
