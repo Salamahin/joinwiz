@@ -16,7 +16,9 @@ of (some) Spark transformations
 
 ## Try it
 
-[![joinwiz_core Scala version support](https://index.scala-lang.org/salamahin/joinwiz/joinwiz_core/latest.svg)](https://index.scala-lang.org/salamahin/joinwiz/joinwiz_core)
+[![joinwiz_core-spark2](https://index.scala-lang.org/salamahin/joinwiz/joinwiz_core-spark2/latest.svg?label=joinwiz_core-spark2)](https://index.scala-lang.org/salamahin/joinwiz/joinwiz_core-spark2)
+[![joinwiz_core-spark3](https://index.scala-lang.org/salamahin/joinwiz/joinwiz_core-spark3/latest.svg?label=joinwiz_core-spark3)](https://index.scala-lang.org/salamahin/joinwiz/joinwiz_core-spark3)
+[![joinwiz_core-spark4](https://index.scala-lang.org/salamahin/joinwiz/joinwiz_core-spark4/latest.svg?label=joinwiz_core-spark4)](https://index.scala-lang.org/salamahin/joinwiz/joinwiz_core-spark4)
 ```scala
 scalacOptions += "-Ydelambdafy:inline"
 // For Spark 3 with Scala 2.13:
