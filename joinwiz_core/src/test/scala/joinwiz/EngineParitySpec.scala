@@ -10,22 +10,15 @@ import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import scala.language.higherKinds
 
 /**
-  * Property-based parity check between the two `ComputationEngine` interpreters.
-  *
-  * joinwiz's whole promise is that one `[F[_]: ComputationEngine]` program runs identically
-  * with Spark (`Dataset`) and without it (`Seq`, the testkit). The hand-written examples in
-  * [[ComputationEngineTest]] pin a few concrete inputs; this suite instead throws randomized
-  * data at the *same* generic program through both interpreters and asserts the results match.
-  * That is exactly the invariant most likely to silently rot (Seq semantics drifting away from
-  * Spark's — ordering, option flattening, anti-join, grouping), so it deserves generative
-  * coverage rather than a couple of fixtures.
+  * Feeds randomized data through the same `[F[_]: ComputationEngine]` program on both the Spark
+  * (`Dataset`) and testkit (`Seq`) interpreters and asserts the results match — guarding the two
+  * from drifting apart where [[ComputationEngineTest]]'s fixed examples wouldn't notice.
   */
 object EngineParitySpec {
   case class L(uuid: Int, value: String)
   case class R(uuid: Int, tag: String)
 
-  // The programs below are written once, generically over the engine — the library's raison
-  // d'être. Each is executed against both `Dataset` and `Seq` in the tests.
+  // Written once over F; each is run through both Dataset and Seq below.
   object programs {
     import joinwiz.syntax._
 
@@ -56,8 +49,7 @@ class EngineParitySpec extends AnyFunSuite with Matchers with ScalaCheckDrivenPr
   import joinwiz.testkit._
   import ss.implicits._
 
-  // Spark spins up per property evaluation, so keep the sample count and collection sizes
-  // modest — enough to exercise matches, misses and duplicates without turning CI glacial.
+  // A Spark job runs per evaluation — keep samples and sizes small so CI stays quick.
   implicit override val generatorDrivenConfig: PropertyCheckConfiguration =
     PropertyCheckConfiguration(minSuccessful = 8, sizeRange = 8)
 

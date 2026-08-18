@@ -1,7 +1,6 @@
 version: 2
 updates:
-  # GitHub Actions used in workflows. Dependabot has no sbt/Scala ecosystem — sbt library and
-  # plugin updates are handled by Scala Steward (see .github/workflows/scala-steward.yml).
+  # Actions only — sbt deps go through Scala Steward (Dependabot has no sbt ecosystem).
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:

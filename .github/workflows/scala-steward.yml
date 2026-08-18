@@ -1,7 +1,6 @@
 name: scala-steward
 
-# Scala Steward opens PRs bumping sbt library + plugin dependencies (Spark, ScalaTest,
-# ScalaCheck, sbt plugins, ...). Runs weekly and on demand.
+# Opens PRs bumping sbt library + plugin versions (the sbt side Dependabot can't do).
 on:
   schedule:
     - cron: "0 6 * * 1"

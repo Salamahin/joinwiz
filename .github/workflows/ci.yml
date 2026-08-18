@@ -78,8 +78,7 @@ jobs:
         with:
           apps: sbt
 
-      # Informational: reports breakage vs the previous stable release without gating the
-      # build. Flip `continue-on-error` off once a baseline release with MiMa is established.
+      # Informational until a released baseline exists; then drop continue-on-error to enforce.
       - name: Report binary issues
         continue-on-error: true
         run: sbt -Dspark.version=4 mimaReportBinaryIssues
