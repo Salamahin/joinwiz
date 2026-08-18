@@ -8,7 +8,6 @@ import scala.language.experimental.macros
 import scala.language.higherKinds
 import scala.reflect.macros.whitebox
 
-
 trait TWindow[O, E] {
   def partitionByCols: List[Column]
   def orderByCols: List[Column]

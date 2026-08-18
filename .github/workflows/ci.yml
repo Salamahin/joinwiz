@@ -9,92 +9,76 @@ on:
       - master
 
 jobs:
-  test_spark2:
-    name: Tests with Spark 2 (JDK 8)
+  format:
+    name: Formatting
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set up JDK 8
-        uses: actions/setup-java@v4
-        with:
-          java-version: 8
-          distribution: 'temurin'
-
-      - name: Set up sbt
-        uses: coursier/setup-action@v1
-        with:
-          apps: sbt
-
-      - name: Cache SBT dependencies
-        uses: actions/cache@v4
-        with:
-          path: ~/.sbt
-          key: ${{ runner.os }}-sbt-spark2-${{ hashFiles('**/*.sbt') }}-${{ hashFiles('**/project/*.scala') }}
-          restore-keys: |
-            ${{ runner.os }}-sbt-
-
-      - name: Run tests with Spark 2
-        run: sbt -Dspark.version=2 +test
-
-  test_spark3:
-    name: Tests with Spark 3 (JDK 11)
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set up JDK 11
-        uses: actions/setup-java@v4
-        with:
-          java-version: 11
-          distribution: 'temurin'
-
-      - name: Set up sbt
-        uses: coursier/setup-action@v1
-        with:
-          apps: sbt
-
-      - name: Cache SBT dependencies
-        uses: actions/cache@v4
-        with:
-          path: ~/.sbt
-          key: ${{ runner.os }}-sbt-spark3-${{ hashFiles('**/*.sbt') }}-${{ hashFiles('**/project/*.scala') }}
-          restore-keys: |
-            ${{ runner.os }}-sbt-
-
-      - name: Run tests with Spark 3
-        run: sbt -Dspark.version=3 +test
-
-  test_spark4:
-    name: Tests with Spark 4 (JDK 17)
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
+      - uses: actions/setup-java@v4
         with:
           java-version: 17
-          distribution: 'temurin'
+          distribution: temurin
+          cache: sbt
 
       - name: Set up sbt
         uses: coursier/setup-action@v1
         with:
           apps: sbt
 
-      - name: Cache SBT dependencies
-        uses: actions/cache@v4
-        with:
-          path: ~/.sbt
-          key: ${{ runner.os }}-sbt-spark4-${{ hashFiles('**/*.sbt') }}-${{ hashFiles('**/project/*.scala') }}
-          restore-keys: |
-            ${{ runner.os }}-sbt-
+      - name: Check formatting
+        run: sbt -Dspark.version=4 scalafmtCheckAll scalafmtSbtCheck
 
-      - name: Run tests with Spark 4
-        run: sbt -Dspark.version=4 +test
+  test:
+    name: Test Spark ${{ matrix.spark }} (JDK ${{ matrix.java }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - spark: "2"
+            java: "8"
+          - spark: "3"
+            java: "11"
+          - spark: "4"
+            java: "17"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          java-version: ${{ matrix.java }}
+          distribution: temurin
+          cache: sbt
+
+      - name: Set up sbt
+        uses: coursier/setup-action@v1
+        with:
+          apps: sbt
+
+      - name: Run tests
+        run: sbt -Dspark.version=${{ matrix.spark }} +test
+
+  binary-compatibility:
+    name: Binary compatibility (MiMa)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-java@v4
+        with:
+          java-version: 17
+          distribution: temurin
+          cache: sbt
+
+      - name: Set up sbt
+        uses: coursier/setup-action@v1
+        with:
+          apps: sbt
+
+      # Informational until a released baseline exists; then drop continue-on-error to enforce.
+      - name: Report binary issues
+        continue-on-error: true
+        run: sbt -Dspark.version=4 mimaReportBinaryIssues

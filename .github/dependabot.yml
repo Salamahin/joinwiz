@@ -1,0 +1,9 @@
+version: 2
+updates:
+  # Actions only — sbt deps go through Scala Steward (Dependabot has no sbt ecosystem).
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "dependencies"

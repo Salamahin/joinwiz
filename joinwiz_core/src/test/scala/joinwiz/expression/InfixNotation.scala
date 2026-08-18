@@ -11,12 +11,8 @@ trait InfixNotation {
   private val sqlQuotes: Regex   = """'([^']*)'""".r
 
   def toInfixNotation(s: String): String = {
-    var result = innerPrefix.replaceAllIn(s, m =>
-      Regex.quoteReplacement(s"(${m.group(2).trim} ${m.group(1)} ${m.group(3).trim})")
-    )
-    result = outerPrefix.replaceAllIn(result, m =>
-      Regex.quoteReplacement(s"(${m.group(2).trim} ${m.group(1)} ${m.group(3).trim})")
-    )
+    var result = innerPrefix.replaceAllIn(s, m => Regex.quoteReplacement(s"(${m.group(2).trim} ${m.group(1)} ${m.group(3).trim})"))
+    result = outerPrefix.replaceAllIn(result, m => Regex.quoteReplacement(s"(${m.group(2).trim} ${m.group(1)} ${m.group(3).trim})"))
     result = sqlQuotes.replaceAllIn(result, m => Regex.quoteReplacement(m.group(1)))
     if (infixOp.findFirstIn(result).isEmpty)
       throw new IllegalArgumentException(s"""Unknown expression format: "$s"""")

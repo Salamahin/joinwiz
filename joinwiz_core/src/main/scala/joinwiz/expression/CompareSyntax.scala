@@ -8,7 +8,7 @@ import java.sql.{Date, Timestamp}
 trait LowLevelCompareSyntax {
   import org.apache.spark.sql.functions.lit
 
-  implicit val dateOrdering: Ordering[Date]           = new Ordering[Date] {
+  implicit val dateOrdering: Ordering[Date] = new Ordering[Date] {
     override def compare(x: Date, y: Date): Int = implicitly[Ordering[Long]].compare(x.getTime, y.getTime)
   }
   implicit val timestampOrdering: Ordering[Timestamp] = new Ordering[Timestamp] {
@@ -16,55 +16,71 @@ trait LowLevelCompareSyntax {
   }
 
   abstract class BasicLTColumnCompareSyntax[F[_], L, R, T: Ordering](thisCol: LTColumn[L, R, F[T]])(implicit op: TColumnCompare[F]) {
-    def <(thatCol: LTColumn[L, R, T]): JoinCondition[L, R]     = joinCondition[L, R]((l, r) => op.compare(thisCol.value(l, r), thatCol.value(l, r))(-1))(thisCol.toColumn < thatCol.toColumn)
-    def <(thatCol: RTColumn[L, R, T]): JoinCondition[L, R]     = joinCondition[L, R]((l, r) => op.compare(thisCol.value(l, r), thatCol.value(l, r))(-1))(thisCol.toColumn < thatCol.toColumn)
-    def <(thatCol: LTColumnOptW[L, R, T]): JoinCondition[L, R] = joinCondition[L, R]((l, r) => op.compare(thisCol.value(l, r), thatCol.wrapped.value(l, r))(-1))(thisCol.toColumn < thatCol.wrapped.toColumn)
-    def <(thatCol: RTColumnOptW[L, R, T]): JoinCondition[L, R] = joinCondition[L, R]((l, r) => op.compare(thisCol.value(l, r), thatCol.wrapped.value(l, r))(-1))(thisCol.toColumn < thatCol.wrapped.toColumn)
-    def <(const: T): JoinCondition[L, R]                    = joinCondition[L, R]((l, r) => op.compare(thisCol.value(l, r), const)(-1))(thisCol.toColumn < lit(const))
+    def <(thatCol: LTColumn[L, R, T]): JoinCondition[L, R] = joinCondition[L, R]((l, r) => op.compare(thisCol.value(l, r), thatCol.value(l, r))(-1))(thisCol.toColumn < thatCol.toColumn)
+    def <(thatCol: RTColumn[L, R, T]): JoinCondition[L, R] = joinCondition[L, R]((l, r) => op.compare(thisCol.value(l, r), thatCol.value(l, r))(-1))(thisCol.toColumn < thatCol.toColumn)
+    def <(thatCol: LTColumnOptW[L, R, T]): JoinCondition[L, R] =
+      joinCondition[L, R]((l, r) => op.compare(thisCol.value(l, r), thatCol.wrapped.value(l, r))(-1))(thisCol.toColumn < thatCol.wrapped.toColumn)
+    def <(thatCol: RTColumnOptW[L, R, T]): JoinCondition[L, R] =
+      joinCondition[L, R]((l, r) => op.compare(thisCol.value(l, r), thatCol.wrapped.value(l, r))(-1))(thisCol.toColumn < thatCol.wrapped.toColumn)
+    def <(const: T): JoinCondition[L, R] = joinCondition[L, R]((l, r) => op.compare(thisCol.value(l, r), const)(-1))(thisCol.toColumn < lit(const))
 
-    def <=(thatCol: LTColumn[L, R, T]): JoinCondition[L, R]     = joinCondition[L, R]((l, r) => op.compare(thisCol.value(l, r), thatCol.value(l, r))(-1, 0))(thisCol.toColumn <= thatCol.toColumn)
-    def <=(thatCol: RTColumn[L, R, T]): JoinCondition[L, R]     = joinCondition[L, R]((l, r) => op.compare(thisCol.value(l, r), thatCol.value(l, r))(-1, 0))(thisCol.toColumn <= thatCol.toColumn)
-    def <=(thatCol: LTColumnOptW[L, R, T]): JoinCondition[L, R] = joinCondition[L, R]((l, r) => op.compare(thisCol.value(l, r), thatCol.wrapped.value(l, r))(-1, 0))(thisCol.toColumn <= thatCol.wrapped.toColumn)
-    def <=(thatCol: RTColumnOptW[L, R, T]): JoinCondition[L, R] = joinCondition[L, R]((l, r) => op.compare(thisCol.value(l, r), thatCol.wrapped.value(l, r))(-1, 0))(thisCol.toColumn <= thatCol.wrapped.toColumn)
-    def <=(const: T): JoinCondition[L, R]                    = joinCondition[L, R]((l, r) => op.compare(thisCol.value(l, r), const)(-1, 0))(thisCol.toColumn <= lit(const))
+    def <=(thatCol: LTColumn[L, R, T]): JoinCondition[L, R] = joinCondition[L, R]((l, r) => op.compare(thisCol.value(l, r), thatCol.value(l, r))(-1, 0))(thisCol.toColumn <= thatCol.toColumn)
+    def <=(thatCol: RTColumn[L, R, T]): JoinCondition[L, R] = joinCondition[L, R]((l, r) => op.compare(thisCol.value(l, r), thatCol.value(l, r))(-1, 0))(thisCol.toColumn <= thatCol.toColumn)
+    def <=(thatCol: LTColumnOptW[L, R, T]): JoinCondition[L, R] =
+      joinCondition[L, R]((l, r) => op.compare(thisCol.value(l, r), thatCol.wrapped.value(l, r))(-1, 0))(thisCol.toColumn <= thatCol.wrapped.toColumn)
+    def <=(thatCol: RTColumnOptW[L, R, T]): JoinCondition[L, R] =
+      joinCondition[L, R]((l, r) => op.compare(thisCol.value(l, r), thatCol.wrapped.value(l, r))(-1, 0))(thisCol.toColumn <= thatCol.wrapped.toColumn)
+    def <=(const: T): JoinCondition[L, R] = joinCondition[L, R]((l, r) => op.compare(thisCol.value(l, r), const)(-1, 0))(thisCol.toColumn <= lit(const))
 
-    def >(thatCol: LTColumn[L, R, T]): JoinCondition[L, R]     = joinCondition[L, R]((l, r) => op.compare(thisCol.value(l, r), thatCol.value(l, r))(1))(thisCol.toColumn > thatCol.toColumn)
-    def >(thatCol: RTColumn[L, R, T]): JoinCondition[L, R]     = joinCondition[L, R]((l, r) => op.compare(thisCol.value(l, r), thatCol.value(l, r))(1))(thisCol.toColumn > thatCol.toColumn)
-    def >(thatCol: LTColumnOptW[L, R, T]): JoinCondition[L, R] = joinCondition[L, R]((l, r) => op.compare(thisCol.value(l, r), thatCol.wrapped.value(l, r))(1))(thisCol.toColumn > thatCol.wrapped.toColumn)
-    def >(thatCol: RTColumnOptW[L, R, T]): JoinCondition[L, R] = joinCondition[L, R]((l, r) => op.compare(thisCol.value(l, r), thatCol.wrapped.value(l, r))(1))(thisCol.toColumn > thatCol.wrapped.toColumn)
-    def >(const: T): JoinCondition[L, R]                    = joinCondition[L, R]((l, r) => op.compare(thisCol.value(l, r), const)(1))(thisCol.toColumn > lit(const))
+    def >(thatCol: LTColumn[L, R, T]): JoinCondition[L, R] = joinCondition[L, R]((l, r) => op.compare(thisCol.value(l, r), thatCol.value(l, r))(1))(thisCol.toColumn > thatCol.toColumn)
+    def >(thatCol: RTColumn[L, R, T]): JoinCondition[L, R] = joinCondition[L, R]((l, r) => op.compare(thisCol.value(l, r), thatCol.value(l, r))(1))(thisCol.toColumn > thatCol.toColumn)
+    def >(thatCol: LTColumnOptW[L, R, T]): JoinCondition[L, R] =
+      joinCondition[L, R]((l, r) => op.compare(thisCol.value(l, r), thatCol.wrapped.value(l, r))(1))(thisCol.toColumn > thatCol.wrapped.toColumn)
+    def >(thatCol: RTColumnOptW[L, R, T]): JoinCondition[L, R] =
+      joinCondition[L, R]((l, r) => op.compare(thisCol.value(l, r), thatCol.wrapped.value(l, r))(1))(thisCol.toColumn > thatCol.wrapped.toColumn)
+    def >(const: T): JoinCondition[L, R] = joinCondition[L, R]((l, r) => op.compare(thisCol.value(l, r), const)(1))(thisCol.toColumn > lit(const))
 
-    def >=(thatCol: LTColumn[L, R, T]): JoinCondition[L, R]     = joinCondition[L, R]((l, r) => op.compare(thisCol.value(l, r), thatCol.value(l, r))(1, 0))(thisCol.toColumn >= thatCol.toColumn)
-    def >=(thatCol: RTColumn[L, R, T]): JoinCondition[L, R]     = joinCondition[L, R]((l, r) => op.compare(thisCol.value(l, r), thatCol.value(l, r))(1, 0))(thisCol.toColumn >= thatCol.toColumn)
-    def >=(thatCol: LTColumnOptW[L, R, T]): JoinCondition[L, R] = joinCondition[L, R]((l, r) => op.compare(thisCol.value(l, r), thatCol.wrapped.value(l, r))(1, 0))(thisCol.toColumn >= thatCol.wrapped.toColumn)
-    def >=(thatCol: RTColumnOptW[L, R, T]): JoinCondition[L, R] = joinCondition[L, R]((l, r) => op.compare(thisCol.value(l, r), thatCol.wrapped.value(l, r))(1, 0))(thisCol.toColumn >= thatCol.wrapped.toColumn)
-    def >=(const: T): JoinCondition[L, R]                    = joinCondition[L, R]((l, r) => op.compare(thisCol.value(l, r), const)(1, 0))(thisCol.toColumn >= lit(const))
+    def >=(thatCol: LTColumn[L, R, T]): JoinCondition[L, R] = joinCondition[L, R]((l, r) => op.compare(thisCol.value(l, r), thatCol.value(l, r))(1, 0))(thisCol.toColumn >= thatCol.toColumn)
+    def >=(thatCol: RTColumn[L, R, T]): JoinCondition[L, R] = joinCondition[L, R]((l, r) => op.compare(thisCol.value(l, r), thatCol.value(l, r))(1, 0))(thisCol.toColumn >= thatCol.toColumn)
+    def >=(thatCol: LTColumnOptW[L, R, T]): JoinCondition[L, R] =
+      joinCondition[L, R]((l, r) => op.compare(thisCol.value(l, r), thatCol.wrapped.value(l, r))(1, 0))(thisCol.toColumn >= thatCol.wrapped.toColumn)
+    def >=(thatCol: RTColumnOptW[L, R, T]): JoinCondition[L, R] =
+      joinCondition[L, R]((l, r) => op.compare(thisCol.value(l, r), thatCol.wrapped.value(l, r))(1, 0))(thisCol.toColumn >= thatCol.wrapped.toColumn)
+    def >=(const: T): JoinCondition[L, R] = joinCondition[L, R]((l, r) => op.compare(thisCol.value(l, r), const)(1, 0))(thisCol.toColumn >= lit(const))
   }
 
   abstract class BasicRTColumnCompareSyntax[F[_], L, R, T: Ordering](thisCol: RTColumn[L, R, F[T]])(implicit op: TColumnCompare[F]) {
-    def <(thatCol: LTColumn[L, R, T]): JoinCondition[L, R]     = joinCondition[L, R]((l, r) => op.compare(thisCol.value(l, r), thatCol.value(l, r))(-1))(thisCol.toColumn < thatCol.toColumn)
-    def <(thatCol: RTColumn[L, R, T]): JoinCondition[L, R]     = joinCondition[L, R]((l, r) => op.compare(thisCol.value(l, r), thatCol.value(l, r))(-1))(thisCol.toColumn < thatCol.toColumn)
-    def <(thatCol: LTColumnOptW[L, R, T]): JoinCondition[L, R] = joinCondition[L, R]((l, r) => op.compare(thisCol.value(l, r), thatCol.wrapped.value(l, r))(-1))(thisCol.toColumn < thatCol.wrapped.toColumn)
-    def <(thatCol: RTColumnOptW[L, R, T]): JoinCondition[L, R] = joinCondition[L, R]((l, r) => op.compare(thisCol.value(l, r), thatCol.wrapped.value(l, r))(-1))(thisCol.toColumn < thatCol.wrapped.toColumn)
-    def <(const: T): JoinCondition[L, R]                    = joinCondition[L, R]((l, r) => op.compare(thisCol.value(l, r), const)(-1))(thisCol.toColumn < lit(const))
+    def <(thatCol: LTColumn[L, R, T]): JoinCondition[L, R] = joinCondition[L, R]((l, r) => op.compare(thisCol.value(l, r), thatCol.value(l, r))(-1))(thisCol.toColumn < thatCol.toColumn)
+    def <(thatCol: RTColumn[L, R, T]): JoinCondition[L, R] = joinCondition[L, R]((l, r) => op.compare(thisCol.value(l, r), thatCol.value(l, r))(-1))(thisCol.toColumn < thatCol.toColumn)
+    def <(thatCol: LTColumnOptW[L, R, T]): JoinCondition[L, R] =
+      joinCondition[L, R]((l, r) => op.compare(thisCol.value(l, r), thatCol.wrapped.value(l, r))(-1))(thisCol.toColumn < thatCol.wrapped.toColumn)
+    def <(thatCol: RTColumnOptW[L, R, T]): JoinCondition[L, R] =
+      joinCondition[L, R]((l, r) => op.compare(thisCol.value(l, r), thatCol.wrapped.value(l, r))(-1))(thisCol.toColumn < thatCol.wrapped.toColumn)
+    def <(const: T): JoinCondition[L, R] = joinCondition[L, R]((l, r) => op.compare(thisCol.value(l, r), const)(-1))(thisCol.toColumn < lit(const))
 
-    def <=(thatCol: LTColumn[L, R, T]): JoinCondition[L, R]     = joinCondition[L, R]((l, r) => op.compare(thisCol.value(l, r), thatCol.value(l, r))(-1, 0))(thisCol.toColumn <= thatCol.toColumn)
-    def <=(thatCol: RTColumn[L, R, T]): JoinCondition[L, R]     = joinCondition[L, R]((l, r) => op.compare(thisCol.value(l, r), thatCol.value(l, r))(-1, 0))(thisCol.toColumn <= thatCol.toColumn)
-    def <=(thatCol: LTColumnOptW[L, R, T]): JoinCondition[L, R] = joinCondition[L, R]((l, r) => op.compare(thisCol.value(l, r), thatCol.wrapped.value(l, r))(-1, 0))(thisCol.toColumn <= thatCol.wrapped.toColumn)
-    def <=(thatCol: RTColumnOptW[L, R, T]): JoinCondition[L, R] = joinCondition[L, R]((l, r) => op.compare(thisCol.value(l, r), thatCol.wrapped.value(l, r))(-1, 0))(thisCol.toColumn <= thatCol.wrapped.toColumn)
-    def <=(const: T): JoinCondition[L, R]                    = joinCondition[L, R]((l, r) => op.compare(thisCol.value(l, r), const)(-1, 0))(thisCol.toColumn <= lit(const))
+    def <=(thatCol: LTColumn[L, R, T]): JoinCondition[L, R] = joinCondition[L, R]((l, r) => op.compare(thisCol.value(l, r), thatCol.value(l, r))(-1, 0))(thisCol.toColumn <= thatCol.toColumn)
+    def <=(thatCol: RTColumn[L, R, T]): JoinCondition[L, R] = joinCondition[L, R]((l, r) => op.compare(thisCol.value(l, r), thatCol.value(l, r))(-1, 0))(thisCol.toColumn <= thatCol.toColumn)
+    def <=(thatCol: LTColumnOptW[L, R, T]): JoinCondition[L, R] =
+      joinCondition[L, R]((l, r) => op.compare(thisCol.value(l, r), thatCol.wrapped.value(l, r))(-1, 0))(thisCol.toColumn <= thatCol.wrapped.toColumn)
+    def <=(thatCol: RTColumnOptW[L, R, T]): JoinCondition[L, R] =
+      joinCondition[L, R]((l, r) => op.compare(thisCol.value(l, r), thatCol.wrapped.value(l, r))(-1, 0))(thisCol.toColumn <= thatCol.wrapped.toColumn)
+    def <=(const: T): JoinCondition[L, R] = joinCondition[L, R]((l, r) => op.compare(thisCol.value(l, r), const)(-1, 0))(thisCol.toColumn <= lit(const))
 
-    def >(thatCol: LTColumn[L, R, T]): JoinCondition[L, R]     = joinCondition[L, R]((l, r) => op.compare(thisCol.value(l, r), thatCol.value(l, r))(1))(thisCol.toColumn > thatCol.toColumn)
-    def >(thatCol: RTColumn[L, R, T]): JoinCondition[L, R]     = joinCondition[L, R]((l, r) => op.compare(thisCol.value(l, r), thatCol.value(l, r))(1))(thisCol.toColumn > thatCol.toColumn)
-    def >(thatCol: LTColumnOptW[L, R, T]): JoinCondition[L, R] = joinCondition[L, R]((l, r) => op.compare(thisCol.value(l, r), thatCol.wrapped.value(l, r))(1))(thisCol.toColumn > thatCol.wrapped.toColumn)
-    def >(thatCol: RTColumnOptW[L, R, T]): JoinCondition[L, R] = joinCondition[L, R]((l, r) => op.compare(thisCol.value(l, r), thatCol.wrapped.value(l, r))(1))(thisCol.toColumn > thatCol.wrapped.toColumn)
-    def >(const: T): JoinCondition[L, R]                    = joinCondition[L, R]((l, r) => op.compare(thisCol.value(l, r), const)(1))(thisCol.toColumn > lit(const))
+    def >(thatCol: LTColumn[L, R, T]): JoinCondition[L, R] = joinCondition[L, R]((l, r) => op.compare(thisCol.value(l, r), thatCol.value(l, r))(1))(thisCol.toColumn > thatCol.toColumn)
+    def >(thatCol: RTColumn[L, R, T]): JoinCondition[L, R] = joinCondition[L, R]((l, r) => op.compare(thisCol.value(l, r), thatCol.value(l, r))(1))(thisCol.toColumn > thatCol.toColumn)
+    def >(thatCol: LTColumnOptW[L, R, T]): JoinCondition[L, R] =
+      joinCondition[L, R]((l, r) => op.compare(thisCol.value(l, r), thatCol.wrapped.value(l, r))(1))(thisCol.toColumn > thatCol.wrapped.toColumn)
+    def >(thatCol: RTColumnOptW[L, R, T]): JoinCondition[L, R] =
+      joinCondition[L, R]((l, r) => op.compare(thisCol.value(l, r), thatCol.wrapped.value(l, r))(1))(thisCol.toColumn > thatCol.wrapped.toColumn)
+    def >(const: T): JoinCondition[L, R] = joinCondition[L, R]((l, r) => op.compare(thisCol.value(l, r), const)(1))(thisCol.toColumn > lit(const))
 
-    def >=(thatCol: LTColumn[L, R, T]): JoinCondition[L, R]     = joinCondition[L, R]((l, r) => op.compare(thisCol.value(l, r), thatCol.value(l, r))(1, 0))(thisCol.toColumn >= thatCol.toColumn)
-    def >=(thatCol: RTColumn[L, R, T]): JoinCondition[L, R]     = joinCondition[L, R]((l, r) => op.compare(thisCol.value(l, r), thatCol.value(l, r))(1, 0))(thisCol.toColumn >= thatCol.toColumn)
-    def >=(thatCol: LTColumnOptW[L, R, T]): JoinCondition[L, R] = joinCondition[L, R]((l, r) => op.compare(thisCol.value(l, r), thatCol.wrapped.value(l, r))(1, 0))(thisCol.toColumn >= thatCol.wrapped.toColumn)
-    def >=(thatCol: RTColumnOptW[L, R, T]): JoinCondition[L, R] = joinCondition[L, R]((l, r) => op.compare(thisCol.value(l, r), thatCol.wrapped.value(l, r))(1, 0))(thisCol.toColumn >= thatCol.wrapped.toColumn)
-    def >=(const: T): JoinCondition[L, R]                    = joinCondition[L, R]((l, r) => op.compare(thisCol.value(l, r), const)(1, 0))(thisCol.toColumn >= lit(const))
+    def >=(thatCol: LTColumn[L, R, T]): JoinCondition[L, R] = joinCondition[L, R]((l, r) => op.compare(thisCol.value(l, r), thatCol.value(l, r))(1, 0))(thisCol.toColumn >= thatCol.toColumn)
+    def >=(thatCol: RTColumn[L, R, T]): JoinCondition[L, R] = joinCondition[L, R]((l, r) => op.compare(thisCol.value(l, r), thatCol.value(l, r))(1, 0))(thisCol.toColumn >= thatCol.toColumn)
+    def >=(thatCol: LTColumnOptW[L, R, T]): JoinCondition[L, R] =
+      joinCondition[L, R]((l, r) => op.compare(thisCol.value(l, r), thatCol.wrapped.value(l, r))(1, 0))(thisCol.toColumn >= thatCol.wrapped.toColumn)
+    def >=(thatCol: RTColumnOptW[L, R, T]): JoinCondition[L, R] =
+      joinCondition[L, R]((l, r) => op.compare(thisCol.value(l, r), thatCol.wrapped.value(l, r))(1, 0))(thisCol.toColumn >= thatCol.wrapped.toColumn)
+    def >=(const: T): JoinCondition[L, R] = joinCondition[L, R]((l, r) => op.compare(thisCol.value(l, r), const)(1, 0))(thisCol.toColumn >= lit(const))
   }
 
   implicit class LTColumnIntCompareSyntax[L, R](thisCol: LTColumn[L, R, Int])               extends BasicLTColumnCompareSyntax[Id, L, R, Int](thisCol)
