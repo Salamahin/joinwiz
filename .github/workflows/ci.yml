@@ -13,7 +13,7 @@ jobs:
     name: Formatting
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: actions/setup-java@v5
         with:
@@ -43,7 +43,7 @@ jobs:
           - spark: "4"
             java: "17"
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: actions/setup-java@v5
         with:
@@ -63,7 +63,7 @@ jobs:
     name: Binary compatibility (MiMa)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
