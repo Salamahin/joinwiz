@@ -38,7 +38,7 @@ class FilterByTest extends AnyFunSuite with Matchers with SparkSuite {
   }
 
   test("compare in filterBy is rejected at compile time for non-ordered element types") {
-    val r = FColumn[Row]
+    val r = FilterColumn[Row]
     assertCompiles("r(_.id) > 1")             // Int is ordered
     assertCompiles("r(_.name) =:= \"a\"")     // equality works for any element type
     assertDoesNotCompile("r(_.name) > \"a\"") // String is not in the SparkOrdered set

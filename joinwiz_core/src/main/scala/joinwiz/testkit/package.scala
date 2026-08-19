@@ -12,27 +12,27 @@ package object testkit {
   implicit val testkitComputationEngine: ComputationEngine[Seq] = new ComputationEngine[Seq] {
     override def join: Join[Seq] = new Join[Seq] {
       override def inner[T, U](ft: Seq[T], fu: Seq[U])(expr: JOIN_CONDITION[T, U]): Seq[(T, U)] = {
-        new SeqJoinImpl[T, U](expr(TColumn.left, TColumn.right), ft, fu).innerJoin()
+        new SeqJoinImpl[T, U](expr(JoinColumn.left, JoinColumn.right), ft, fu).innerJoin()
       }
 
       override def left[T: TypeTag, U: TypeTag](ft: Seq[T], fu: Seq[U])(expr: JOIN_CONDITION[T, U]): Seq[(T, Option[U])] = {
-        new SeqJoinImpl[T, U](expr(TColumn.left, TColumn.right), ft, fu).leftJoin()
+        new SeqJoinImpl[T, U](expr(JoinColumn.left, JoinColumn.right), ft, fu).leftJoin()
       }
 
       override def left_anti[T: TypeTag, U](ft: Seq[T], fu: Seq[U])(expr: JOIN_CONDITION[T, U]): Seq[T] = {
-        new SeqJoinImpl[T, U](expr(TColumn.left, TColumn.right), ft, fu).leftAntiJoin()
+        new SeqJoinImpl[T, U](expr(JoinColumn.left, JoinColumn.right), ft, fu).leftAntiJoin()
       }
 
       override def left_semi[T: TypeTag, U](ft: Seq[T], fu: Seq[U])(expr: JOIN_CONDITION[T, U]): Seq[T] = {
-        new SeqJoinImpl[T, U](expr(TColumn.left, TColumn.right), ft, fu).leftSemiJoin()
+        new SeqJoinImpl[T, U](expr(JoinColumn.left, JoinColumn.right), ft, fu).leftSemiJoin()
       }
 
       override def full[T: TypeTag, U: TypeTag](ft: Seq[T], fu: Seq[U])(expr: JOIN_CONDITION[T, U]): Seq[(Option[T], Option[U])] = {
-        new SeqJoinImpl[T, U](expr(TColumn.left, TColumn.right), ft, fu).fullJoin()
+        new SeqJoinImpl[T, U](expr(JoinColumn.left, JoinColumn.right), ft, fu).fullJoin()
       }
 
       override def right[T: TypeTag, U: TypeTag](ft: Seq[T], fu: Seq[U])(expr: JOIN_CONDITION[T, U]): Seq[(Option[T], U)] = {
-        new SeqJoinImpl[T, U](expr(TColumn.left, TColumn.right), ft, fu).rightJoin()
+        new SeqJoinImpl[T, U](expr(JoinColumn.left, JoinColumn.right), ft, fu).rightJoin()
       }
     }
 

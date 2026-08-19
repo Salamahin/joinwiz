@@ -23,9 +23,9 @@ class TemporalCompareTest extends AnyFunSuite with Matchers with SparkSuite {
   )
 
   test("LocalDate and Instant are comparable in the DSL") {
-    assertCompiles("FColumn[Event](_.day) < d1")
-    assertCompiles("FColumn[Event](_.at) >= Instant.now()")
-    assertDoesNotCompile("FColumn[Event](_.id) < d1")
+    assertCompiles("FilterColumn[Event](_.day) < d1")
+    assertCompiles("FilterColumn[Event](_.at) >= Instant.now()")
+    assertDoesNotCompile("FilterColumn[Event](_.id) < d1")
   }
 
   test("filterBy on a LocalDate column round-trips through Spark") {

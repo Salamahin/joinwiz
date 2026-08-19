@@ -12,8 +12,8 @@ object syntax
     with CombinatorsSyntax
     with Wrappers
     with UnapplySyntax
-    with ApplyTColumnSyntax
-    with ApplyFColumnSyntax
+    with ApplyJoinColumnSyntax
+    with ApplyFilterColumnSyntax
     with FilterWrappers
     with FilterEqualSyntax
     with FilterCompareSyntax
@@ -22,9 +22,9 @@ object syntax
     with WindowExpressionSyntax
     with UdfSyntax {
 
-  type JOIN_CONDITION[L, R]     = (LTColumn[L, R, L], RTColumn[L, R, R]) => JoinCondition[L, R]
+  type JOIN_CONDITION[L, R]     = (LeftColumn[L, R, L], RightColumn[L, R, R]) => JoinCondition[L, R]
   type WINDOW_EXPRESSION[T, S]  = ApplyTWindow[T] => TWindowSpec[T, S]
-  type FILTER_CONDITION[T]      = FColumn[T, T] => FilterCondition[T]
+  type FILTER_CONDITION[T]      = FilterColumn[T, T] => FilterCondition[T]
 
   implicit class DatasetLikeSyntax[F[_], T: TypeTag](ft: F[T])(implicit ce: ComputationEngine[F]) {
     def innerJoin[U](fu: F[U])(expr: JOIN_CONDITION[T, U]): F[(T, U)] =
@@ -57,7 +57,7 @@ object syntax
       ce.filter(ft)(func)
 
     def filterBy(expr: FILTER_CONDITION[T]): F[T] =
-      ce.filter.byColumn(ft)(expr(FColumn[T]))
+      ce.filter.byColumn(ft)(expr(FilterColumn[T]))
 
     def distinct(): F[T] = ce.distinct(ft)
 

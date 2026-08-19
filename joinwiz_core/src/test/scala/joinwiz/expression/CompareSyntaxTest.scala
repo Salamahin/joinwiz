@@ -1,13 +1,13 @@
 package joinwiz.expression
 
-import joinwiz.TColumn
+import joinwiz.JoinColumn
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
 
 class CompareSyntaxTest extends AnyFunSuite with Matchers with InfixNotation {
   import joinwiz.syntax._
 
-  private val evaluate = (TColumn.left[Left, Right], TColumn.right[Left, Right])
+  private val evaluate = (JoinColumn.left[Left, Right], JoinColumn.right[Left, Right])
 
   case class Left(pk: Int = Int.MinValue, opt: Option[Int] = None)
 
