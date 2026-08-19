@@ -1,6 +1,6 @@
 package joinwiz
 
-import joinwiz.api.{Collect, Distinct, Filter, FlatMap, GroupByKey, Join, Map, UnionByName, WithWindow}
+import joinwiz.api.{Broadcast, Collect, Distinct, Filter, FlatMap, GroupByKey, Join, Map, UnionByName, WithWindow}
 
 trait ComputationEngine[F[_]] extends Serializable {
   def map: Map[F]
@@ -12,4 +12,5 @@ trait ComputationEngine[F[_]] extends Serializable {
   def join: Join[F]
   def unionByName: UnionByName[F]
   def withWindow: WithWindow[F]
+  def broadcast: Broadcast[F]
 }

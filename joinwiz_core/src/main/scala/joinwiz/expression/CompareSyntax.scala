@@ -5,19 +5,19 @@ import joinwiz.{Id, LTColumn, RTColumn, TColumn}
 
 import java.sql.{Date, Timestamp}
 
-sealed trait SparkOrdered[T] {
+trait SparkOrdered[T] {
   def ordering: Ordering[T]
 }
 
-object SparkOrdered {
-  private def of[T](implicit o: Ordering[T]): SparkOrdered[T] = new SparkOrdered[T] {
+trait SparkOrderedInstances {
+  protected def of[T](implicit o: Ordering[T]): SparkOrdered[T] = new SparkOrdered[T] {
     val ordering: Ordering[T] = o
   }
 
-  private implicit val dateOrdering: Ordering[Date] = new Ordering[Date] {
+  protected implicit val dateOrdering: Ordering[Date] = new Ordering[Date] {
     override def compare(x: Date, y: Date): Int = Ordering.Long.compare(x.getTime, y.getTime)
   }
-  private implicit val timestampOrdering: Ordering[Timestamp] = new Ordering[Timestamp] {
+  protected implicit val timestampOrdering: Ordering[Timestamp] = new Ordering[Timestamp] {
     override def compare(x: Timestamp, y: Timestamp): Int = Ordering.Long.compare(x.getTime, y.getTime)
   }
 
@@ -31,6 +31,10 @@ object SparkOrdered {
   implicit val dateOrdered: SparkOrdered[Date]             = of
   implicit val timestampOrdered: SparkOrdered[Timestamp]   = of
 }
+
+// java.time instances are layered in per Spark version (SparkOrderedVersioned): Spark 3+ only,
+// since Spark 2.4 has no LocalDate/Instant encoders.
+object SparkOrdered extends SparkOrderedVersioned
 
 trait LowLevelCompareSyntax {
   import org.apache.spark.sql.functions.lit

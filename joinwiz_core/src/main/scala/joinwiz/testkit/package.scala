@@ -1,6 +1,6 @@
 package joinwiz
 
-import joinwiz.api.{Collect, Distinct, Filter, FlatMap, GroupByKey, Join, KeyValueGroupped, Map, UnionByName, WithWindow}
+import joinwiz.api.{Broadcast, Collect, Distinct, Filter, FlatMap, GroupByKey, Join, KeyValueGroupped, Map, UnionByName, WithWindow}
 import joinwiz.syntax.{JOIN_CONDITION, WINDOW_EXPRESSION}
 import joinwiz.window.TWindowSpec
 
@@ -22,6 +22,18 @@ package object testkit {
       override def left_anti[T: TypeTag, U](ft: Seq[T], fu: Seq[U])(expr: JOIN_CONDITION[T, U]): Seq[T] = {
         new SeqJoinImpl[T, U](expr(TColumn.left, TColumn.right), ft, fu).leftAntiJoin()
       }
+
+      override def left_semi[T: TypeTag, U](ft: Seq[T], fu: Seq[U])(expr: JOIN_CONDITION[T, U]): Seq[T] = {
+        new SeqJoinImpl[T, U](expr(TColumn.left, TColumn.right), ft, fu).leftSemiJoin()
+      }
+
+      override def full[T: TypeTag, U: TypeTag](ft: Seq[T], fu: Seq[U])(expr: JOIN_CONDITION[T, U]): Seq[(Option[T], Option[U])] = {
+        new SeqJoinImpl[T, U](expr(TColumn.left, TColumn.right), ft, fu).fullJoin()
+      }
+
+      override def right[T: TypeTag, U: TypeTag](ft: Seq[T], fu: Seq[U])(expr: JOIN_CONDITION[T, U]): Seq[(Option[T], U)] = {
+        new SeqJoinImpl[T, U](expr(TColumn.left, TColumn.right), ft, fu).rightJoin()
+      }
     }
 
     override def map: Map[Seq] = new Map[Seq] {
@@ -36,6 +48,9 @@ package object testkit {
     override def filter: Filter[Seq] = new Filter[Seq] {
       override def apply[T](ft: Seq[T])(predicate: T => Boolean): Seq[T] =
         ft.filter(predicate)
+
+      override def byColumn[T](ft: Seq[T])(cond: joinwiz.expression.FilterCondition[T]): Seq[T] =
+        ft.filter(cond.apply)
     }
 
     override def distinct: Distinct[Seq] = new Distinct[Seq] {
@@ -93,6 +108,10 @@ package object testkit {
     }
 
     override def collect: Collect[Seq] = new Collect[Seq] {
+      override def apply[T](ft: Seq[T]): Seq[T] = ft
+    }
+
+    override def broadcast: Broadcast[Seq] = new Broadcast[Seq] {
       override def apply[T](ft: Seq[T]): Seq[T] = ft
     }
 

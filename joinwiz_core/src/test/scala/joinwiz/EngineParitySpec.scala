@@ -25,6 +25,21 @@ object EngineParitySpec {
     def leftAntiJoin[F[_]: ComputationEngine](ls: F[L], rs: F[R]): F[L] =
       ls.leftAntiJoin(rs)((l, r) => l(_.uuid) =:= r(_.uuid))
 
+    def leftSemiJoin[F[_]: ComputationEngine](ls: F[L], rs: F[R]): F[L] =
+      ls.leftSemiJoin(rs)((l, r) => l(_.uuid) =:= r(_.uuid))
+
+    def fullJoin[F[_]: ComputationEngine](ls: F[L], rs: F[R]): F[(Option[L], Option[R])] =
+      ls.fullJoin(rs)((l, r) => l(_.uuid) =:= r(_.uuid))
+
+    def rightJoin[F[_]: ComputationEngine](ls: F[L], rs: F[R]): F[(Option[L], R)] =
+      ls.rightJoin(rs)((l, r) => l(_.uuid) =:= r(_.uuid))
+
+    def broadcastInnerJoin[F[_]: ComputationEngine](ls: F[L], rs: F[R]): F[(L, R)] =
+      ls.innerJoin(rs.broadcast())((l, r) => l(_.uuid) =:= r(_.uuid))
+
+    def filterByColumn[F[_]: ComputationEngine](ls: F[L]): F[L] =
+      ls.filterBy(l => (l(_.uuid) > 1) || (l(_.value) =:= "aaa"))
+
     def filterThenMap[F[_]: ComputationEngine](ls: F[L]): F[Int] =
       ls.filter(_.uuid % 2 == 0).map(_.uuid)
 
@@ -79,6 +94,26 @@ class EngineParitySpec extends AnyFunSuite with Matchers with ScalaCheckDrivenPr
 
   test("left anti join is identical on Spark and Seq") {
     forAll(genLs, genRs) { (ls, rs) => sparkThenSeq(ls, rs)(programs.leftAntiJoin(_, _))(programs.leftAntiJoin(_, _)) }
+  }
+
+  test("left semi join is identical on Spark and Seq") {
+    forAll(genLs, genRs) { (ls, rs) => sparkThenSeq(ls, rs)(programs.leftSemiJoin(_, _))(programs.leftSemiJoin(_, _)) }
+  }
+
+  test("full outer join is identical on Spark and Seq") {
+    forAll(genLs, genRs) { (ls, rs) => sparkThenSeq(ls, rs)(programs.fullJoin(_, _))(programs.fullJoin(_, _)) }
+  }
+
+  test("right join is identical on Spark and Seq") {
+    forAll(genLs, genRs) { (ls, rs) => sparkThenSeq(ls, rs)(programs.rightJoin(_, _))(programs.rightJoin(_, _)) }
+  }
+
+  test("broadcast hint does not change join results on Spark and Seq") {
+    forAll(genLs, genRs) { (ls, rs) => sparkThenSeq(ls, rs)(programs.broadcastInnerJoin(_, _))(programs.broadcastInnerJoin(_, _)) }
+  }
+
+  test("column-based filterBy is identical on Spark and Seq") {
+    forAll(genLs) { ls => sparkThenSeq(ls, Seq.empty[R])((l, _) => programs.filterByColumn(l))((l, _) => programs.filterByColumn(l)) }
   }
 
   test("filter then map is identical on Spark and Seq") {
