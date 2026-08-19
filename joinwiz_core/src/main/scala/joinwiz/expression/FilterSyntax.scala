@@ -3,7 +3,6 @@ package joinwiz.expression
 import joinwiz.expression.FilterCondition.filterCondition
 import joinwiz.{FColumn, Id}
 
-/** `Option`-typed single-relation column wrapped so it can be compared against a non-optional one. */
 final case class FColumnOptW[T, A] private[joinwiz] (wrapped: FColumn[T, Option[A]])
 
 trait FilterWrappers {
@@ -12,7 +11,6 @@ trait FilterWrappers {
 
 trait FilterCombinatorsSyntax {
   implicit class CombineFilterSyntax[T](thisF: FilterCondition[T]) {
-    // OR is safe in a filter (it lowers to a source `Or` filter); only a join OR forces a nested-loop join.
     def &&(thatF: FilterCondition[T]): FilterCondition[T] = filterCondition[T](t => thisF(t) && thatF(t))(thisF() && thatF())
     def ||(thatF: FilterCondition[T]): FilterCondition[T] = filterCondition[T](t => thisF(t) || thatF(t))(thisF() || thatF())
   }

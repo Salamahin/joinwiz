@@ -25,8 +25,14 @@ object EngineParitySpec {
     def leftAntiJoin[F[_]: ComputationEngine](ls: F[L], rs: F[R]): F[L] =
       ls.leftAntiJoin(rs)((l, r) => l(_.uuid) =:= r(_.uuid))
 
+    def leftSemiJoin[F[_]: ComputationEngine](ls: F[L], rs: F[R]): F[L] =
+      ls.leftSemiJoin(rs)((l, r) => l(_.uuid) =:= r(_.uuid))
+
     def fullJoin[F[_]: ComputationEngine](ls: F[L], rs: F[R]): F[(Option[L], Option[R])] =
       ls.fullJoin(rs)((l, r) => l(_.uuid) =:= r(_.uuid))
+
+    def rightJoin[F[_]: ComputationEngine](ls: F[L], rs: F[R]): F[(Option[L], R)] =
+      ls.rightJoin(rs)((l, r) => l(_.uuid) =:= r(_.uuid))
 
     def broadcastInnerJoin[F[_]: ComputationEngine](ls: F[L], rs: F[R]): F[(L, R)] =
       ls.innerJoin(rs.broadcast())((l, r) => l(_.uuid) =:= r(_.uuid))
@@ -90,8 +96,16 @@ class EngineParitySpec extends AnyFunSuite with Matchers with ScalaCheckDrivenPr
     forAll(genLs, genRs) { (ls, rs) => sparkThenSeq(ls, rs)(programs.leftAntiJoin(_, _))(programs.leftAntiJoin(_, _)) }
   }
 
+  test("left semi join is identical on Spark and Seq") {
+    forAll(genLs, genRs) { (ls, rs) => sparkThenSeq(ls, rs)(programs.leftSemiJoin(_, _))(programs.leftSemiJoin(_, _)) }
+  }
+
   test("full outer join is identical on Spark and Seq") {
     forAll(genLs, genRs) { (ls, rs) => sparkThenSeq(ls, rs)(programs.fullJoin(_, _))(programs.fullJoin(_, _)) }
+  }
+
+  test("right join is identical on Spark and Seq") {
+    forAll(genLs, genRs) { (ls, rs) => sparkThenSeq(ls, rs)(programs.rightJoin(_, _))(programs.rightJoin(_, _)) }
   }
 
   test("broadcast hint does not change join results on Spark and Seq") {

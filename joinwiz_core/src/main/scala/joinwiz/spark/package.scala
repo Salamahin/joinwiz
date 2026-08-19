@@ -48,12 +48,33 @@ package object spark {
           .as[L]
       }
 
+      override def left_semi[L: TypeTag, R](fl: Dataset[L], fr: Dataset[R])(expr: JOIN_CONDITION[L, R]): Dataset[L] = {
+        implicit val enc: Encoder[L] = ExpressionEncoder[L]()
+
+        fl.as(joinwiz.alias.left)
+          .join(
+            fr.as(joinwiz.alias.right),
+            expr(TColumn.left, TColumn.right)(),
+            "left_semi"
+          )
+          .as[L]
+      }
+
       override def full[L: TypeTag, R: TypeTag](fl: Dataset[L], fr: Dataset[R])(expr: JOIN_CONDITION[L, R]): Dataset[(Option[L], Option[R])] = {
         implicit val enc: Encoder[(Option[L], Option[R])] = ExpressionEncoder[(Option[L], Option[R])]()
 
         joinWiz(fl, fr, "full_outer")(expr)
           .map {
             case (x, y) => (Option(x), Option(y))
+          }
+      }
+
+      override def right[L: TypeTag, R: TypeTag](fl: Dataset[L], fr: Dataset[R])(expr: JOIN_CONDITION[L, R]): Dataset[(Option[L], R)] = {
+        implicit val enc: Encoder[(Option[L], R)] = ExpressionEncoder[(Option[L], R)]()
+
+        joinWiz(fl, fr, "right_outer")(expr)
+          .map {
+            case (x, y) => (Option(x), y)
           }
       }
     }

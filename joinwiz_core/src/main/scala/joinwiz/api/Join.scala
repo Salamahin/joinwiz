@@ -11,5 +11,9 @@ trait Join[F[_]] {
 
   def left_anti[LEFT: TypeTag, RIGHT](ft: F[LEFT], fu: F[RIGHT])(expr: JOIN_CONDITION[LEFT, RIGHT]): F[LEFT]
 
+  def left_semi[LEFT: TypeTag, RIGHT](ft: F[LEFT], fu: F[RIGHT])(expr: JOIN_CONDITION[LEFT, RIGHT]): F[LEFT]
+
   def full[LEFT: TypeTag, RIGHT: TypeTag](ft: F[LEFT], fu: F[RIGHT])(expr: JOIN_CONDITION[LEFT, RIGHT]): F[(Option[LEFT], Option[RIGHT])]
+
+  def right[LEFT: TypeTag, RIGHT: TypeTag](ft: F[LEFT], fu: F[RIGHT])(expr: JOIN_CONDITION[LEFT, RIGHT]): F[(Option[LEFT], RIGHT)]
 }

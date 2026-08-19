@@ -23,8 +23,16 @@ package object testkit {
         new SeqJoinImpl[T, U](expr(TColumn.left, TColumn.right), ft, fu).leftAntiJoin()
       }
 
+      override def left_semi[T: TypeTag, U](ft: Seq[T], fu: Seq[U])(expr: JOIN_CONDITION[T, U]): Seq[T] = {
+        new SeqJoinImpl[T, U](expr(TColumn.left, TColumn.right), ft, fu).leftSemiJoin()
+      }
+
       override def full[T: TypeTag, U: TypeTag](ft: Seq[T], fu: Seq[U])(expr: JOIN_CONDITION[T, U]): Seq[(Option[T], Option[U])] = {
         new SeqJoinImpl[T, U](expr(TColumn.left, TColumn.right), ft, fu).fullJoin()
+      }
+
+      override def right[T: TypeTag, U: TypeTag](ft: Seq[T], fu: Seq[U])(expr: JOIN_CONDITION[T, U]): Seq[(Option[T], U)] = {
+        new SeqJoinImpl[T, U](expr(TColumn.left, TColumn.right), ft, fu).rightJoin()
       }
     }
 

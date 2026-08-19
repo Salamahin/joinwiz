@@ -2,7 +2,6 @@ package joinwiz.expression
 
 import org.apache.spark.sql.Column
 
-/** Single-relation predicate, carrying both the Catalyst `Column` (Spark, pushdown) and the `T => Boolean` (Seq). */
 trait FilterCondition[T] {
   def apply(): Column
   def apply(t: T): Boolean

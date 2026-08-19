@@ -36,8 +36,14 @@ object syntax
     def leftAntiJoin[U: TypeTag](fu: F[U])(expr: JOIN_CONDITION[T, U]): F[T] =
       ce.join.left_anti[T, U](ft, fu)(expr)
 
+    def leftSemiJoin[U: TypeTag](fu: F[U])(expr: JOIN_CONDITION[T, U]): F[T] =
+      ce.join.left_semi[T, U](ft, fu)(expr)
+
     def fullJoin[U: TypeTag](fu: F[U])(expr: JOIN_CONDITION[T, U]): F[(Option[T], Option[U])] =
       ce.join.full[T, U](ft, fu)(expr)
+
+    def rightJoin[U: TypeTag](fu: F[U])(expr: JOIN_CONDITION[T, U]): F[(Option[T], U)] =
+      ce.join.right[T, U](ft, fu)(expr)
 
     def broadcast(): F[T] = ce.broadcast(ft)
 
@@ -50,9 +56,6 @@ object syntax
     def filter(func: T => Boolean): F[T] =
       ce.filter(ft)(func)
 
-    // Column-based sibling of `filter`: lowers to a Catalyst predicate (pushdown) instead of an
-    // opaque closure. A distinct name is required — an overloaded `filter` collides on JVM erasure
-    // (both are Function1) and, even hacked apart, defeats lambda-parameter inference.
     def filterBy(expr: FILTER_CONDITION[T]): F[T] =
       ce.filter.byColumn(ft)(expr(FColumn[T]))
 

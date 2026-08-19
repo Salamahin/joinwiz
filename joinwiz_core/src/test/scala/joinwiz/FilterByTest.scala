@@ -19,13 +19,10 @@ class FilterByTest extends AnyFunSuite with Matchers with SparkSuite {
     val byColumn  = rows.toDS().filterBy(r => r(_.id) > 1)
     val byClosure = rows.toDS().filter(_.id > 1)
 
-    // Use the analyzed (pre-optimization) plan: over a LocalRelation the optimizer would otherwise
-    // constant-fold the column predicate away entirely (ConvertToLocalRelation) — itself proof it is a
-    // real Catalyst predicate — whereas the opaque TypedFilter always survives.
+    // Analyzed plan: over a LocalRelation the optimizer would fold the column predicate away.
     val columnPlan  = byColumn.queryExecution.analyzed.toString()
     val closurePlan = byClosure.queryExecution.analyzed.toString()
 
-    // Column path is a real Catalyst predicate on `id`; the closure path is a black-box TypedFilter.
     columnPlan should include("Filter")
     columnPlan should not include ("TypedFilter")
     closurePlan should include("TypedFilter")
@@ -36,7 +33,6 @@ class FilterByTest extends AnyFunSuite with Matchers with SparkSuite {
     rows.toDS().filterBy(r => (r(_.id) > 1) || (r(_.name) =:= "a")).collect().toSeq should
       contain theSameElementsAs rows.filter(expected)
 
-    // Option field vs constant: only defined values passing the predicate survive (null-safe, matches Spark).
     rows.toDS().filterBy(r => r(_.opt) > 10).collect().toSeq should
       contain theSameElementsAs rows.filter(_.opt.exists(_ > 10))
   }

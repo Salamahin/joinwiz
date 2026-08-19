@@ -76,6 +76,13 @@ lazy val mimaSettings = Seq(
     .toSet
 )
 
+lazy val versionedSourceDir = if (sparkMajorVersion == "2") "scala-spark2" else "scala-spark3plus"
+
+lazy val versionedSources = Seq(
+  Compile / unmanagedSourceDirectories += (Compile / sourceDirectory).value / versionedSourceDir,
+  Test / unmanagedSourceDirectories += (Test / sourceDirectory).value / versionedSourceDir
+)
+
 lazy val root = (project in file("."))
   .aggregate(joinwiz_macro, joinwiz_core)
   .settings(commonSettings: _*)
@@ -92,4 +99,5 @@ lazy val joinwiz_core = (project in file("joinwiz_core"))
   .dependsOn(joinwiz_macro)
   .settings(commonSettings: _*)
   .settings(mimaSettings: _*)
+  .settings(versionedSources: _*)
   .settings(libraryDependencies ++= scalaTest.value :: scalaCheck.value :: scalaTestPlus.value :: Nil)

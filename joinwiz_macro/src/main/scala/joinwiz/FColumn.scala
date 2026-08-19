@@ -6,11 +6,6 @@ import org.apache.spark.sql.functions.col
 import scala.language.experimental.macros
 import scala.reflect.macros.whitebox
 
-/**
-  * Typed reference to a column of a single relation `T`, projected down to element type `A`.
-  * Unlike [[TColumn]] (which is join-scoped and carries a `LEFT`/`RIGHT` alias), this addresses the
-  * dataset directly, so `toColumn` is an un-aliased `col(path)` that Catalyst can push to the source.
-  */
 class FColumn[T, +A](val path: Seq[String], val get: T => A) {
   def value(t: T): A   = get(t)
   def toColumn: Column = col(path.mkString("."))
