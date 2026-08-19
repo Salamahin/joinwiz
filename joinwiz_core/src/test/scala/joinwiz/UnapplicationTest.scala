@@ -16,8 +16,8 @@ class UnapplicationTest extends AnyFunSuite with Matchers with InfixNotation {
   private type ABC = ((A, B), C)
   private type BCD = (B, (C, D))
 
-  private val leftTestee  = (TColumn.left[ABC, D], TColumn.right[ABC, D])
-  private val rightTestee = (TColumn.left[A, BCD], TColumn.right[A, BCD])
+  private val leftTestee  = (JoinColumn.left[ABC, D], JoinColumn.right[ABC, D])
+  private val rightTestee = (JoinColumn.left[A, BCD], JoinColumn.right[A, BCD])
 
   import joinwiz.syntax._
 

@@ -1,6 +1,6 @@
 package joinwiz.expression
 
-import joinwiz.TColumn
+import joinwiz.JoinColumn
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
 
@@ -13,8 +13,8 @@ class CompareTypeSafetyTest extends AnyFunSuite with Matchers {
   case class Left(pk: Int, name: String, flag: Boolean, d: Date, sub: Sub, optI: Option[Int], optName: Option[String])
   case class Right(pk: Int, name: String, flag: Boolean, d: Date, sub: Sub, optI: Option[Int], optName: Option[String])
 
-  private val l = TColumn.left[Left, Right]
-  private val r = TColumn.right[Left, Right]
+  private val l = JoinColumn.left[Left, Right]
+  private val r = JoinColumn.right[Left, Right]
 
   test("ordered element types support compare") {
     assertCompiles("l(_.pk) < r(_.pk)")

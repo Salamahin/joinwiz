@@ -18,7 +18,7 @@ package object spark {
         fl.as(joinwiz.alias.left)
           .joinWith(
             fr.as(joinwiz.alias.right),
-            joinBy(TColumn.left, TColumn.right)(),
+            joinBy(JoinColumn.left, JoinColumn.right)(),
             joinType
           )
       }
@@ -42,7 +42,7 @@ package object spark {
         fl.as(joinwiz.alias.left)
           .join(
             fr.as(joinwiz.alias.right),
-            expr(TColumn.left, TColumn.right)(),
+            expr(JoinColumn.left, JoinColumn.right)(),
             "left_anti"
           )
           .as[L]
@@ -54,7 +54,7 @@ package object spark {
         fl.as(joinwiz.alias.left)
           .join(
             fr.as(joinwiz.alias.right),
-            expr(TColumn.left, TColumn.right)(),
+            expr(JoinColumn.left, JoinColumn.right)(),
             "left_semi"
           )
           .as[L]
